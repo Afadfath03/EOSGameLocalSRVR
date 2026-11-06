@@ -100,7 +100,24 @@ downloading a release that does not exist.
   `patch-manifest.json` beside the binary. Built on Ubuntu 22.04 to keep an old glibc baseline.
 - `ascnet-patch.zip`: `version.dll`, `lucia.dll`, `KRSDK.dll`, `libraries.txt`, `supported-client.json`.
 
-Tagged builds attach all three to the GitHub release.
+**Releases are automatic.** The `prepare` job reads the workspace version from `AscNet.Launcher/Cargo.toml` and
+checks whether the tag `v<version>` already exists:
+
+- A pull request or a push whose version already has a tag: builds only, no release.
+- A push to `main` with a new version, or a manually pushed matching tag: the release job publishes the three assets,
+  creates the tag `v<version>` at that commit, and generates release notes.
+- A pushed tag that disagrees with the `Cargo.toml` version fails the run instead of publishing a mislabelled build.
+
+To cut a release, bump the version once and push:
+
+```toml
+# AscNet.Launcher/Cargo.toml
+[workspace.package]
+version = "1.1.1"
+```
+
+`patch-manifest.json` points at the release only on publishing runs; otherwise it is empty, so `setup-local.sh`
+refuses to download a release that does not exist and asks for `ASCNET_PATCH_DIR` instead.
 
 Local Linux build:
 

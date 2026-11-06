@@ -23,8 +23,35 @@ env:
   RUST_BACKTRACE: "1"
 
 jobs:
+  prepare:
+    name: Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      publish: ${{ steps.version.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        shell: bash
+        run: |
+          version="$(sed -n 's/^version = "\(.*\)"/\1/p' AscNet.Launcher/Cargo.toml | head -n1)"
+          test -n "$version" || { echo "AscNet.Launcher/Cargo.toml has no workspace version" >&2; exit 1; }
+          tag="v$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            [ "$GITHUB_REF_NAME" = "$tag" ] || { echo "tag $GITHUB_REF_NAME does not match Cargo.toml version $tag" >&2; exit 1; }
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          elif [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          elif [ -n "$(git ls-remote --tags origin "refs/tags/$tag")" ]; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
   patch:
     name: Windows patch DLLs
+    needs: prepare
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
@@ -53,9 +80,9 @@ jobs:
           [IO.File]::WriteAllText((Join-Path $bundle 'libraries.txt'), "*PGR.exe`nlucia.dll`n", (New-Object Text.UTF8Encoding($false)))
           Compress-Archive -Path (Join-Path $bundle '*') -DestinationPath (Join-Path $PWD 'ascnet-patch.zip')
           $hash = (Get-FileHash -Algorithm SHA256 (Join-Path $PWD 'ascnet-patch.zip')).Hash.ToLower()
-          # Only tagged builds publish a reusable bundle; a branch build gets an empty manifest so setup
-          # fails with an actionable message instead of downloading a release that does not exist.
-          $tag = if ("${{ github.ref }}" -like 'refs/tags/*') { "${{ github.ref_name }}" } else { '' }
+          # The bundle URL only exists when this run publishes a release; otherwise the manifest stays empty
+          # so setup fails with an actionable message instead of downloading a missing release.
+          $tag = if ("${{ needs.prepare.outputs.publish }}" -eq 'true') { "v${{ needs.prepare.outputs.version }}" } else { '' }
           $manifest = [ordered]@{
             url = if ($tag) { "https://github.com/${{ github.repository }}/releases/download/$tag/ascnet-patch.zip" } else { '' }
             sha256 = if ($tag) { $hash } else { '' }
@@ -136,8 +163,8 @@ jobs:
 
   release:
     name: Publish release
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: [windows, linux, patch]
+    if: needs.prepare.outputs.publish == 'true'
+    needs: [prepare, patch, windows, linux]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/download-artifact@v4
@@ -145,6 +172,9 @@ jobs:
           path: artifacts
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ needs.prepare.outputs.version }}
+          name: AscNet Launcher v${{ needs.prepare.outputs.version }}
+          generate_release_notes: true
           files: |
             artifacts/windows/AscNetLauncher.zip
             artifacts/linux/AscNetLauncher-x86_64.AppImage
