@@ -49,19 +49,48 @@ internal static class AwarenessModule
     public static void SetCharacter(Session session, Packet.Request packet)
     {
         AwarenessSetCharacterRequest r = packet.Deserialize<AwarenessSetCharacterRequest>();
-        if (!Runtime.Value.ByChapter.TryGetValue(r.ChapterId, out AwarenessChapterTable? chapter)) { SendCharacter(session, packet, ChapterMissing); return; }
+        int code = SetChapterCharacter(session, r.ChapterId, r.CharacterId, out bool changed);
+        if (changed) session.player.Save();
+        SendCharacter(session, packet, code);
+    }
+
+    internal static IReadOnlyList<AwarenessChapterTable> ChapterTables => Runtime.Value.Chapters;
+
+    internal static bool IsChapterCompleted(AwarenessState state, int chapterId) =>
+        state.Chapters.Any(x => x.ChapterId == chapterId) || state.Challenges.Any(x => x.ChapterId == chapterId && x.Count > 0);
+
+    internal static bool CanSelectCharacter(Session session, AwarenessChapterTable chapter, CharacterData character) => CanSelect(session, chapter, character);
+
+    /// <summary>Applies AwarenessSetCharacterRequest's rules; the caller saves when <paramref name="changed"/> is set.</summary>
+    internal static int SetChapterCharacter(Session session, int chapterId, long characterId, out bool changed)
+    {
+        changed = false;
+        if (!Runtime.Value.ByChapter.TryGetValue(chapterId, out AwarenessChapterTable? chapter)) return ChapterMissing;
         AwarenessState state = session.player.Awareness ??= new();
-        bool completed = state.Chapters.Any(x => x.ChapterId == r.ChapterId) || state.Challenges.Any(x => x.ChapterId == r.ChapterId && x.Count > 0);
-        if (r.CharacterId == 0)
+        bool completed = IsChapterCompleted(state, chapterId);
+        if (characterId == 0)
         {
-            AwarenessChapterState? own = state.Chapters.FirstOrDefault(x => x.ChapterId == r.ChapterId);
-            if (!completed || own is null) { SendCharacter(session, packet, ChallengeMissing); return; }
-            if (own.CharacterId != 0) { own.CharacterId = 0; session.player.Save(); }
-            SendCharacter(session, packet); return;
+            AwarenessChapterState? own = state.Chapters.FirstOrDefault(x => x.ChapterId == chapterId);
+            if (!completed || own is null) return ChallengeMissing;
+            if (own.CharacterId != 0) { own.CharacterId = 0; changed = true; }
+            return 0;
         }
-        if (!completed || session.character.Characters.FirstOrDefault(x => x.Id == r.CharacterId) is not CharacterData character || !CanSelect(session, chapter, character)) { SendCharacter(session, packet, ChapterUnfinished); return; }
-        if (state.Chapters.Any(x => x.ChapterId != r.ChapterId && x.CharacterId == r.CharacterId)) { SendCharacter(session, packet, CharacterOccupied); return; }
-        Chapter(state, r.ChapterId).CharacterId = r.CharacterId; session.player.Save(); SendCharacter(session, packet);
+        if (!completed || session.character.Characters.FirstOrDefault(x => x.Id == characterId) is not CharacterData character || !CanSelect(session, chapter, character)) return ChapterUnfinished;
+        if (state.Chapters.Any(x => x.ChapterId != chapterId && x.CharacterId == characterId)) return CharacterOccupied;
+        AwarenessChapterState record = Chapter(state, chapterId);
+        if (record.CharacterId != characterId) { record.CharacterId = characterId; changed = true; }
+        return 0;
+    }
+
+    /// <summary>GM completion: records one full clear exactly as TrySettle does after the last stage.</summary>
+    internal static bool CompleteChapter(AwarenessState state, int chapterId)
+    {
+        if (!Runtime.Value.ByChapter.ContainsKey(chapterId) || IsChapterCompleted(state, chapterId)) return false;
+        AwarenessChallengeState challenge = Challenge(state, chapterId);
+        challenge.Count++;
+        challenge.FinishStageIds.Clear();
+        Chapter(state, chapterId);
+        return true;
     }
 
     [RequestPacketHandler("AwarenessSetTeamRequest")]

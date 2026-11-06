@@ -774,7 +774,9 @@ namespace AscNet.GameServer.Handlers
                     RobotId = 0,
                     IsNpc = false,
                     CharacterCareer = ResolveCharacterCareer((int)characterData.Id),
-                    MagicIds = new Dictionary<int, int>()
+                    MagicIds = new Dictionary<int, int>(),
+                    // XCharacterAgency.GetFightNpcData: Border Pact occupation skill-level bonus.
+                    CharacterSkillPlus = CharacterPower.GetAssignmentLevels(session, characterData)
                 });
             }
 

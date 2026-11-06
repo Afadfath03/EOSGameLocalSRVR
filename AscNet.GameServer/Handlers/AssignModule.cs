@@ -136,25 +136,60 @@ internal static class AssignModule
     public static void AssignSetCharacterRequestHandler(Session session, Packet.Request packet)
     {
         AssignSetCharacterRequest request = packet.Deserialize<AssignSetCharacterRequest>();
-        if (!Runtime.Value.ByChapter.TryGetValue(request.ChapterId, out AssignChapterTable? chapter)) { SendCharacter(session, packet, GroupMissing); return; }
+        int code = SetChapterCharacter(session, request.ChapterId, request.CharacterId, out bool changed);
+        if (changed) session.player.Save();
+        SendCharacter(session, packet, code);
+    }
+
+    internal static IReadOnlyList<AssignChapterTable> ChapterTables => Runtime.Value.Chapters;
+
+    internal static bool IsChapterCompleted(AssignState state, AssignChapterTable chapter) =>
+        chapter.GroupId.All(groupId => state.Groups.Any(group => group.GroupId == groupId && group.Count > 0));
+
+    // Applies the AssignSetCharacterRequest rules without persisting; changed reports whether state must be saved.
+    internal static int SetChapterCharacter(Session session, int chapterId, long characterId, out bool changed)
+    {
+        changed = false;
+        if (!Runtime.Value.ByChapter.TryGetValue(chapterId, out AssignChapterTable? chapter)) return GroupMissing;
         AssignState state = session.player.Assign ??= new();
-        bool completed = chapter.GroupId.All(groupId => state.Groups.Any(group => group.GroupId == groupId && group.Count > 0));
-        if (!completed) { SendCharacter(session, packet, ChapterUnfinished); return; }
-        if (request.CharacterId == 0)
+        if (!IsChapterCompleted(state, chapter)) return ChapterUnfinished;
+        if (characterId == 0)
         {
-            AssignChapterState? own = state.Chapters.FirstOrDefault(record => record.ChapterId == request.ChapterId);
-            if (own is null) { SendCharacter(session, packet, CharacterMissing); return; }
-            if (own.CharacterId != 0) { own.CharacterId = 0; session.player.Save(); }
-            SendCharacter(session, packet);
-            return;
+            AssignChapterState? own = state.Chapters.FirstOrDefault(record => record.ChapterId == chapterId);
+            if (own is null) return CharacterMissing;
+            if (own.CharacterId != 0) { own.CharacterId = 0; changed = true; }
+            return 0;
         }
-        CharacterData? character = session.character.Characters.FirstOrDefault(character => character.Id == request.CharacterId);
-        if (character is null) { SendCharacter(session, packet, CharacterMissing); return; }
-        if (!ExhibitionModule.MeetsCharacterConditions(session, character, chapter.SelectCharCondition)) { SendCharacter(session, packet, ChapterUnfinished); return; }
-        if (state.Chapters.Any(record => record.ChapterId != request.ChapterId && record.CharacterId == request.CharacterId)) { SendCharacter(session, packet, CharacterOccupied); return; }
-        Chapter(state, request.ChapterId).CharacterId = request.CharacterId;
-        session.player.Save();
-        SendCharacter(session, packet);
+        CharacterData? character = session.character.Characters.FirstOrDefault(character => character.Id == characterId);
+        if (character is null) return CharacterMissing;
+        if (!ExhibitionModule.MeetsCharacterConditions(session, character, chapter.SelectCharCondition)) return ChapterUnfinished;
+        if (state.Chapters.Any(record => record.ChapterId != chapterId && record.CharacterId == characterId)) return CharacterOccupied;
+        Chapter(state, chapterId).CharacterId = characterId;
+        changed = true;
+        return 0;
+    }
+
+    // Marks every group of the chapter cleared exactly as TrySettle does after a group's final stage
+    // (Count incremented from 0, IsPerfect, FinishStageIds cleared) and records the chapter as passed.
+    // The chapter reward stays unclaimed so AssignGetRewardRequest grants it through the normal flow.
+    internal static bool CompleteChapter(AssignState state, AssignChapterTable chapter)
+    {
+        bool changed = false;
+        foreach (int groupId in chapter.GroupId)
+        {
+            AssignGroupState progress = Group(state, groupId);
+            if (progress.Count > 0) continue;
+            progress.Count++;
+            progress.IsPerfect = true;
+            progress.FinishStageIds.Clear();
+            changed = true;
+        }
+        if (state.Chapters.All(record => record.ChapterId != chapter.ChapterId))
+        {
+            Chapter(state, chapter.ChapterId);
+            changed = true;
+        }
+        return changed;
     }
 
     [RequestPacketHandler("AssignResetStageRequest")]

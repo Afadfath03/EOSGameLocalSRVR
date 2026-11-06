@@ -12,15 +12,15 @@ namespace AscNet.GameServer.Commands
     {
         public ItemCommand(Session session, string[] args, bool validate = true) : base(session, args, validate) { }
 
-        public override string Help => "Command to interact with user's items";
+        public override string Help => "Use /item add <id|name|all> <amount|max>, /item clear <id|name|all>, /item reset <id|name|all>, or /item find <name>. Names may contain spaces, e.g. /item add simulation score 500.";
 
-        [Argument(0, @"^add$|^clear$|^reset$", "The operation selected (add, clear, reset)", ArgumentFlags.IgnoreCase)]
+        [Argument(0, @"^add$|^clear$|^reset$|^find$", "The operation selected (add, clear, reset, find)", ArgumentFlags.IgnoreCase)]
         string Op { get; set; } = string.Empty;
 
-        [Argument(1, @"^[0-9]+$|^all$", "The target item, value is item id or 'all'", ArgumentFlags.Optional)]
+        [Argument(1, @"^\S+$", "The target item: item id, item name (may span several words), or 'all'", ArgumentFlags.Optional)]
         string Target { get; set; } = string.Empty;
 
-        [Argument(2, @"^[0-9]+$|^max$", "The target item amount, value is number or 'max' (when using other than max amount will be limited to game's max limit)", ArgumentFlags.Optional)]
+        [Argument(2, @"^\S+$", "For add: the amount, a number or 'max' (limited to the game's max count); for names it is the last word", ArgumentFlags.Optional)]
         string Amount { get; set; } = string.Empty;
 
         public override void Execute()
@@ -35,6 +35,9 @@ namespace AscNet.GameServer.Commands
                     break;
                 case "reset":
                     ResetItems();
+                    break;
+                case "find":
+                    FindItems();
                     break;
                 default:
                     throw new InvalidOperationException("Invalid operation!");
@@ -67,18 +70,66 @@ namespace AscNet.GameServer.Commands
             }
             else
             {
-                if (string.IsNullOrEmpty(Target) || string.IsNullOrEmpty(Amount))
-                    throw new ArgumentException("Invalid Target / Amount!");
+                if (args.Length < 3)
+                    throw new CommandMessageCallbackException("Usage: /item add <id|name> <amount|max>");
 
-                int itemId = Miscs.ParseIntOr(Target);
-                if (!TableReaderV2.Parse<ItemTable>().Any(x => x.Id == itemId))
-                    throw new ArgumentException("Invalid Target item id!");
+                string amountText = args[^1];
+                bool useMaxCount = amountText.Equals("max", StringComparison.OrdinalIgnoreCase);
+                if (!useMaxCount && !int.TryParse(amountText, out _))
+                    throw new CommandMessageCallbackException("Usage: /item add <id|name> <amount|max>. The last word must be the amount.");
 
-                notifyItemData.ItemDataList.Add(session.inventory.Do(itemId, Miscs.ParseIntOr(Amount)));
+                ItemTable item = ResolveItem(args[1..^1]);
+                long current = session.inventory.Items.FirstOrDefault(x => x.Id == item.Id)?.Count ?? 0;
+                int amount = useMaxCount
+                    ? (int)Math.Clamp(Inventory.GetMaxCount(item) - current, 0, int.MaxValue)
+                    : Miscs.ParseIntOr(amountText);
+
+                Item updated = session.inventory.Do(item.Id, amount);
+                notifyItemData.ItemDataList.Add(updated);
+                session.inventory.Save();
+                session.SendPush(notifyItemData);
+                List<int> sameName = TableReaderV2.Parse<ItemTable>()
+                    .Where(row => row.Id != item.Id && string.Equals(row.Name, item.Name, StringComparison.OrdinalIgnoreCase))
+                    .Select(row => row.Id)
+                    .ToList();
+                throw new CommandMessageCallbackException($"{item.Name} ({item.Id}): {current} -> {updated.Count}."
+                    + (sameName.Count > 0 ? $" Other items share this name: {string.Join(", ", sameName)}; use the id to pick one." : string.Empty));
             }
 
             session.inventory.Save();
             session.SendPush(notifyItemData);
+        }
+
+        private void FindItems()
+        {
+            if (args.Length < 2)
+                throw new CommandMessageCallbackException("Usage: /item find <name>");
+            NameLookup.Result<ItemTable> result = NameLookup.Resolve(
+                TableReaderV2.Parse<ItemTable>(), row => row.Id, row => [row.Name], args[1..]);
+            List<NameLookup.Candidate<ItemTable>> found = result.Match is null
+                ? result.Suggestions.ToList()
+                : [result.Match, .. result.Suggestions];
+            throw new CommandMessageCallbackException(found.Count == 0
+                ? $"No item matches \"{string.Join(' ', args[1..])}\"."
+                : "Items: " + string.Join(", ", found.Take(10).Select(candidate => $"{candidate.Name} ({candidate.Id})")));
+        }
+
+        // Resolves an item id or a (possibly multi-word) item name; ambiguous or unknown names list candidates.
+        private static ItemTable ResolveItem(string[] tokens)
+        {
+            string query = string.Join(' ', tokens);
+            if (tokens.Length == 0)
+                throw new CommandMessageCallbackException("Specify an item id or name.");
+            NameLookup.Result<ItemTable> result = NameLookup.Resolve(
+                TableReaderV2.Parse<ItemTable>().Where(row => Inventory.IsValidClientItemId(row.Id)),
+                row => row.Id,
+                row => [row.Name],
+                tokens);
+            if (result.Match is null)
+                throw new CommandMessageCallbackException(int.TryParse(query, out _)
+                    ? $"Item id {query} does not exist."
+                    : NameLookup.FormatSuggestions("item", query, result.Suggestions));
+            return result.Match.Row;
         }
 
         private void ClearItems()
@@ -99,11 +150,9 @@ namespace AscNet.GameServer.Commands
             else
             {
                 if (string.IsNullOrEmpty(Target))
-                    throw new ArgumentException("Specify an item ID or 'all' to clear.");
+                    throw new ArgumentException("Specify an item ID, name, or 'all' to clear.");
 
-                int itemId = Miscs.ParseIntOr(Target);
-                if (!TableReaderV2.Parse<ItemTable>().Any(x => x.Id == itemId))
-                    throw new ArgumentException("Invalid Target item id!");
+                int itemId = ResolveItem(args[1..]).Id;
 
                 Item clearedItem = session.inventory.Do(itemId, int.MinValue);
                 notifyItemData.ItemDataList.Add(clearedItem);
@@ -154,11 +203,9 @@ namespace AscNet.GameServer.Commands
             else
             {
                 if (string.IsNullOrEmpty(Target))
-                    throw new ArgumentException("Specify an item ID or 'all' to reset.");
+                    throw new ArgumentException("Specify an item ID, name, or 'all' to reset.");
 
-                int itemId = Miscs.ParseIntOr(Target);
-                if (!itemTables.ContainsKey(itemId))
-                    throw new ArgumentException("Invalid Target item id!");
+                int itemId = ResolveItem(args[1..]).Id;
 
                 long targetCount = defaultItemMap.GetValueOrDefault(itemId, 0);
                 Item? existingItem = session.inventory.Items.FirstOrDefault(x => x.Id == itemId);

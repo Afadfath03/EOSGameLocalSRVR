@@ -1,6 +1,7 @@
 using System.Globalization;
 using AscNet.Common.MsgPack;
 using AscNet.Common.Util;
+using AscNet.Logging;
 using AscNet.Table.V2.share.attrib;
 using AscNet.Table.V2.share.character.grade;
 using AscNet.Table.V2.share.character.quality;
@@ -14,51 +15,72 @@ internal static partial class CharacterPower
     private static int GetPowerNpcType(CharacterData character) => AttributeTables.Npcs[
         AttributeTables.Qualities[((int)character.Id, character.Quality)].NpcId].Type;
 
+    private static readonly Logger PowerLog = new(typeof(CharacterPower), LogLevel.DEBUG, LogLevel.DEBUG);
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, byte> ReportedMissingRows = new();
+
+    // A row the calculation needs is absent from Resources/table (client rows newer than the last
+    // exact table decode, e.g. 4.9 Npc/Attrib rows). AscNet policy: that row contributes nothing
+    // instead of failing the request; each missing row is reported once so the gap stays visible.
+    private static T? PowerRow<TKey, T>(Dictionary<TKey, T> table, TKey key, string tableName, CharacterData character)
+        where TKey : notnull
+    {
+        if (table.TryGetValue(key, out T? row))
+            return row;
+        if (ReportedMissingRows.TryAdd($"{tableName}:{key}", 0))
+            PowerLog.Warn($"Character power: {tableName} row {key} is missing (character {character.Id}); its attributes are omitted until the table is updated.");
+        return default;
+    }
+
+    private static PowerAttributes NumericRow(int id, CharacterData character) =>
+        PowerRow(AttributeTables.Numeric, id, "share/attrib/Attrib", character);
+
     private static long CalculateAttributePower(CharacterData character, IReadOnlyList<EquipData> equips)
     {
-        CharacterQualityTable quality = AttributeTables.Qualities[((int)character.Id, character.Quality)];
-        NpcTable npc = AttributeTables.Npcs[quality.NpcId];
-        PowerAttributes attributes = AttributeTables.Numeric[npc.AttribId];
-        if (npc.PromotedId > 0 && character.Level > 1)
-            attributes += AttributeTables.Promoted[npc.PromotedId].Multiply((long)(character.Level - 1) << 32);
+        CharacterQualityTable? quality = PowerRow(AttributeTables.Qualities, ((int)character.Id, character.Quality), "share/character/quality/CharacterQuality", character);
+        NpcTable? npc = quality is null ? null : PowerRow(AttributeTables.Npcs, quality.NpcId, "share/fight/npc/Npc", character);
+        PowerAttributes attributes = npc is null ? default : NumericRow(npc.AttribId, character);
+        if (npc is { PromotedId: > 0 } && character.Level > 1)
+            attributes += PowerRow(AttributeTables.Promoted, npc.PromotedId, "share/attrib/AttribPromoted", character)
+                .Multiply((long)(character.Level - 1) << 32);
 
         PowerAttributes numeric = default, growth = default, promoted = default;
-        for (int star = 0; star < Math.Min(character.Star, quality.AttrId.Count); star++)
+        for (int star = 0; quality is not null && star < Math.Min(character.Star, quality.AttrId.Count); star++)
             if (quality.AttrId[star] > 0)
-                numeric += AttributeTables.Numeric[quality.AttrId[star]];
-        int gradeId = AttributeTables.Grades[((int)character.Id, character.Grade)].AttrId;
+                numeric += NumericRow(quality.AttrId[star], character);
+        int gradeId = PowerRow(AttributeTables.Grades, ((int)character.Id, character.Grade), "share/character/grade/CharacterGrade", character)?.AttrId ?? 0;
         if (gradeId > 0)
-            numeric += AttributeTables.Numeric[gradeId];
+            numeric += NumericRow(gradeId, character);
 
         foreach (EquipData equip in equips)
         {
-            EquipBreakThroughTable breakthrough = AttributeTables.Breakthroughs[((int)equip.TemplateId, equip.Breakthrough)];
-            if (breakthrough.AttribId > 0)
-                numeric += AttributeTables.Numeric[breakthrough.AttribId];
+            EquipBreakThroughTable? breakthrough = PowerRow(AttributeTables.Breakthroughs, ((int)equip.TemplateId, equip.Breakthrough), "share/equip/EquipBreakThrough", character);
+            if (breakthrough is { AttribId: > 0 })
+                numeric += NumericRow(breakthrough.AttribId, character);
             foreach (ResonanceInfo resonance in equip.ResonanceInfo ?? [])
             {
                 if (resonance.Type != EquipResonanceType.Attrib ||
                     (resonance.CharacterId != 0 && resonance.CharacterId != character.Id))
                     continue;
-                AttribPoolTable pool = AttributeTables.Pools[resonance.TemplateId];
-                if (pool.AttribId > 0)
-                    numeric += AttributeTables.Numeric[pool.AttribId];
-                if (pool.AttribGrowRateId > 0)
-                    growth += AttributeTables.GrowRates[pool.AttribGrowRateId];
+                AttribPoolTable? pool = PowerRow(AttributeTables.Pools, resonance.TemplateId, "share/attrib/AttribPool", character);
+                if (pool is { AttribId: > 0 })
+                    numeric += NumericRow(pool.AttribId, character);
+                if (pool is { AttribGrowRateId: > 0 })
+                    growth += PowerRow(AttributeTables.GrowRates, pool.AttribGrowRateId, "share/attrib/AttribGrowRate", character);
             }
-            if (equip.AwakeSlotList is { Count: > 0 })
+            if (equip.AwakeSlotList is { Count: > 0 }
+                && PowerRow(AttributeTables.Awake, (int)equip.TemplateId, "share/equip/EquipAwake", character) is { } awake)
             {
-                EquipAwakeTable awake = AttributeTables.Awake[(int)equip.TemplateId];
                 foreach (object value in equip.AwakeSlotList)
                 {
                     int slot = Convert.ToInt32(value, CultureInfo.InvariantCulture);
                     foreach (ResonanceInfo resonance in equip.ResonanceInfo ?? [])
                         if (resonance.Slot == slot && (resonance.CharacterId == 0 || resonance.CharacterId == character.Id))
-                            numeric += AttributeTables.Numeric[awake.AttribId[slot - 1]];
+                            numeric += NumericRow(awake.AttribId[slot - 1], character);
                 }
             }
-            if (breakthrough.AttribPromotedId > 0 && equip.Level > 1)
-                promoted += AttributeTables.Promoted[breakthrough.AttribPromotedId].Multiply((long)(equip.Level - 1) << 32);
+            if (breakthrough is { AttribPromotedId: > 0 } && equip.Level > 1)
+                promoted += PowerRow(AttributeTables.Promoted, breakthrough.AttribPromotedId, "share/attrib/AttribPromoted", character)
+                    .Multiply((long)(equip.Level - 1) << 32);
         }
 
         // XCharacterAgency.GetFightNpcData supplies no revision and an empty attribute-group list.

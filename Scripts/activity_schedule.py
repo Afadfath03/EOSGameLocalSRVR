@@ -992,7 +992,8 @@ def _simulated_battlefield_windows(source: Path, notices: Iterable[dict[str, Any
     if len(panels) != 1 or len(shop_rows) != 1:
         raise ValueError("current Simulated Battlefield panel or shop is unavailable")
     panel_id, shop_id = _int(panels[0].get("TimeId")), _int(shop_rows[0].get("TimeId"))
-    if (panel_id, shop_id) != (50403, 50402):
+    # Authored pairs per release: 4.8 panel 50403 / 4.9 panel 51502, both with shop timer 50402.
+    if (panel_id, shop_id) not in {(50403, 50402), (51502, 50402)}:
         raise ValueError("current Simulated Battlefield panel and shop timers differ from authored pair")
     description = panels[0].get("ActivityDes")
     if not isinstance(description, str):

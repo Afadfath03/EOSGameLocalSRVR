@@ -344,7 +344,9 @@ namespace AscNet.GameServer.Handlers
                 session.SendResponse(new ReconnectResponse
                 {
                     ReconnectToken = request.Token,
-                    RequestNo = request.LastMsgSeqNo
+                    // LastMsgSeqNo counts server pushes; RequestNo is the last client request
+                    // handled, so the client re-calls everything after it.
+                    RequestNo = Session.GetLastHandledRequestNo(player.PlayerData.Id)
                 }, packet.Id);
                 session.GuildIdentityReady = true;
                 BossModule.ReconcileReconnect(session);
@@ -804,6 +806,8 @@ namespace AscNet.GameServer.Handlers
                 FubenUrgentEventData = new(),
                 FubenShortStoryLoginData = new(),
                 SignInfos = SignInModule.BuildLoginSignInfos(session.player),
+                // XLoginManager: FubenAssignManager.InitServerData(data.AssignChapterRecord) before character ability init.
+                AssignChapterRecord = AssignModule.BuildLoginChapterRecords(session),
                 UseBackgroundId = session.player.UseBackgroundId,
                 HaveBackgroundIds = BuildHaveBackgroundIds(session.player),
                 RandomBackgroundLoginData = new(),

@@ -22,12 +22,25 @@ internal static class ArenaStageDataset
     public static bool Supports(int areaId, uint stageId, int markId, string archetype) =>
         Resolve(areaId, stageId, markId, archetype) is not null;
 
-    public static IReadOnlySet<int> GeneratedAreaIds => Data.Value.Stages
-        .Where(stage => stage.Generator is not null)
-        .Select(stage => stage.AreaId)
-        .ToHashSet();
+    // AscNet policy: profiles flagged CommandSelectOnly hydrate an area only after a player explicitly picks it
+    // (/warzone zone|set); automatic weekly zone selection keeps using the other profiles.
+    public static bool IsAutoSelectable(int areaId, uint stageId, int markId, string archetype) =>
+        Resolve(areaId, stageId, markId, archetype) is { CommandSelectOnly: false };
 
-    public static bool IsGeneratedArea(int areaId) => GeneratedAreaIds.Contains(areaId);
+    public static string? DescribeProfile(int areaId, uint stageId, int markId, string archetype)
+    {
+        Stage? stage = Resolve(areaId, stageId, markId, archetype);
+        if (stage is null)
+            return null;
+        if (stage.Generator is { } generator)
+            return $"MarkId {stage.MarkId} generator from area {stage.AreaId}: {generator.WaveCount} single-enemy waves, "
+                + $"bosses [{string.Join(", ", generator.BossNpcIds)}], repeatable [{string.Join(", ", generator.RepeatableNpcIds)}]";
+        return $"MarkId {stage.MarkId} waves from area {stage.AreaId}: {stage.NpcGroupRefs.Count} waves, NPCs ["
+            + string.Join(", ", stage.NpcGroupRefs
+                .SelectMany(groupRef => Data.Value.GroupDefinitions[groupRef].NpcRefs)
+                .Select(npcRef => Data.Value.NpcDefinitions[npcRef].Value<int>("NpcId"))
+                .Distinct()) + "]";
+    }
 
     public static int? PassTimeLimit(int areaId, uint stageId, int markId, string archetype) =>
         Resolve(areaId, stageId, markId, archetype)?.PassTimeLimit;
@@ -178,7 +191,7 @@ internal static class ArenaStageDataset
         if (exact is not null)
             return exact.MarkId == markId && exact.Archetype == archetype ? exact : null;
         return Data.Value.Stages.SingleOrDefault(candidate =>
-            candidate.MarkId == markId && candidate.Archetype == archetype && candidate.ReusableArchetype);
+            candidate.ReusableArchetype && candidate.MarkId == markId && candidate.Archetypes.Contains(archetype));
     }
 
     private static object? CloneObject(JToken token) => token switch
@@ -197,10 +210,15 @@ internal static class ArenaStageDataset
             throw new InvalidDataException($"Unsupported Arena stage schema {data.SchemaVersion}");
         if (data.Stages.Select(stage => (stage.AreaId, stage.StageId)).Distinct().Count() != data.Stages.Count)
             throw new InvalidDataException("Arena stage keys must be unique");
-        if (data.Stages.Where(stage => stage.ReusableArchetype).GroupBy(stage => (stage.MarkId, stage.Archetype)).Any(group => group.Count() > 1))
+        if (data.Stages.Where(stage => stage.ReusableArchetype)
+                .SelectMany(stage => stage.Archetypes.Select(archetype => (stage.MarkId, archetype)))
+                .GroupBy(key => key).Any(group => group.Count() > 1))
             throw new InvalidDataException("Arena reusable MarkId/archetype profiles must be unique");
-        if (data.Stages.Any(stage => string.IsNullOrWhiteSpace(stage.Archetype)))
-            throw new InvalidDataException("Arena stages must identify a source archetype");
+        if (data.Stages.Any(stage => string.IsNullOrWhiteSpace(stage.Archetype)
+                || stage.ArchetypeAliases.Any(alias => string.IsNullOrWhiteSpace(alias) || alias == stage.Archetype)))
+            throw new InvalidDataException("Arena stages must identify a source archetype and distinct non-empty aliases");
+        if (data.Stages.Any(stage => stage.ArchetypeAliases.Count > 0 && !stage.ReusableArchetype))
+            throw new InvalidDataException("Arena archetype aliases only apply to reusable profiles");
         if (data.Stages.Any(stage => !ConfiguredStages.Value.Contains(
                 (stage.AreaId, stage.StageId, stage.MarkId, stage.Archetype))))
             throw new InvalidDataException("Arena dataset contains a stage profile absent from nonabandoned AreaStage configuration");
@@ -262,6 +280,9 @@ internal static class ArenaStageDataset
         public int AreaId { get; set; }
         public int MarkId { get; set; }
         public bool ReusableArchetype { get; set; }
+        public List<string> ArchetypeAliases { get; set; } = new();
+        public bool CommandSelectOnly { get; set; }
+        public IEnumerable<string> Archetypes => ArchetypeAliases.Prepend(Archetype);
         public List<int> NpcGroupRefs { get; set; } = new();
         public Generator? Generator { get; set; }
         public string Archetype { get; set; } = string.Empty;

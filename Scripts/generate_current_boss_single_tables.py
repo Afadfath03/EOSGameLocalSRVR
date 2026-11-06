@@ -65,6 +65,15 @@ def number_list(row: dict[str, Any], field: str, source: Path, *, floats: bool =
             result.append(item)
     return result
 
+def text_field(row: dict[str, Any], field: str, source: Path) -> str:
+    value = row.get(field)
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        raise ValueError(f"{source}: {field} must be a string, got {value!r}")
+    return value
+
+
 def number_list_or_empty(row: dict[str, Any], field: str, source: Path) -> list[str | int]:
     return number_list(row, field, source) if field in row else []
 
@@ -157,14 +166,14 @@ def generate(source: Path) -> dict[str, bytes]:
 
     boss_stages = sorted(data["BossSingleStage"], key=lambda r: integer(r, "StageId", paths["BossSingleStage"]))
     unique_index(boss_stages, "StageId", paths["BossSingleStage"])
-    stage_cols = ["StageId", "Score", "BossLoseHpScore", "LeftTimeScore", "LeftHpScore", "DifficultyType", "AutoFight", "RebootId", "PassTimeLimit"]
+    stage_cols = ["StageId", "Score", "BossLoseHpScore", "LeftTimeScore", "LeftHpScore", "DifficultyType", "AutoFight", "RebootId", "PassTimeLimit", "BossName"]
     stage_rows = []
     for row in boss_stages:
         stage_id = integer(row, "StageId", paths["BossSingleStage"])
         joined = stages.get(stage_id)
         if joined is None:
             raise ValueError(f"{stage_path}: missing StageId {stage_id} referenced by BossSingleStage")
-        stage_rows.append([stage_id] + [integer(row, f, paths["BossSingleStage"]) for f in stage_cols[1:6]] + [boolean01(row, "AutoFight", paths["BossSingleStage"]), integer(joined, "RebootId", stage_path, default=0), integer(joined, "PassTimeLimit", stage_path, default=0)])
+        stage_rows.append([stage_id] + [integer(row, f, paths["BossSingleStage"]) for f in stage_cols[1:6]] + [boolean01(row, "AutoFight", paths["BossSingleStage"]), integer(joined, "RebootId", stage_path, default=0), integer(joined, "PassTimeLimit", stage_path, default=0), text_field(row, "BossName", paths["BossSingleStage"])])
     output["BossSingleStage.tsv"] = table(stage_cols, stage_rows)
 
     rules = sorted(data["BossSingleScoreRule"], key=lambda r: integer(r, "Id", paths["BossSingleScoreRule"]))
@@ -209,8 +218,9 @@ def generate(source: Path) -> dict[str, bytes]:
     unique_index(features, "Id", feature_path)
     feature_width = max((len(number_list(r, "FightEventIds", feature_path)) for r in features), default=0)
     output["BossSingleChallengeFeature.tsv"] = table(
-        ["Id"] + repeated_columns("FightEventIds", feature_width),
-        ([integer(r, "Id", feature_path)] + padded(number_list(r, "FightEventIds", feature_path), feature_width) for r in features))
+        ["Id"] + repeated_columns("FightEventIds", feature_width) + ["Name", "Desc"],
+        ([integer(r, "Id", feature_path)] + padded(number_list(r, "FightEventIds", feature_path), feature_width)
+         + [text_field(r, "Name", feature_path), text_field(r, "Desc", feature_path)] for r in features))
 
     buffs = sorted(data["BossSingleChallengeBuffGroup"], key=lambda r: integer(r, "Id", paths["BossSingleChallengeBuffGroup"]))
     buff_path = paths["BossSingleChallengeBuffGroup"]

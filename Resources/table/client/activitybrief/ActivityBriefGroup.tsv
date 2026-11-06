@@ -152,3 +152,6 @@ Id	Name	SkipId	TimeId	BtnInitMethodName	IsRemindWhenOpen	RemindPriority	RedCondi
 155	Collab Story	90073	50202		1	11							0		0
 156	卡池复刻	20400	51001		1	12	CONDITION_GACHA_FASHION_SELF_CHOICE						0		0
 157	Overclock Simulation	90077	50100		1	5							0		0
+151	Dreamhouse Tycoon	90082	51011		1	10									
+158	人传人H5	189074	51021		1	8									
+159	Preview	20421	51503		1	9									

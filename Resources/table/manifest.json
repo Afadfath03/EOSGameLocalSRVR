@@ -127,16 +127,17 @@
     },
     {
       "path": "client/activitybrief/ActivityBriefGroup.tsv",
-      "rows": 153,
+      "rows": 156,
       "columns": 16,
-      "contentSha256": "6218d106dc7aee6a1cb77a83162f6f0b1eeb6b02ed5d32cac9ecf0efc432642a",
+      "contentSha256": "c7e04a06537064ab61bda026a753e72acd3fee1da4406efa5ce0c123e5d2e772",
       "naturalKey": "Id",
       "source": [
         ".runtime/upgrade-4.8/tables/client/activitybrief/ActivityBriefGroup.json (sha256:810431ddb81da7084c0af100f92217d14239523a4b6bd37a6bdcb1ee95b6dcde)"
       ],
       "filter": "authored 4.8 source with explicitly preserved historical/local-policy rows",
       "transformation": [
-        "Updated 12 changed authored group rows and appended six new 4.8 group identities; all 153 rows match installed projection. Group146 SkipId89102 TimeId50947 is a promo entry only, not Theatre6PvP's independent season TimeId48601. No guessed schedule for undated 50947."
+        "Updated 12 changed authored group rows and appended six new 4.8 group identities; all 153 rows match installed projection. Group146 SkipId89102 TimeId50947 is a promo entry only, not Theatre6PvP's independent season TimeId48601. No guessed schedule for undated 50947.",
+        "Scripts/import_new_rows_4_9.py: appended 3 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/activitybrief/ActivityBriefGroup.json (sha256:10c5b5620618e218bae1e01c6196b2300bbafbd694808f0bbc31c6fc6d83833a), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -173,9 +174,9 @@
     },
     {
       "path": "client/draw/DrawAimProbability.tsv",
-      "rows": 3031,
+      "rows": 3054,
       "columns": 16,
-      "contentSha256": "9064cf83adeff8d26f5227b7679163a5a318e393025fec32bc52cd1919361f5d",
+      "contentSha256": "474b48fa7976df4371c8f8af05073c4c91ab177de52ff761994e77844b4b83dc",
       "source": [
         {
           "path": "client/draw/drawaimprobability.tab",
@@ -184,7 +185,10 @@
           "rawTabSha1": "64bf1f15942cf843dac0e776fb4a23c7b8f953bb"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 23 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/draw/DrawAimProbability.json (sha256:c350fc942d3e6c33cf3ac9375ef47bc3faba9cd06ad418fd4d4d7806c39251fc), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
@@ -205,9 +209,9 @@
     },
     {
       "path": "client/draw/DrawCharacterImage.tsv",
-      "rows": 22,
+      "rows": 23,
       "columns": 2,
-      "contentSha256": "0f53a9948c6460f36099252bc2ae26ea8fb0ad45c5c98de648f889985c2f02b8",
+      "contentSha256": "dcf29d856a2234d95763f96709c6b66a4907be0f0712ab3a40c6b4fe01ef25f6",
       "source": [
         {
           "path": "client/draw/drawcharacterimage.tab",
@@ -216,7 +220,10 @@
           "rawTabSha1": "710bb45522ee7506646f1f626fff466d47011bbf"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/draw/DrawCharacterImage.json (sha256:a8a88cf194fb0681b88946c61d7c02af7fd7265ef9b16238375e27210ee9b7e0), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
@@ -317,9 +324,9 @@
     },
     {
       "path": "client/draw/DrawPredictPos.tsv",
-      "rows": 81,
+      "rows": 82,
       "columns": 5,
-      "contentSha256": "b6d8ef87bad5a9558f5066c874c5f323b8fcc617610bbd6d06a4f8a24383e5bc",
+      "contentSha256": "7d2cdc0061fb3b08e58e9aa16035cfef4b2f19a87c4439022e301429a05ee605",
       "source": [
         {
           "path": "client/draw/drawpredictpos.tab",
@@ -328,14 +335,17 @@
           "rawTabSha1": "9d4ad8168e59dff353e295fda27b97e3a1755f21"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/draw/DrawPredictPos.json (sha256:e8e4236d3ec625fcd3ab79bcb50973c72d111f13fca3332cb3a5204f00b5fb16), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "CharacterId"
     },
     {
       "path": "client/draw/DrawPreview.tsv",
-      "rows": 2637,
+      "rows": 2660,
       "columns": 89,
-      "contentSha256": "969e5137e8915d93554edb693e6e304e745359617bf0eab14b3bf0ddbaecd099",
+      "contentSha256": "e775d1588e417a97e27a0244ac74bbc7a3d9166c8b9c6d7d74406e199660c256",
       "source": [
         {
           "path": "client/draw/drawpreview.tab",
@@ -344,14 +354,17 @@
           "rawTabSha1": "d20eb0f815c0b82cfb40e815976e46c1e8d1b62e"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 23 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/draw/DrawPreview.json (sha256:65cc1da7048e03c1a23a414d057415d661368c3c47a908c1235085ce6753f576), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
       "path": "client/draw/DrawPreviewGoods.tsv",
-      "rows": 570,
+      "rows": 575,
       "columns": 5,
-      "contentSha256": "9ac1d4ae2a10779e500629f2358ccc21aa54fc8328215035a3ef758db3241a14",
+      "contentSha256": "ec3069cd60d61d8896a166efda02d7ecf1fc56648c831a1041162fd518ea1ffb",
       "source": [
         {
           "path": "client/draw/drawpreviewgoods.tab",
@@ -360,14 +373,17 @@
           "rawTabSha1": "4346a42e0df3039eaa1deb0307b3060242345b88"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 5 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/draw/DrawPreviewGoods.json (sha256:ac2989fdc2263b506c851eb30d175b73ca4e39bd2e5086b9f0cb7838fa8933df), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
       "path": "client/draw/DrawProbShow.tsv",
-      "rows": 1669,
+      "rows": 1692,
       "columns": 49,
-      "contentSha256": "19ac36ecc3872dd18e6075b16350073f670170c169cac49d9e79501b33c13fd3",
+      "contentSha256": "bf825ca2ff73151dae0bbe2aea2c611177c76e58de823cf02acb87fa14301ce6",
       "source": [
         {
           "path": "client/draw/drawprobshow.tab",
@@ -376,16 +392,19 @@
           "rawTabSha1": "2bf9f962fbb4933c2b833955f307e3bac0af1bed"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 23 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/draw/DrawProbShow.json (sha256:b8ff01fc196b49d13e88002d44a6bbded9db1b21dd077933e6a4bd8208aee060), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "DrawId"
     },
     {
       "columns": 45,
-      "contentSha256": "2f3d2fce40e79b96a4ea95836a0683c833192c2fa3eff36c7bfe28226f216d3d",
+      "contentSha256": "e084cd5dcf80f31a4a70bbf100103a87033040a302c6fad5943f0d5654380d3d",
       "filter": "all",
       "naturalKey": "Id",
       "path": "client/draw/DrawRolePerformance.tsv",
-      "rows": 58,
+      "rows": 59,
       "source": [
         {
           "path": "client/draw/drawroleperformance.tab",
@@ -394,13 +413,16 @@
           "rawTabSha1": "48e2b94a59ecc30458a8092dbdbfbdeb7acb095d"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells"
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/draw/DrawRolePerformance.json (sha256:e6ab8c75fcaf5b4eccb93a3303edd7c66896006080bc77eaae34a80d15a76413), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ]
     },
     {
       "path": "client/draw/DrawScene.tsv",
-      "rows": 2179,
+      "rows": 2202,
       "columns": 9,
-      "contentSha256": "a19e93e0afeba11d36726a3e833758cebe9861c1555a9a1dd4ca398c07358db8",
+      "contentSha256": "0a312e3dcef57ed5fd0b7ca425d0de1f0466e2f2c2549ba8a41fdb7d3033672e",
       "source": [
         {
           "path": "client/draw/drawscene.tab",
@@ -409,7 +431,10 @@
           "rawTabSha1": "68513f730aced16be0a9ae9e06a325ad7e5599ec"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 23 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/draw/DrawScene.json (sha256:cc5bd5da9e2ea4ba43781069fe005dbb71bb0d07977bf528f4bad43dcd75efee), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
@@ -473,9 +498,9 @@
     },
     {
       "path": "client/draw/DrawSkip.tsv",
-      "rows": 1,
+      "rows": 2,
       "columns": 2,
-      "contentSha256": "d58e4d798008c76bd5903ea7680c027864e17443be173adca8067cf6aedb98ef",
+      "contentSha256": "12f8bf17b17da52f27c388a27bb090b1c2888ad39f39bd0fd392e7cd9f69fcbe",
       "source": [
         {
           "path": "client/draw/drawskip.tab",
@@ -484,7 +509,10 @@
           "rawTabSha1": "09c85700605e559b5e3e5f80f368ed4653950b82"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/draw/DrawSkip.json (sha256:fab7360b0663355b02f38611ae2c4f3fac6e9c667c252d3b97ea527ae2422fec), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "DrawId"
     },
     {
@@ -543,11 +571,11 @@
     },
     {
       "columns": 20,
-      "contentSha256": "d4e35f1e5a5a4715f96d1b1e774ba05ae8e762fa973a64b35b4a87eec9b5f536",
+      "contentSha256": "8d153015e86d3c9c6e0f12ffacdd5da9e81b8209f55074e6eeed69f573ba7bca",
       "filter": "all",
       "naturalKey": "SkipId",
       "path": "client/functional/SkipFunctional.tsv",
-      "rows": 3434,
+      "rows": 3462,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset client/functional/SkipFunctional.tab (sha1:d28a7f82140dd0d46664eca76b980077a69fdafc; 155881 bytes)",
@@ -555,7 +583,8 @@
         "Bundle index sha1:c3c04124a4703aea7ec0e5447b8e4b8636eb4ba5"
       ],
       "transformation": [
-        "Scripts/import_boss_trials_4_8.py: import_client_tables.project onto existing server columns in source order; rows equal modulo blank/0 keep current bytes; source-dropped rows fail closed"
+        "Scripts/import_boss_trials_4_8.py: import_client_tables.project onto existing server columns in source order; rows equal modulo blank/0 keep current bytes; source-dropped rows fail closed",
+        "Scripts/import_new_rows_4_9.py: appended 28 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/functional/SkipFunctional.json (sha256:fefa6416b93f0edcb45eb15138b4de8e36718ef21a6e32387e177908606274aa), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -576,13 +605,16 @@
     },
     {
       "columns": 6,
-      "contentSha256": "b2e54de5221ec9b7976a57b705e30e48f25a66d01703f54407667e983681167f",
+      "contentSha256": "8fea85ac954fc9519709f027db86a5e6c38fb43964764013d808a44a077bb7fe",
       "filter": "all",
       "naturalKey": "Id",
       "path": "client/mail/MailReward.tsv",
-      "rows": 989,
+      "rows": 1028,
       "source": [
         "client/mail/MailReward.json"
+      ],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 39 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/mail/MailReward.json (sha256:a84e10d79e63eb1ab0ed49fce09d2edd198afacb93b9d2b6f772d0f52480272e), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -598,9 +630,9 @@
     },
     {
       "path": "client/partner/PartnerItemSkipId.tsv",
-      "rows": 41,
+      "rows": 42,
       "columns": 6,
-      "contentSha256": "5e09f5ef8fd5d968f46a8ca882d835a1406ebeff5b59d19c9b488176c7ad90b7",
+      "contentSha256": "50b20eefa1c75a662a6eb62b933e11cde778cbafa381adecf42e1777f4430bd1",
       "source": [
         {
           "path": "client/partner/partneritemskipid.tab",
@@ -609,14 +641,17 @@
           "rawTabSha1": "062aeefbcc2860c193654a84ea3a1aba100b0ef3"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/partner/PartnerItemSkipId.json (sha256:82b958e86ebc28779a1149caa918f3a6039dcc2d3fba0cb81ded273e83235a1b), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "PartnerId"
     },
     {
       "path": "client/partner/PartnerModel.tsv",
-      "rows": 43,
+      "rows": 44,
       "columns": 10,
-      "contentSha256": "70d2917c59484180df79e66f9d182a470dba81b24861233c49eeed1c38bce5ae",
+      "contentSha256": "e7b5e3c6f4287ea995c193365428dd3a407322bfad8154d225ac4af0af31011e",
       "source": [
         {
           "path": "client/partner/partnermodel.tab",
@@ -625,7 +660,10 @@
           "rawTabSha1": "416a5d2dfa076c472c03c93d47487fe5a8dceeba"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/partner/PartnerModel.json (sha256:59bfbb1e622b977b84b43da2674abc972e82110bd3141f6f20405c9fe71c8177), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
@@ -646,9 +684,9 @@
     },
     {
       "path": "client/partner/PartnerSkillInfo.tsv",
-      "rows": 3655,
+      "rows": 3740,
       "columns": 6,
-      "contentSha256": "4257d9718ee1b9ed217c75499a9eef883e765101e91d31b9c98b383547bb23dc",
+      "contentSha256": "ddca6206c7d9b31855c02ae0a7bb7c97b4cb2f0ac89ece56af7770fd249ecd6e",
       "source": [
         {
           "path": "client/partner/partnerskillinfo.tab",
@@ -657,14 +695,17 @@
           "rawTabSha1": "b2a86aa1cc0019e6d539bb25f3433a4e1af35712"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 85 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/partner/PartnerSkillInfo.json (sha256:2eec325e78986e47c2a021166d1e0d872bbf184947508fbe5a3fcebccc710891), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
       "path": "client/partner/PartnerUiEffect.tsv",
-      "rows": 135,
+      "rows": 138,
       "columns": 6,
-      "contentSha256": "a0b0f0ad975c98ccd7ca0e77364d9ddd1649b55d2abe4a690bf9f35cce7019c9",
+      "contentSha256": "b72e68bc771392f6aef1ec4637219db5548bd41f9bedd6b3849132f9d3396c73",
       "source": [
         {
           "path": "client/partner/partneruieffect.tab",
@@ -673,7 +714,10 @@
           "rawTabSha1": "6b837bac04815c1dfdcb3cb666f7de2992d845e4"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells; flatten single authored EffectPath list",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells; flatten single authored EffectPath list",
+        "Scripts/import_new_rows_4_9.py: appended 3 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/partner/PartnerUiEffect.json (sha256:4bbecc5c4e3298fdcb822eb6bdbaed3ab504af5131050002e153fac2eb97dd91), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
@@ -766,13 +810,16 @@
     },
     {
       "columns": 16,
-      "contentSha256": "72528b63979275b47fd3b5ee8af1596dc30c999f34fab24e7f14ad3f464b3cb0",
+      "contentSha256": "e839678587e926a9107a0beb05cb7a011aa0dd8abc9bb77f6e022732a445b4ab",
       "filter": "all",
       "naturalKey": "Id",
       "path": "client/uimain/ActivityBtn.tsv",
-      "rows": 23,
+      "rows": 25,
       "source": [
         "client/uimain/ActivityBtn.json"
+      ],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 2 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/uimain/ActivityBtn.json (sha256:da910990dddf28ad24cc4ebb9999a1e08f09d4a21a70d0e8e43c6c97f786143e), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -829,31 +876,35 @@
     },
     {
       "path": "share/character/Character.tsv",
-      "rows": 85,
+      "rows": 86,
       "columns": 25,
       "naturalKey": "Id",
-      "contentSha256": "4fde1d00b7a42c6172f6024cfc6175a094e9e2c0ea9dae2d96f4c2f5c44bf516",
+      "contentSha256": "442e7cf6fb5b8326d5bbdc5e82155640e35525e4c543fb034301d03ae41760ff",
       "source": [
         "share/character/Character.tab"
       ],
       "sourceSha1": "24c109e7b4295c435d848e183dc6120c7ecdfe5f",
       "indexSha1": "6404952973afd2eee2321f0c43cae55085eb661e",
       "filter": "all",
-      "transformation": []
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/character/Character.json (sha256:ac17b90e91503121aaa4c22151e654e64662f329f41947390a994585005b2eb2), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ]
     },
     {
       "path": "share/character/enhanceskill/EnhanceSkill.tsv",
-      "rows": 85,
+      "rows": 86,
       "columns": 33,
       "naturalKey": "CharacterId",
-      "contentSha256": "ad40a70aa196415640a5a62ad6a397a2e2e1113cfd01744e52527f56c7e7fef4",
+      "contentSha256": "963d8fb132a9009f6bb8dafc778c868f7a804aaf860d46847340f7d76d161ec3",
       "source": [
         "share/character/enhanceskill/EnhanceSkill.tab"
       ],
       "sourceSha1": "5f33f449d39f9745fe4634e92de373e8d4ac8f11",
       "indexSha1": "6cd86b8540510875bea53ba7a0ef8d450c7f8836",
       "filter": "all",
-      "transformation": []
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/character/enhanceskill/EnhanceSkill.json (sha256:023ba96de16326e5863389a800b70679bf1b6ddd2046d3cad57112b87e333e6e), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ]
     },
     {
       "columns": 4,
@@ -882,31 +933,35 @@
     },
     {
       "path": "share/character/grade/CharacterGrade.tsv",
-      "rows": 1190,
+      "rows": 1204,
       "columns": 14,
       "naturalKey": "Id",
-      "contentSha256": "5773b5219078edaed3f1c6022bc66259552a4bae02670affedc2226302853e97",
+      "contentSha256": "0ad38e86ae31579ebb39b35fe50f8ebabf7f6fc490db419333d0f8d38f6a09fa",
       "source": [
         "share/character/grade/CharacterGrade.tab"
       ],
       "sourceSha1": "a5fe9dffe60cebaab57b4202e0d5b675c1f52f25",
       "indexSha1": "a1b209ca4c18cfe6b9dae412097e033f93ed51c6",
       "filter": "all",
-      "transformation": []
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 14 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/character/grade/CharacterGrade.json (sha256:bedf7c26b73a73fac3bdac6c8a544bec2e55e95f8881ca077a632d9babdc2032), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ]
     },
     {
       "path": "share/character/quality/CharacterQuality.tsv",
-      "rows": 370,
+      "rows": 374,
       "columns": 14,
       "naturalKey": "Id",
-      "contentSha256": "0b5b0fc40e674b23f12c9ee7ea27840e94587f0fb0a5f4da729c198646dec68e",
+      "contentSha256": "1ed3c8c78f2b7e35cf82b82492225ef910c56c7d8a5a6dcfc9179a15159c6195",
       "source": [
         "share/character/quality/CharacterQuality.tab"
       ],
       "sourceSha1": "f1b1a5e73b93be50f54c8d2f8b1c78725845c4bc",
       "indexSha1": "5165638f4d9f8695b73b02dc78dc6075dafa82c7",
       "filter": "all",
-      "transformation": []
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 4 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/character/quality/CharacterQuality.json (sha256:6e7bb306fe61ab84a5dcb72c8d212295592440ddbb05876736ea1e60a904b8ce), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ]
     },
     {
       "columns": 17,
@@ -935,73 +990,83 @@
     },
     {
       "path": "share/character/skill/CharacterSkill.tsv",
-      "rows": 85,
+      "rows": 86,
       "columns": 33,
       "naturalKey": "CharacterId",
-      "contentSha256": "bd87f7b575d1dfe2edddb55f649753acdb0b051a7fffb9788c285061d6a4ec57",
+      "contentSha256": "ed0366e09ff4043cb1752bac1dcce5d8d50508dcf0aab6319a704e619a98f603",
       "source": [
         "share/character/skill/CharacterSkill.tab"
       ],
       "sourceSha1": "7972f0dfc5f38bc7097fad8c3b5a966ace04814a",
       "indexSha1": "d48fea81decf1df43d035ce31076f8bd05bb26b9",
       "filter": "all",
-      "transformation": []
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/character/skill/CharacterSkill.json (sha256:8176a727a30cb1e7406e4ad15d590a679401f1288c63ff85ff0539894cd6ad13), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ]
     },
     {
       "path": "share/character/skill/CharacterSkillGroup.tsv",
-      "rows": 1105,
+      "rows": 1118,
       "columns": 4,
       "naturalKey": "Id",
-      "contentSha256": "174128983ded695d486b2ec98f3729f267b159fd14cfdd1738abd32f209739c5",
+      "contentSha256": "30a477bea8612e312b76130f3b32070d5d893b5bf3321d26b8e737ac19506ba9",
       "source": [
         "share/character/skill/CharacterSkillGroup.tab"
       ],
       "sourceSha1": "421e49106a23cdb0b23b38b61cfdfe4b2d2824ad",
       "indexSha1": "d48fea81decf1df43d035ce31076f8bd05bb26b9",
       "filter": "all",
-      "transformation": []
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 13 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/character/skill/CharacterSkillGroup.json (sha256:1e086000c8dd91808b628cd8cb75ce077428ee4a20064665477a1ef4b6dd5e65), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ]
     },
     {
       "path": "share/character/skill/CharacterSkillLevelEffect.tsv",
-      "rows": 24783,
+      "rows": 25072,
       "columns": 189,
       "naturalKey": "Id",
-      "contentSha256": "180bf60928d97b2b508d7aa42a556aa107ede5914c0141140c0757fabf9c27d5",
+      "contentSha256": "a02712eef108d8e0ef5f0844519d996f4c3b3a8cb3a5e75d8428db18c2b45721",
       "source": [
         "share/character/skill/CharacterSkillLevelEffect.tab"
       ],
       "sourceSha1": "55dd0a32f584aea06101c25e84bbda9b4483ee3e",
       "indexSha1": "d48fea81decf1df43d035ce31076f8bd05bb26b9",
       "filter": "derive SkillId/Level from SkillLevelId; retain legacy Id by (SkillId,Level)",
-      "transformation": []
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 289 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/character/skill/CharacterSkillLevelEffect.json (sha256:bc9fe7ea89a10a881f173b9663c728b95a629c401de1f4ce48f33c1586f6218a), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged; SkillId/Level split from SkillLevelId (SkillId*100+Level) and Id numbered after the current maximum (AscNet policy: local row number)"
+      ]
     },
     {
       "path": "share/character/skill/CharacterSkillPool.tsv",
-      "rows": 680,
+      "rows": 688,
       "columns": 4,
       "naturalKey": "Id",
-      "contentSha256": "3046f17e30ec62a3890ff31667e46f4d26540a7379a5cb4c98c658445ab324df",
+      "contentSha256": "1da67cb49b137f7c9bdc1d9b21ab4d9e4bb54877f7ea468731b6685d716c6973",
       "source": [
         "share/character/skill/CharacterSkillPool.tab"
       ],
       "sourceSha1": "2faf7a7c04606aae74572c4c566f45fa6bf280a1",
       "indexSha1": "d48fea81decf1df43d035ce31076f8bd05bb26b9",
       "filter": "all",
-      "transformation": []
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 8 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/character/skill/CharacterSkillPool.json (sha256:08b890a9ff918dbddad967cd2832c7b3c4f82563183280c1ce1032e2568d151c), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ]
     },
     {
       "path": "share/character/skill/CharacterSkillUpgrade.tsv",
-      "rows": 13462,
+      "rows": 13620,
       "columns": 8,
       "naturalKey": "Id",
-      "contentSha256": "9c7e31c920a379404d9495cb086572d50f3e8a8a38a95a7ae2371a52c147bfef",
+      "contentSha256": "a4ab1aa052743ac68d379c549839e80463d6071fafaefa972d71c390025f678d",
       "source": [
         "client/character/skill/CharacterSkillUpgradeIdOptimize.tab"
       ],
       "sourceSha1": "10acf1d41837eecb04f9242812852c0c9da6762e",
       "indexSha1": "fa4ea8a1eb0d62d6cf61275cdfc9a3152684a827",
       "filter": "split-SkillLevelId; retain legacy Id by (SkillId,Level)",
-      "transformation": []
+      "transformation": [
+        "appended 158 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 bytes/client/character/skill/CharacterSkillUpgradeIdOptimize.json (sha256:e360c8edef1546cab496d7bbccb19bc3ceea62a6f317562f14f61d4061122840); SkillLevelId split into SkillId*100+Level; keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047, which reproduces all existing rows; Id is an AscNet local row number continuing after the existing maximum"
+      ]
     },
     {
       "columns": 2,
@@ -1021,9 +1086,9 @@
     },
     {
       "path": "share/chat/Emoji.tsv",
-      "rows": 344,
+      "rows": 349,
       "columns": 14,
-      "contentSha256": "9041c4ca17b9e9b36bfee810a93dc1380395a780819e961e5683b2b97d3529c4",
+      "contentSha256": "f274ace3478468c576a85e9c72754904cdf08206f01d99f653cfd3ae8b9a84e9",
       "naturalKey": "Id",
       "filter": "only installed Ids 11000349, 11000350, 11000351 needed by usable calendar and sign-in rewards",
       "previousRows": 341,
@@ -1034,7 +1099,8 @@
         "Scripts/scan_client_upgrade.py ExactTable exact typed decode"
       ],
       "transformation": [
-        "appended only three referenced authored ChatEmoji rows; preserved existing TSV columns, order and local rows; other new unrelated emoji rows not imported"
+        "appended only three referenced authored ChatEmoji rows; preserved existing TSV columns, order and local rows; other new unrelated emoji rows not imported",
+        "Scripts/import_new_rows_4_9.py: appended 5 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/chat/Emoji.json (sha256:2ff03e5ebeff82c3925478efcb0d6b15dba469a7b258736bdbc027cd21f76b89), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -1050,9 +1116,9 @@
     },
     {
       "path": "share/condition/Condition.tsv",
-      "rows": 10242,
+      "rows": 10417,
       "columns": 36,
-      "contentSha256": "24c7503165de784ebb258ae1d1ec2e8d25dd65d05c22be09183082048277fce5",
+      "contentSha256": "eed5dd5ffcb29b5e93b3cc0fa811ee1de970b6a773fc067bd317a7d5746e8039",
       "naturalKey": "Id",
       "filter": "all installed authored IDs (existing server column projection)",
       "previousRows": 10095,
@@ -1063,16 +1129,17 @@
         "Scripts/scan_client_upgrade.py ExactTable exact typed decode"
       ],
       "transformation": [
-        "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained"
+        "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained",
+        "Scripts/import_new_rows_4_9.py: appended 175 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/condition/Condition.json (sha256:979ed974223dab3cb21bc70534f95ea7e4b363ff45786ca10f9a76a5588c8507), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 2,
-      "contentSha256": "3d42ec4ba287197b9515af85d6cb82d0b663641a5460da9fe77af2bf5ba22560",
+      "contentSha256": "3560c7b632b38d3dfc0c537c91fcef836a1edecc7e5a6c70071fc8f8d9c1685f",
       "filter": "all",
       "naturalKey": "Key",
       "path": "share/config/Config.tsv",
-      "rows": 383,
+      "rows": 386,
       "source": [
         "share/config/Config.json"
       ],
@@ -1162,7 +1229,10 @@
           "GuildShopCoinLimit"
         ],
         "transformation": "Existing TSV preserved byte-for-byte."
-      }
+      },
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 3 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/config/Config.json (sha256:f0d04db0323c430d3ba93d45cf76c3758980aa11e70a54a0c688d4074980999b), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ]
     },
     {
       "columns": 2,
@@ -1210,11 +1280,11 @@
     },
     {
       "columns": 11,
-      "contentSha256": "75a4f40fba7e594657ed2f50a84afdc13dedbec7ea8393194ff03da8e431e96a",
+      "contentSha256": "45404dfb3e51cf88ca7827ef59101d78b85da44891baa9415f4a7b093d2486c6",
       "filter": "all",
       "naturalKey": "EventId",
       "path": "share/dormitory/character/DormCharacterEvent.tsv",
-      "rows": 752,
+      "rows": 760,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/dormitory/character/DormCharacterEvent.tab (sha1:1e37012f8d73b0ce5978cbec0d6880e5c3a6998d; 19428 bytes)",
@@ -1222,16 +1292,17 @@
         "Bundle index sha1:f10ed471fcb24ed7e40a35275b7552b082603011"
       ],
       "transformation": [
-        "Scripts/import_roster_life_4_8.py: import_client_tables.project of all source rows onto existing server columns (current rows as defaults; blank cells kept where source decodes 0); every runtime row verified present in source and unchanged except as noted"
+        "Scripts/import_roster_life_4_8.py: import_client_tables.project of all source rows onto existing server columns (current rows as defaults; blank cells kept where source decodes 0); every runtime row verified present in source and unchanged except as noted",
+        "Scripts/import_new_rows_4_9.py: appended 8 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/dormitory/character/DormCharacterEvent.json (sha256:469ff7446277454edd96514565000fa2387700ae6cc0590264e79e8bc2759036), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 9,
-      "contentSha256": "e5ada2fa6f21ccb9fc0bf2b149f95e0aee1ce2ffaff9c03d2371323520723507",
+      "contentSha256": "9078d595d9f0645a8511b1383a0908a1218130343c0719706e5b8dc2aee5c48e",
       "filter": "all",
       "naturalKey": "CharacterId",
       "path": "share/dormitory/character/DormCharacterFondle.tsv",
-      "rows": 94,
+      "rows": 95,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/dormitory/character/DormCharacterFondle.tab (sha1:b979fc97d7e19e03b81637d84503b045a73a7bb4; 2417 bytes)",
@@ -1239,16 +1310,17 @@
         "Bundle index sha1:f10ed471fcb24ed7e40a35275b7552b082603011"
       ],
       "transformation": [
-        "Scripts/import_roster_life_4_8.py: import_client_tables.project of all source rows onto existing server columns (current rows as defaults; blank cells kept where source decodes 0); every runtime row verified present in source and unchanged except as noted"
+        "Scripts/import_roster_life_4_8.py: import_client_tables.project of all source rows onto existing server columns (current rows as defaults; blank cells kept where source decodes 0); every runtime row verified present in source and unchanged except as noted",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/dormitory/character/DormCharacterFondle.json (sha256:7c2cdc22639a8b70c9c23e0c7fa0e9c8dd68f0a51d66cd3cd52c93204d473f74), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 13,
-      "contentSha256": "a431e0f272cb0a06e6d49db57739eb117ac8bfdfe89f5bc910c67dd284aa17be",
+      "contentSha256": "536040d364d60a127c96de135edddcc204cc9b280abf6ec464d0e79f028c27e4",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/dormitory/character/DormCharacterRecovery.tsv",
-      "rows": 470,
+      "rows": 475,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/dormitory/character/DormCharacterRecovery.tab (sha1:c08453aae4b17f775e85ba24ba997a9f34dfe0a1; 25862 bytes)",
@@ -1256,7 +1328,8 @@
         "Bundle index sha1:f10ed471fcb24ed7e40a35275b7552b082603011"
       ],
       "transformation": [
-        "Scripts/import_roster_life_4_8.py: import_client_tables.project of all source rows onto existing server columns (current rows as defaults; blank cells kept where source decodes 0); every runtime row verified present in source and unchanged except as noted; AttrCondition decodes as 0-based map {0,1,2} keyed by furniture AttrType-1 (Beauty/Comfort/Utility, xdormmanager.lua GetCharRecoveryCurLevel). Previous TSV kept only AttrCondition[1],[2] = source slots 1,2 (Beauty dropped, misaligned with DormModule.RecalculateRecovery score[0..2]). Header widened to contiguous AttrCondition[1],[2],[3] = source slots 0,1,2 for ALL 470 rows (460 pre-4.8 rows rewritten in those cells only); zeros written explicitly so parsed lists stay positional. Columns 12->13."
+        "Scripts/import_roster_life_4_8.py: import_client_tables.project of all source rows onto existing server columns (current rows as defaults; blank cells kept where source decodes 0); every runtime row verified present in source and unchanged except as noted; AttrCondition decodes as 0-based map {0,1,2} keyed by furniture AttrType-1 (Beauty/Comfort/Utility, xdormmanager.lua GetCharRecoveryCurLevel). Previous TSV kept only AttrCondition[1],[2] = source slots 1,2 (Beauty dropped, misaligned with DormModule.RecalculateRecovery score[0..2]). Header widened to contiguous AttrCondition[1],[2],[3] = source slots 0,1,2 for ALL 470 rows (460 pre-4.8 rows rewritten in those cells only); zeros written explicitly so parsed lists stay positional. Columns 12->13.",
+        "Scripts/import_new_rows_4_9.py: appended 5 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/dormitory/character/DormCharacterRecovery.json (sha256:bcf5362256758d6821f4171bb0957b38bd560a7d7fe5b529926f83e49af113ef), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -1272,11 +1345,11 @@
     },
     {
       "columns": 29,
-      "contentSha256": "513cc3112c21a299f0763ac75e8a481d4f3b395e2f237f71ac4fd019a3c2e4c0",
+      "contentSha256": "4316a56b8eb15b619be1c9b6706be895c1cc3ea4f98c2349159b83370c87e66f",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/dormitory/character/DormCharacterStyle.tsv",
-      "rows": 94,
+      "rows": 95,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/dormitory/character/DormCharacterStyle.tab (sha1:c9b6f7cf4667cdbcc180e055cf84bec6c41d2dc7; 22817 bytes)",
@@ -1284,7 +1357,8 @@
         "Bundle index sha1:f10ed471fcb24ed7e40a35275b7552b082603011"
       ],
       "transformation": [
-        "Scripts/import_roster_life_4_8.py: import_client_tables.project of all source rows onto existing server columns (current rows as defaults; blank cells kept where source decodes 0); every runtime row verified present in source and unchanged except as noted"
+        "Scripts/import_roster_life_4_8.py: import_client_tables.project of all source rows onto existing server columns (current rows as defaults; blank cells kept where source decodes 0); every runtime row verified present in source and unchanged except as noted",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/dormitory/character/DormCharacterStyle.json (sha256:0a0c75f12bf079235e7bc752b5c53c0bb6ad6a0c91061b084c927d2d28f06e7f), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -1300,13 +1374,16 @@
     },
     {
       "columns": 35,
-      "contentSha256": "daafa7141f243835a3493087ba065c928b4835551f34a3ef5b44e39694e91b60",
+      "contentSha256": "76a96e948fcf88aa42de7ca9fe8c4f719bcf2cbfb8bc528dfd6d10bb28e4b45d",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/dormitory/furniture/Furniture.tsv",
-      "rows": 1015,
+      "rows": 1024,
       "source": [
         "share/dormitory/furniture/Furniture.json"
+      ],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 9 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/dormitory/furniture/Furniture.json (sha256:f14794edac200ced628621cbcd2a0278710c7d074380362ec382a6c19d47b1f9), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -1388,24 +1465,30 @@
     },
     {
       "columns": 5,
-      "contentSha256": "1fddcb7b90bb42d467d7d53eec8058758b3dab202b6c81f0eb05be4c1c3c063c",
+      "contentSha256": "82e95d0bd77eccda1f6022cf75800a5d886f9a298af2b20741ebde4abdd30f7e",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/dormitory/furniture/FurnitureReward.tsv",
-      "rows": 1022,
+      "rows": 1031,
       "source": [
         "share/dormitory/furniture/FurnitureReward.json"
+      ],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 9 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/dormitory/furniture/FurnitureReward.json (sha256:54e21de53a5c5eed62363022703b8c53cc24513f9d825c89fa4245570e04464e), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 6,
-      "contentSha256": "8d45645fa3ee0a31876ce898bca746f51509e8a342cc94ec04342eecae19b12a",
+      "contentSha256": "b37c12f6b0aef8dcd073502e4636612012a4711eb048cedb8191e971062ba456",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/dormitory/furniture/FurnitureSuit.tsv",
-      "rows": 89,
+      "rows": 90,
       "source": [
         "share/dormitory/furniture/FurnitureSuit.json"
+      ],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/dormitory/furniture/FurnitureSuit.json (sha256:4da0a89dd6a48573c3a637a8dac50cfa5f2da79dce241fc6efca07a1e1287b97), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -1503,9 +1586,9 @@
     },
     {
       "path": "share/draw/DrawCombinations.tsv",
-      "rows": 2634,
+      "rows": 2657,
       "columns": 4,
-      "contentSha256": "1110bd223b248ff40b8e21c466336ce3d8d24b97fce79904c363f14f77ec4daf",
+      "contentSha256": "9555d923671d10c4d52033af87ee9807226b06197af608f2848acd3a4918303e",
       "source": [
         {
           "path": "share/draw/drawcombinations.tab",
@@ -1514,14 +1597,17 @@
           "rawTabSha1": "ba1ead6fecb2f52fa1380bc84e7d66a50c07ba06"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 23 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/draw/DrawCombinations.json (sha256:25a683e3dfbf2c9c0ca6bf529165333971cd8faa75f1c90fcf33411ec608ba2b), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
       "path": "share/equip/Equip.tsv",
       "columns": 15,
-      "rows": 933,
-      "contentSha256": "f03a2accbc0089ac75a36d1a7375c99094e09a757211ea9503290b820a658594",
+      "rows": 942,
+      "contentSha256": "d8b2a4d05b0b8c8d681c7d7956834537db6467d05da4cd473dad2f146a943913",
       "source": [
         "share/equip/Equip.tab"
       ],
@@ -1529,7 +1615,8 @@
       "sourceBundleSha1": "52b005eb7de811dcb565cc7b211574eba403d40f",
       "sourceScope": "document",
       "transformation": [
-        "append-installed-new-ids-preserve-legacy-projection"
+        "append-installed-new-ids-preserve-legacy-projection",
+        "Scripts/import_new_rows_4_9.py: appended 9 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/equip/Equip.json (sha256:ca8d2afe04d2d2f1de3bfb03c11d6b81d92c08d24c84aa7e4d308373aa4b4a1f), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "naturalKey": "Id",
       "filter": "all"
@@ -1537,8 +1624,8 @@
     {
       "path": "share/equip/EquipAwake.tsv",
       "columns": 25,
-      "rows": 390,
-      "contentSha256": "ce20038d706ef67dbca8cbf37874a2732a88fe17ec6ad4d81aa14500ca22af9c",
+      "rows": 396,
+      "contentSha256": "50f037b84befcfa891704d6bf0f06d931b5b35da524b9c2d9b120d9fba5475d9",
       "source": [
         "share/equip/EquipAwake.tab"
       ],
@@ -1546,7 +1633,8 @@
       "sourceBundleSha1": "52b005eb7de811dcb565cc7b211574eba403d40f",
       "sourceScope": "document",
       "transformation": [
-        "append-installed-new-ids-preserve-legacy-projection"
+        "append-installed-new-ids-preserve-legacy-projection",
+        "Scripts/import_new_rows_4_9.py: appended 6 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/equip/EquipAwake.json (sha256:292ccf3fae543095514bffcf65df247e1e92f1c5619652c9130566afea28477b), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "naturalKey": "Id",
       "filter": "all"
@@ -1554,8 +1642,8 @@
     {
       "path": "share/equip/EquipBreakThrough.tsv",
       "columns": 20,
-      "rows": 4391,
-      "contentSha256": "333e13a3bd87d7622954e83cf1aaa08b894d42cab8b692c99eca56964cd9e56c",
+      "rows": 4435,
+      "contentSha256": "ff3b052645f206b67a0dbc21b5c3985666a5a5e1738c64da7627e4f425aecf11",
       "source": [
         "share/equip/EquipBreakThrough.tab"
       ],
@@ -1563,7 +1651,8 @@
       "sourceBundleSha1": "52b005eb7de811dcb565cc7b211574eba403d40f",
       "sourceScope": "document",
       "transformation": [
-        "authoritative-row-rekey-and-removals"
+        "authoritative-row-rekey-and-removals",
+        "Scripts/import_new_rows_4_9.py: appended 44 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/equip/EquipBreakThrough.json (sha256:5122461d6f23ec3397866ac6a4f08b4c7c5a9b6792a27cadd65f6895de9a1661), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged; Id of every row set to its 4.9 client row Id by natural key (4.9 inserted rows mid-table; server lookups use the natural key)"
       ],
       "naturalKey": "EquipId,Times",
       "filter": "all"
@@ -1610,8 +1699,8 @@
     {
       "path": "share/equip/EquipResonance.tsv",
       "columns": 17,
-      "rows": 752,
-      "contentSha256": "98121ba3a4b6d5ce947aa012b9e1bbe1ce45f149cf6bc117bd2603e9e83d0e37",
+      "rows": 760,
+      "contentSha256": "a14197492f014faa5f18883c02afe8ae897c9c09937db3ae8361f9ec3276de15",
       "source": [
         "share/equip/EquipResonance.tab"
       ],
@@ -1619,7 +1708,8 @@
       "sourceBundleSha1": "52b005eb7de811dcb565cc7b211574eba403d40f",
       "sourceScope": "document",
       "transformation": [
-        "append-installed-new-ids-preserve-legacy-projection"
+        "append-installed-new-ids-preserve-legacy-projection",
+        "Scripts/import_new_rows_4_9.py: appended 8 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/equip/EquipResonance.json (sha256:5227ba3c60f418e107c20db6a5cf6c3415eb2bb76b431fc5b4444266c9c12d6b), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "naturalKey": "Id",
       "filter": "all"
@@ -1627,8 +1717,8 @@
     {
       "path": "share/equip/EquipResonanceUseItem.tsv",
       "columns": 11,
-      "rows": 752,
-      "contentSha256": "f166d298fa11c8ee47b530b789aee2e3b380ea835f5c3538b1ee770543e52c31",
+      "rows": 760,
+      "contentSha256": "3e4a495259914a2049c0267f7f5238867d6fce5e6a937b9c19892ea95d3ed144",
       "source": [
         "share/equip/EquipResonanceUseItem.tab"
       ],
@@ -1636,16 +1726,17 @@
       "sourceBundleSha1": "52b005eb7de811dcb565cc7b211574eba403d40f",
       "sourceScope": "document",
       "transformation": [
-        "append-installed-new-ids-preserve-legacy-projection"
+        "append-installed-new-ids-preserve-legacy-projection",
+        "Scripts/import_new_rows_4_9.py: appended 8 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/equip/EquipResonanceUseItem.json (sha256:0e9de6df840bc3ba5d18ed350f0c895c5b7d62dfdd9dc3647fd72985fa340687), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "naturalKey": "Id",
       "filter": "all"
     },
     {
       "path": "share/equip/WeaponOverrun.tsv",
-      "columns": 46,
-      "rows": 98,
-      "contentSha256": "9775091bdbf0f8da865781821644f93ada5de056c193cec52234e34d7a9f2575",
+      "columns": 50,
+      "rows": 105,
+      "contentSha256": "33baedb5b91c53045e0104ab3cfcc700825cbc9971bc36ae27f30e191b8ab65e",
       "source": [
         "share/equip/WeaponOverrun.tab"
       ],
@@ -1653,7 +1744,8 @@
       "sourceBundleSha1": "52b005eb7de811dcb565cc7b211574eba403d40f",
       "sourceScope": "document",
       "transformation": [
-        "indexed-map-keys-1-through-7"
+        "indexed-map-keys-1-through-7",
+        "Scripts/import_new_rows_4_9.py: appended 7 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/equip/WeaponOverrun.json (sha256:3d02af85c3dd89a4207f802a8df4dd42fc4a167f3fe486c7b731be7a275ce82f), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged; index maps read from key 1 as in the existing rows"
       ],
       "naturalKey": "Id",
       "filter": "all"
@@ -1661,8 +1753,8 @@
     {
       "path": "share/equip/WeaponSkillPool.tsv",
       "columns": 20,
-      "rows": 255,
-      "contentSha256": "015fbfab74bb98f717bb3ef88b7d847470b2c8511f3fa46061c2849b67d9ed32",
+      "rows": 258,
+      "contentSha256": "44e9a7cc212fe9b81a4f507926a5f843212024d5a1826b961a9c014ff5ead79e",
       "source": [
         "share/equip/WeaponSkillPool.tab"
       ],
@@ -1670,7 +1762,8 @@
       "sourceBundleSha1": "52b005eb7de811dcb565cc7b211574eba403d40f",
       "sourceScope": "document",
       "transformation": [
-        "append-installed-new-ids-preserve-legacy-projection"
+        "append-installed-new-ids-preserve-legacy-projection",
+        "Scripts/import_new_rows_4_9.py: appended 3 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/equip/WeaponSkillPool.json (sha256:7f3146898b207a61687dc469f4cbcbe0d22c706f4a1da908df88c1a25a3c487e), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "naturalKey": "Id",
       "filter": "all"
@@ -1678,8 +1771,8 @@
     {
       "path": "share/equip/equipguide/EquipRecommend.tsv",
       "columns": 12,
-      "rows": 931,
-      "contentSha256": "b64dce142f6594abedb9850546bcdef96fbd0aa29676d761db51634efb90e5de",
+      "rows": 933,
+      "contentSha256": "e5d124bbbcbb5828940d842901740eebf6fc716e45911309dcad096af4e4b967",
       "source": [
         "share/equip/equipguide/EquipRecommend.tab"
       ],
@@ -1687,30 +1780,33 @@
       "sourceBundleSha1": "9d0ffa640af3690bf32bb889b9d25b724631aa20",
       "sourceScope": "document",
       "transformation": [
-        "append-installed-new-ids-preserve-legacy-projection"
+        "append-installed-new-ids-preserve-legacy-projection",
+        "Scripts/import_new_rows_4_9.py: appended 2 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/equip/equipguide/EquipRecommend.json (sha256:5f8c2423438aec59096167cf713f487d4f74bbaf21e296c760159cb93be6095a), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "naturalKey": "Id",
       "filter": "all"
     },
     {
       "path": "share/exhibition/ExhibitionReward.tsv",
-      "rows": 425,
+      "rows": 430,
       "columns": 9,
       "naturalKey": "Id",
-      "contentSha256": "2e1fccab5c8aed18491b7153a667266eb740b620a3ad706683f56cb59dc4e67a",
+      "contentSha256": "1372d50bd998fe2fc3b8a67f81bf4cdd58ba1e87e135e781204a2d3bf2e82cc7",
       "source": [
         "share/exhibition/ExhibitionReward.tab"
       ],
       "sourceSha1": "83efb44e1c3124e8a7a3f4460c63a6da03d38bd0",
       "indexSha1": "22c55133e0c10aa02293218ad763743d895bc78c",
       "filter": "all",
-      "transformation": []
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 5 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/exhibition/ExhibitionReward.json (sha256:6e7baa4508fc3f0080e8e1eb51bfcbac38139eb5118f33f9f95496b9fed9655d), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ]
     },
     {
       "path": "share/fashion/Fashion.tsv",
       "columns": 41,
-      "rows": 458,
-      "contentSha256": "e33b056f5dacb9d5367797630e2b10e6120ff9104a9f21ab59cc6960f8dc12c4",
+      "rows": 464,
+      "contentSha256": "d2f6c16dc45e56e758bd19fcd00d0beead0c0cba093f19ee7e6873aa243bb17e",
       "source": [
         "share/fashion/Fashion.tab"
       ],
@@ -1718,7 +1814,8 @@
       "sourceBundleSha1": "429a577fcf0d77158c556c25cf9cdfb58ccd7998",
       "sourceScope": "document",
       "transformation": [
-        "append-installed-new-ids-preserve-legacy-projection"
+        "append-installed-new-ids-preserve-legacy-projection",
+        "Scripts/import_new_rows_4_9.py: appended 6 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fashion/Fashion.json (sha256:63df616d2c806bdc9d30c456ef11af98c3b1e42e4c9b75ed78b3bc609ec4224d), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "naturalKey": "Id",
       "filter": "all"
@@ -1726,8 +1823,8 @@
     {
       "path": "share/fashion/FashionColor.tsv",
       "columns": 15,
-      "rows": 4,
-      "contentSha256": "181d37e6895b8aa7c59f79ea160342f463ff48678fa5713903ef8472c844902c",
+      "rows": 5,
+      "contentSha256": "8ab55326511d4e6aa0de8f6b80eb060bf5643f7067c7fb2741396833aa5bb6d7",
       "source": [
         "share/fashion/FashionColor.tab"
       ],
@@ -1735,16 +1832,17 @@
       "sourceBundleSha1": "429a577fcf0d77158c556c25cf9cdfb58ccd7998",
       "sourceScope": "document",
       "transformation": [
-        "append-installed-new-ids-preserve-legacy-projection"
+        "append-installed-new-ids-preserve-legacy-projection",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fashion/FashionColor.json (sha256:ab765a489e226e902afce336172b5d4332edf7a4dbd222d30728395444e0127a), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "naturalKey": "Id",
       "filter": "all"
     },
     {
       "path": "share/fuben/Stage.tsv",
-      "rows": 11234,
+      "rows": 11299,
       "columns": 108,
-      "contentSha256": "d35e9eb0a02858be3068ecee6eb3e5163bd0362ba5c89d6e7aec3ab3fa16f60e",
+      "contentSha256": "39b85db82d85fc0717ffd4751833280fbbf0fa635160c2db8bac597f08407465",
       "naturalKey": "StageId",
       "filter": "all installed authored IDs (existing server column projection)",
       "previousRows": 11093,
@@ -1756,7 +1854,8 @@
       ],
       "transformation": [
         "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained",
-        "retained curated Arcade BeginStoryId/EndStoryId aliases; projected 11 authored IsBanGeneralSkill=true cells as 1, remaining cells blank (generated int?)"
+        "retained curated Arcade BeginStoryId/EndStoryId aliases; projected 11 authored IsBanGeneralSkill=true cells as 1, remaining cells blank (generated int?)",
+        "Scripts/import_new_rows_4_9.py: appended 65 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fuben/Stage.json (sha256:e609a716e88b5ff311201bb45f2d1a630dbd6bee49d31c0a601ce39d06118a99), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -1790,13 +1889,16 @@
     },
     {
       "columns": 3,
-      "contentSha256": "d129d3588406af7c930f9f52eca6a20f7edc25c5a5e970f3e4e7c799da01af48",
+      "contentSha256": "34a1dde74206249f9852af5d52e09d8accbc19882475f62f4dd23735d0273b9b",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/fuben/arena/ArenaGroupFightEvent.tsv",
-      "rows": 195,
+      "rows": 200,
       "source": [
         "share/fuben/arena/ArenaGroupFightEvent.json"
+      ],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 5 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fuben/arena/ArenaGroupFightEvent.json (sha256:489a9137564fe8fa0af4be88e04b058384cd5b510ff5b2725c953f8f963bec38), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -2261,8 +2363,8 @@
       ]
     },
     {
-      "columns": 9,
-      "contentSha256": "48b667904c499108bbf6a2bd98c136ab9c507211b0c2d9517e287bc6c09ad49d",
+      "columns": 10,
+      "contentSha256": "6bed2bb6c613cfb44ee837ab08642352dc7defd3546798c2fda6d7373584081a",
       "filter": "boss-single-derived",
       "naturalKey": "StageId",
       "path": "share/fuben/bosssingle/BossSingleStage.tsv",
@@ -2272,6 +2374,9 @@
         "share/fuben/Stage.json",
         "share/config/Config.json",
         "share/reward/{Reward,RewardGoods}.json"
+      ],
+      "transformation": [
+        "BossName appended from EN BossSingleStage.json for every StageId whose existing numeric columns match the client row (used by the /ppc intensive commands)"
       ]
     },
     {
@@ -2345,34 +2450,36 @@
     },
     {
       "columns": 8,
-      "contentSha256": "e9cb86ce88a80705178bd2b4520b379fc3414a773a8f8eb1a2cf1e782f7139f3",
+      "contentSha256": "e00f7c72d87d3f84b009c23642436725fb9a668c85a0244594c2af0f83bbd44c",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/fuben/mainline2/MainLine2Achievement.tsv",
-      "rows": 25,
+      "rows": 26,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/fuben/mainline2/MainLine2Achievement.tab (sha1:6adddbf2a80b4766c5a7131bbc57bf9d4a37b20f; 3850 bytes)",
         "Decoded JSON sha256:2441e48be90c847fa38aa3818b59be288cdd771a9db14bb010614e2826f6da10"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fuben/mainline2/MainLine2Achievement.json (sha256:779ae251b6f9af262f8b2d4f46ecc8ac77556b0277e8b2c96d93feab0f43f1d4), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 90,
-      "contentSha256": "c71658658283eb53014ddc136be5b0609592bcb91216094e4c4ef48d9c7364c2",
+      "contentSha256": "329eb9b9c20e3965e9fe1b227c4771ba229374b8f0f87de61535cbdde38824f7",
       "filter": "all",
       "naturalKey": "ChapterId",
       "path": "share/fuben/mainline2/MainLine2Chapter.tsv",
-      "rows": 32,
+      "rows": 33,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/fuben/mainline2/MainLine2Chapter.tab (sha1:3492356634ec362942514cfcd4e7a11aef3e8b3b; 8261 bytes)",
         "Decoded JSON sha256:0c88d0975aa1c0b8a90d47c7049b7305ffb315aad299e2a7453ee014e8d0afe5"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fuben/mainline2/MainLine2Chapter.json (sha256:18aba064301dbfdfc05aac0bc5690dc51ebfb42c1195b6eebaf1edc01ea74188), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -2388,34 +2495,36 @@
     },
     {
       "columns": 11,
-      "contentSha256": "42053f06c02c0af0f33123c69424297c0b567b31e425f7899cbeb200438b63a5",
+      "contentSha256": "d30a2878df108c719275bf714c90d21fa7d8b4a6674c7c758c083990ae1ed419",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/fuben/mainline2/MainLine2ExhibitionChapter.tsv",
-      "rows": 64,
+      "rows": 65,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/fuben/mainline2/MainLine2ExhibitionChapter.tab (sha1:cb626c057b2f1615983b5746a0a16ff1e9086c96; 2905 bytes)",
         "Decoded JSON sha256:43c3b70b71971b429fab12bfc240b0b5dfe173907fdd4a2d0257c87e85a9ef20"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fuben/mainline2/MainLine2ExhibitionChapter.json (sha256:05e45c7c9189f996fdeb821e82469c4431ab27480f3c406a9b8a2e0dfffef056), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 22,
-      "contentSha256": "6ec39ae1f0e6fa7c4d20b6e30c74fa2ecd2cf9d6549563b639bd4ae5dd0f8f1a",
+      "contentSha256": "707de2fd03d64ed87a41872c0bdcf4c953df88cf4946ab5e05d9d52af9ab5834",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/fuben/mainline2/MainLine2Main.tsv",
-      "rows": 25,
+      "rows": 26,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/fuben/mainline2/MainLine2Main.tab (sha1:7ee0b98d3394b184225fe985ffa2317172f1f1b5; 3431 bytes)",
         "Decoded JSON sha256:6a26e743113da104fadc2d2594fa975ad9892b0e2aaa7c10569587bdb1c8d060"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fuben/mainline2/MainLine2Main.json (sha256:684a0a0cd057bb4eda2b85ca573b053fd7c3f4042c87c70fd965dd78a488ffa6), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -2431,50 +2540,53 @@
     },
     {
       "columns": 37,
-      "contentSha256": "65ed989e61079e45c2ff2fee58541057cf1d25e796a652e8ce81693cc687421b",
+      "contentSha256": "7a8723a75a4c7835b39a06ad37449626b893ab37e0349f8b860897228759e896",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/fuben/mainline2/MainLine2Stage.tsv",
-      "rows": 599,
+      "rows": 631,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/fuben/mainline2/MainLine2Stage.tab (sha1:9f5488af418c724377bbf6749a09a6d7898ac1f5; 47929 bytes)",
         "Decoded JSON sha256:f7cdb82825dc99e26695820c437543fe122259859d6e1d743ba602ce1f450072"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 32 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fuben/mainline2/MainLine2Stage.json (sha256:aba30e9a9a4bbf5f7f269260c03439bf789d1a7f994a7fc0303aa92fda1ab9d1), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 32,
-      "contentSha256": "81b2b90068aadd266aa0341c92c93ce667f9c9f8bd6194dce976a18ccca44498",
+      "contentSha256": "a0faeb10bda2c774b755161c5f736f8f92a811e95f10fd1f2b93b6ac63a92ee4",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/fuben/mainline2/MainLine2StageGroup.tsv",
-      "rows": 67,
+      "rows": 72,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/fuben/mainline2/MainLine2StageGroup.tab (sha1:a90740b1f4d761a2da859b649edde888687bd91e; 3044 bytes)",
         "Decoded JSON sha256:c0e56d5246ffee8132c3320d7f52df3e387ca156bd87c6249fb29875097d108c"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 5 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fuben/mainline2/MainLine2StageGroup.json (sha256:4602a45c9a0ea183b2a3c542192265904f16885a995a05e9b57c078fdffa0d25), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 13,
-      "contentSha256": "87f552f19ac7e63db6afb4f83ca5797b852bef24bf7f870d93b38130be5a943d",
+      "contentSha256": "9d6b65f5c04b391005152f33f068a8811cafc8822816f7b489ac4c6965c3c268",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/fuben/mainline2/MainLine2Treasure.tsv",
-      "rows": 25,
+      "rows": 26,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/fuben/mainline2/MainLine2Treasure.tab (sha1:79a3bdfec3ef24a515383b9a886d85671e8c643a; 1040 bytes)",
         "Decoded JSON sha256:1876bc98045bdb217739a0e04d7bac79589324e087a2c86e009e1ae09e5f54be"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fuben/mainline2/MainLine2Treasure.json (sha256:3f0538a20bfbb5a392ff1fe69f611d2542a43069f041fd40ac7a23e4f2f027df), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -2578,11 +2690,11 @@
     },
     {
       "columns": 39,
-      "contentSha256": "d807c496e976ac3d2004d84bf44da865c5cfcaffb7c6b94b32aac22eeae99fbc",
+      "contentSha256": "5b9e516cf2e900a114e03c9176e5609b1bdc94ae33d34aadd9926637e3b8498a",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/fuben/teaching/TeachingActivity.tsv",
-      "rows": 52,
+      "rows": 53,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/fuben/teaching/TeachingActivity.tab (sha1:e24cb952aa460bb968e3bc39bf998e5983afa415; 30500 bytes)",
@@ -2590,7 +2702,8 @@
         "Bundle index sha1:9c8302cf1a3e8bd6ccd7fbb990b666581b64da66"
       ],
       "transformation": [
-        "Scripts/import_boss_trials_4_8.py: import_client_tables.project onto existing server columns in source order; rows equal modulo blank/0 keep current bytes; source-dropped rows fail closed"
+        "Scripts/import_boss_trials_4_8.py: import_client_tables.project onto existing server columns in source order; rows equal modulo blank/0 keep current bytes; source-dropped rows fail closed",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fuben/teaching/TeachingActivity.json (sha256:e672478e221f9e62f08bd98abf4dfeae6a21f3e7570a9b38e19a8bfe1741138b), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -2760,29 +2873,33 @@
     },
     {
       "columns": 8,
-      "contentSha256": "31f5fbd4dd09b78d262716d1b7fd982b337b973190f7df69806361bf234a515c",
+      "contentSha256": "1cbd419bc0732544ec72f526a0a152129068c372443ea74f3e87402cdd868870",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/functional/FunctionalOpen.tsv",
-      "rows": 298,
+      "rows": 300,
       "source": [
         "share/functional/FunctionalOpen.json"
+      ],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 2 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/functional/FunctionalOpen.json (sha256:a24b5696578a4f7e298167ce74f145832ac45f1ef1f03507937fd9c28d572323), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 12,
-      "contentSha256": "e8756ae795c3bb4c4a13e7502ca0d01360068600814678c4b08ec6f74674b972",
+      "contentSha256": "33f9f6fcba2ed59caf717a8509a2212861cc50583fa1914744872c94717debc8",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/guide/GuideComplete.tsv",
-      "rows": 878,
+      "rows": 893,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/guide/GuideComplete.tab (sha1:837e216560a36af3065584c06c062b7f301b2251; 44072 bytes)",
         "Decoded JSON sha256:204cbdc4764d2218c6df57eec926022987e79935daabe401b171bd6a9d017a6c"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 15 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/guide/GuideComplete.json (sha256:627e3cde9c432575f0f17b050cc3bdaff9e0f553efef465076304e77a1cdb48b), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -2803,25 +2920,26 @@
     },
     {
       "columns": 14,
-      "contentSha256": "12c9df17890ea99be338477dbec7908b0e2d7f22b01a5fc449c4e3f56e7b870f",
+      "contentSha256": "4d6e85debfa1d4ec5ba43b021fa0cd80ea618196a2ad58a3760a7f1e4aa3f523",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/guide/GuideGroup.tsv",
-      "rows": 870,
+      "rows": 885,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/guide/GuideGroup.tab (sha1:62917d87e261394c284a2a7d90eeb8070743de23; 72830 bytes)",
         "Decoded JSON sha256:5bc4ccb9bbd3a8adcefd2e816ae90a51f79e8e0b1f074bde1120285be27c4046"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 15 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/guide/GuideGroup.json (sha256:cc8ea1295b55d4dd28fc2b34ecabb93676c18f48cacd018033837ab2a2019c4f), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "path": "share/headportrait/HeadPortrait.tsv",
       "columns": 19,
-      "rows": 317,
-      "contentSha256": "3262560c0772a8e6de58d412e06db62b76874d9b1ab587189b7077184e05e44b",
+      "rows": 320,
+      "contentSha256": "4d3bc8cdc8fe85a7a7c42a6b17963b199a15bd63e9fcdb99e25631ca5c98677f",
       "source": [
         "share/headportrait/HeadPortrait.tab"
       ],
@@ -2829,16 +2947,17 @@
       "sourceBundleSha1": "8e85a92db35e4a22ad59a8f497862aae90fd128f",
       "sourceScope": "document",
       "transformation": [
-        "append-installed-new-ids-preserve-legacy-projection"
+        "append-installed-new-ids-preserve-legacy-projection",
+        "Scripts/import_new_rows_4_9.py: appended 3 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/headportrait/HeadPortrait.json (sha256:633a2919dc35c25cf5311e30b0597a4e65a27dd315cd525b48562b734b19be0c), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "naturalKey": "Id",
       "filter": "all"
     },
     {
       "path": "share/item/Item.tsv",
-      "rows": 2948,
+      "rows": 2972,
       "columns": 37,
-      "contentSha256": "00bcde705c678884ddb5c9cf7cc55aa915f6b1338cfb55b24c8b5ec96cfc897a",
+      "contentSha256": "998b16a7b18d368cd5d2b95bdc5885df7cc8df0a7673d3ab15ad7248e587afd5",
       "naturalKey": "Id",
       "filter": "all installed authored IDs (existing server column projection)",
       "previousRows": 2917,
@@ -2849,7 +2968,8 @@
         "Scripts/scan_client_upgrade.py ExactTable exact typed decode"
       ],
       "transformation": [
-        "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained"
+        "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained",
+        "Scripts/import_new_rows_4_9.py: appended 24 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/item/Item.json (sha256:62ad81d032aa62ea73e314e4a5dfd79bb5acfcfb45af34cebf366603583c20a2), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -2865,34 +2985,36 @@
     },
     {
       "columns": 4,
-      "contentSha256": "75d36c7e688d00811e3c280a74b80dd6b0b34daae516b798a542df2985f7fbc3",
+      "contentSha256": "f8f263bf034a45f387f780cfe6a22877179174a24852308dc593d89d5bb0fa16",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/lifetree/LifeTreeChapter.tsv",
-      "rows": 9,
+      "rows": 10,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/lifetree/LifeTreeChapter.tab (sha1:d1ed345fbd95bb304ba47b09a7ddd527c1f1a5e7; 1007 bytes)",
         "Decoded JSON sha256:9d60d3f29909279a69d1ee08f2671ca4d487d1a39ea7f710f565f6045cbd5a98"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/lifetree/LifeTreeChapter.json (sha256:1df1ad0c2c7191ff307949ab913ee6946c24a65c51e4ee00918bd2cac6e4bdaf), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 9,
-      "contentSha256": "24ffeb29712d49f4390d77bf732e96bf29f902689f94e8a442900a983eabce48",
+      "contentSha256": "c661bbd824cb3101626bab168ca5e1e149153f7c085e9e5a14dfaa888dd4fcc8",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/lifetree/LifeTreeCharacter.tsv",
-      "rows": 9,
+      "rows": 10,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/lifetree/LifeTreeCharacter.tab (sha1:87385cd182b95c9a42c8de2dcf0807730e68bd05; 515 bytes)",
         "Decoded JSON sha256:a928b8997d4798e85403653f61f3d7ee2008b7af2c5000b736ea06e3fea89c5c"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/lifetree/LifeTreeCharacter.json (sha256:79393d24458bb11c87783ad713124b98970190eff56669eb342b2b521356027e), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -2961,13 +3083,16 @@
     },
     {
       "columns": 5,
-      "contentSha256": "a4c9466553e7238fe8361f71b1c0fd708174e1d9ab929d9b548e8f9b16f31421",
+      "contentSha256": "7ff905ae8e8822d60ecbac1ff52b6276a2844316cb2fe55775381fb92f56dd49",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/mail/MailRewardGoods.tsv",
-      "rows": 1268,
+      "rows": 1373,
       "source": [
         "share/mail/MailRewardGoods.json"
+      ],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 105 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/mail/MailRewardGoods.json (sha256:7987d97cb3709c718b4f279183d935fbb0601698b89e4fc72ca56948cbdc6a75), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -3176,9 +3301,9 @@
     },
     {
       "path": "share/partner/Partner.tsv",
-      "rows": 43,
+      "rows": 44,
       "columns": 21,
-      "contentSha256": "6069a3306da5feb72d5fabc0b5d71dd4b7d7a309206f505ded93156fea48fd60",
+      "contentSha256": "dbc43b022b22f5f1116ab130a530b2466d4d11a50e3d63b30c057dc525b50efb",
       "source": [
         {
           "path": "share/partner/partner.tab",
@@ -3187,14 +3312,17 @@
           "rawTabSha1": "9d10d09d5349987aa8dd728e4df2ae70a856bb5f"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/partner/Partner.json (sha256:0e205bcce6a7db3e5cebf61e1e40d0658626a60b1f4326a0a215f659109f6e31), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
       "path": "share/partner/PartnerBreakThrough.tsv",
-      "rows": 172,
+      "rows": 176,
       "columns": 13,
-      "contentSha256": "a29e09b09e1d3f390027e8d84646010b1b901637a7341bf275bea236b18d2230",
+      "contentSha256": "41ce7998d356883eaed2db0c43fa90625357b0c719a259a59229459e35612555",
       "source": [
         {
           "path": "share/partner/partnerbreakthrough.tab",
@@ -3203,14 +3331,17 @@
           "rawTabSha1": "225e0464dd592ccb90287db9da150f7a955d5ef5"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 4 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/partner/PartnerBreakThrough.json (sha256:f3a18659fa7301343223593ed1488b04d05a826f374639fcbc0e01f4cd6d1f4a), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
       "path": "share/partner/PartnerMainSkillGroup.tsv",
-      "rows": 86,
+      "rows": 88,
       "columns": 14,
-      "contentSha256": "3d1e49eefbd77f9ae63e2baf2469daae0a9b2cfe8336a790d18ff31f3af70c2f",
+      "contentSha256": "565ddd5dd147dca319fce16339acf0bf3bd5234f4cb37f56ec3e6663e51370e4",
       "source": [
         {
           "path": "share/partner/partnermainskillgroup.tab",
@@ -3219,14 +3350,17 @@
           "rawTabSha1": "d41507560369c25f81aa03e351f6d74b832a759d"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 2 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/partner/PartnerMainSkillGroup.json (sha256:1974f7faa8d32c13791eda3a3c69a1fce1387b47b2488df15a708a8287513f21), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
       "path": "share/partner/PartnerPassiveSkillGroup.tsv",
-      "rows": 215,
+      "rows": 220,
       "columns": 2,
-      "contentSha256": "54673fbd9273b64fb79b9d0f91d87ed1472c67fbd5e952ecc100931cf6eb8e3d",
+      "contentSha256": "d789abbe100ad48d1206ef1c5073b23823d744dd9365a52ab8e52ede71a8bbec",
       "source": [
         {
           "path": "share/partner/partnerpassiveskillgroup.tab",
@@ -3235,14 +3369,17 @@
           "rawTabSha1": "88fee68fdf8dfe45ac44f6fa966210d6b60741f2"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 5 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/partner/PartnerPassiveSkillGroup.json (sha256:63a32f384550d1d185bf7a3712d5ca9c655e54911379f43cb1eb073422ed5f2f), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
       "path": "share/partner/PartnerQuality.tsv",
-      "rows": 177,
+      "rows": 181,
       "columns": 17,
-      "contentSha256": "6e828509ebe3ee445913f187b08143c249c7ec057415e90ca76a318a588e18a4",
+      "contentSha256": "7ef55abae86d637aa2900a12da392e81b18379f3233e2d9dd245422c72020979",
       "source": [
         {
           "path": "share/partner/partnerquality.tab",
@@ -3251,14 +3388,17 @@
           "rawTabSha1": "9ef335bcc61ac16805c5b29cd775771a5c194f16"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 4 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/partner/PartnerQuality.json (sha256:252d1fd2a301350a5f871617d9d8c3508ddacdaacb476302c4f3353aee4d7164), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
       "path": "share/partner/PartnerSkill.tsv",
-      "rows": 43,
+      "rows": 44,
       "columns": 13,
-      "contentSha256": "413433e1528ce5034a857f20392d15be620545c27b1e1afe18ece69ff964e752",
+      "contentSha256": "afab4d72724ab0affdeed9d6f445eb2a9cc7c98d4abed109fbfb0892f648710d",
       "source": [
         {
           "path": "share/partner/partnerskill.tab",
@@ -3267,14 +3407,17 @@
           "rawTabSha1": "041738a7957c8f6fb3c50a09eb04870e3a7b898a"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/partner/PartnerSkill.json (sha256:6fabb89d4fa16ae5e1739983a9f2af639b095d27d84c615ff928facfe58a4b97), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "PartnerId"
     },
     {
       "path": "share/partner/PartnerSkillEffect.tsv",
-      "rows": 3655,
+      "rows": 3740,
       "columns": 13,
-      "contentSha256": "a51e0038317f39d8b1c838ca8b24b6c09c4cca63651954da9cbaacc99f4627a3",
+      "contentSha256": "10726aa196d3cd3d6f8e46095e0fd9c98d1a38f9833ba74fa6cf29d2d42fcca1",
       "source": [
         {
           "path": "share/partner/partnerskilleffect.tab",
@@ -3283,7 +3426,10 @@
           "rawTabSha1": "384fd9e1198683bdaaf986de3fecbdf5152213ba"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 85 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/partner/PartnerSkillEffect.json (sha256:90e9404aa11568c2e3470af105bc9177061d87873a2a71b736c0ca4076ac0552), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
@@ -3324,66 +3470,70 @@
     },
     {
       "columns": 34,
-      "contentSha256": "f0ba0c8f0b6d5e68afc00216ada42e0ed7dd81f1090244b2713edf2ed0ef6fdd",
+      "contentSha256": "6cb7780ddd41bf50024dbf57f09c99d6f388394186df40009095af3891aa2b73",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/passport/PassportActivity.tsv",
-      "rows": 47,
+      "rows": 48,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/passport/PassportActivity.tab (sha1:a5eb27f76d87c1d42bff188d1b7ecfd76d30f1ef; 2648 bytes)",
         "Decoded JSON sha256:e5a80ea57774859c44a3774553b43b3afaff68b325a82976cd7c85237e470700"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/passport/PassportActivity.json (sha256:33018a5b86b77e49106fa3dcbb29f49b7daf822f2f188505579a2bf91a193e57), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 7,
-      "contentSha256": "f8dee28092c04d2e5e58843e139befa279f07ca1c6460df67143f01757f8933b",
+      "contentSha256": "94c74a9e1569b7c0f4c970fce76597eea3c654e7862ae337c1b67d7444883780",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/passport/PassportLevel.tsv",
-      "rows": 3700,
+      "rows": 3780,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/passport/PassportLevel.tab (sha1:23133a0048166c23cb87ac056183e1778e2f7297; 55868 bytes)",
         "Decoded JSON sha256:db55a75f07f670c6179502a670d0912a0266bbbcadf00a924441e0e6100a8b23"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 80 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/passport/PassportLevel.json (sha256:5909fe83489fb0cdf805d09e3ee8b15d24d3c6d4827554652eeee128a0122ef8), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 5,
-      "contentSha256": "d5ad3aac97c2240f4f370af4220aec0cba961bff40a7e6bd57c53b6cfac3d09b",
+      "contentSha256": "416aed665b3421bd611d28afbc0c247f5a28aa9d706fe47a6f55e372d362d029",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/passport/PassportReward.tsv",
-      "rows": 11100,
+      "rows": 11340,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/passport/PassportReward.tab (sha1:6266efaf307ee6903b730cc2b6d588bb7d7e5f6e; 153587 bytes)",
         "Decoded JSON sha256:5ed608ea94c08f66506bd26a5f495ab4f25979da748f65a29e2dbeeca10adcef"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 240 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/passport/PassportReward.json (sha256:560623b3749a73e60048011d48e056b158ac3ec8ea75d184fe257714840d0fef), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 11,
-      "contentSha256": "c92590000cb83973ba813f2a1207bfb81a46e8ddb16ba56e6a11e931c6a0a3d2",
+      "contentSha256": "7509ec81f54d5e147a356685fe395c0f19c8ca746d101a468e4b92fb44a57f19",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/passport/PassportTaskGroup.tsv",
-      "rows": 362,
+      "rows": 370,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/passport/PassportTaskGroup.tab (sha1:2a6cf585190e683a5bd1526942d728d58fa5e232; 10494 bytes)",
         "Decoded JSON sha256:1f2c65e60cbb8dc53f97f9a3f725513fd36dc97e98e22ee685feed762f4c10dd"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 8 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/passport/PassportTaskGroup.json (sha256:e5a85da7fd98ecefb4678125e6ff6b073536869a86b01a4c2c31d97213f68057), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -3404,18 +3554,19 @@
     },
     {
       "columns": 9,
-      "contentSha256": "9ce5ae44f0cb630c405a9ffffd39bf2ff595c1b381e80c097b437ae350a3aabf",
+      "contentSha256": "0363e218ec8c76c55acbf700b547927cc6011fa046b38e81209e97a54a0fe01d",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/passport/PassportTypeInfo.tsv",
-      "rows": 141,
+      "rows": 144,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/passport/PassportTypeInfo.tab (sha1:5d4e02962925e3b6f4766b9685460152b49fb32c; 21663 bytes)",
         "Decoded JSON sha256:87fe9ce403f304476be7dc819aacdbc5c2860581e2b00b043155cc501277e67d"
       ],
       "transformation": [
-        "import_client_tables.project onto existing server columns; local-only cells/rows kept"
+        "import_client_tables.project onto existing server columns; local-only cells/rows kept",
+        "Scripts/import_new_rows_4_9.py: appended 3 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/passport/PassportTypeInfo.json (sha256:9fec3c7adae937c5ae26a8a3c654a712c27be7c9cad9d3abdbee81fa90a79c2c), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -3583,9 +3734,9 @@
     },
     {
       "path": "share/reward/Reward.tsv",
-      "rows": 23170,
+      "rows": 23493,
       "columns": 76,
-      "contentSha256": "d67a91e1cd4a71efd3e8009be0d86c8ec75581a583256dda0461736f7a6c2e4e",
+      "contentSha256": "6171e30cf020026f14c224818ea8f245e615a2352364d99206efaa2db1d9f2b6",
       "naturalKey": "Id",
       "filter": "all installed authored IDs (existing server column projection)",
       "previousRows": 22950,
@@ -3596,14 +3747,15 @@
         "Scripts/scan_client_upgrade.py ExactTable exact typed decode"
       ],
       "transformation": [
-        "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained"
+        "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained",
+        "Scripts/import_new_rows_4_9.py: appended 323 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/reward/Reward.json (sha256:24056b636a409e5beabd2bbf813d67ac736e989274a2b5d519202dc6139407c3), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "path": "share/reward/RewardGoods.tsv",
-      "rows": 46410,
+      "rows": 46999,
       "columns": 6,
-      "contentSha256": "1a32aa51b4adfd150b1b79bbab94035ffaa8b68f72e939e861291466c727c78a",
+      "contentSha256": "5d7747d5132938f395b1a1177094c333357ca45bc7c608f5c0fc4a19b883129c",
       "naturalKey": "Id",
       "filter": "all installed authored IDs (existing server column projection)",
       "previousRows": 45985,
@@ -3614,14 +3766,15 @@
         "Scripts/scan_client_upgrade.py ExactTable exact typed decode"
       ],
       "transformation": [
-        "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained"
+        "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained",
+        "Scripts/import_new_rows_4_9.py: appended 589 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/reward/RewardGoods.json (sha256:b2ebbae16cc7ab8773fab2d46021ed76bcc0db071601e49ab5a933312e98b79f), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "path": "share/robot/Robot.tsv",
-      "rows": 5155,
+      "rows": 5181,
       "columns": 66,
-      "contentSha256": "13c3922293e7389149a7c781b4d1a3efb20bffffd5218c7e09e58794bb0d2ec5",
+      "contentSha256": "b7c53cf094f0f7c1fcdf3e3ac89867df9cdcd3bf53a9769201ea3e5668b3952a",
       "naturalKey": "Id",
       "filter": "all installed authored IDs (existing server column projection)",
       "previousRows": 5079,
@@ -3633,21 +3786,23 @@
       ],
       "transformation": [
         "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained",
-        "new source fields SpSkillIds/SpSkillLevels/SwitchSkillGroupId/UseFashionColor omitted pending explicit runtime consumer/schema cutover"
+        "new source fields SpSkillIds/SpSkillLevels/SwitchSkillGroupId/UseFashionColor omitted pending explicit runtime consumer/schema cutover",
+        "Scripts/import_new_rows_4_9.py: appended 26 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/robot/Robot.json (sha256:ecd6c97d49d11c400b78ec5093be697bf672410c582b6634927cfcca6e575606), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "path": "share/signin/SignIn.tsv",
-      "rows": 141,
+      "rows": 142,
       "columns": 17,
-      "contentSha256": "19023eb387338dd1ee0fa096a4f835649763a7909ff264232b31e0b39b06820e",
+      "contentSha256": "76a099ff66ef7941dd40d6e72f2851d44ebb3b9aa0ed8a26e1497f57b1b5d810",
       "naturalKey": "Id",
       "source": [
         ".runtime/upgrade-4.8/tables/share/signin/SignIn.json (sha256:5b821e48300f3894cd7563bd1590d1492bbf5d49cf49f86885184bac8e6ccbc8)"
       ],
       "filter": "authored 4.8 source with explicitly preserved historical/local-policy rows",
       "transformation": [
-        "New installed rows Id=116,117,118,119 projected to preexisting TSV schema. Id=116 has authored RoundDays=[7,7]; old Id=115 remains historical, not current selector."
+        "New installed rows Id=116,117,118,119 projected to preexisting TSV schema. Id=116 has authored RoundDays=[7,7]; old Id=115 remains historical, not current selector.",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/signin/SignIn.json (sha256:ab6cd5eaa65e0f2171ae89cf7164481ab3db9666f5145d7ce6210952c14c1d1d), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -3667,9 +3822,9 @@
     },
     {
       "path": "share/task/Condition.tsv",
-      "rows": 12134,
+      "rows": 12267,
       "columns": 63,
-      "contentSha256": "421144e12127b16360618be0df42720feb80332811e95c8dbc886fa8d659f663",
+      "contentSha256": "88afa8ac3ead4b311f471744d59c284a5f98fff3595b2e0aeed1cfa8b427fe1d",
       "naturalKey": "Id",
       "filter": "all installed authored IDs (existing server column projection)",
       "previousRows": 11971,
@@ -3681,7 +3836,8 @@
       ],
       "transformation": [
         "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained",
-        "recovered exact Condition.tab from effective document share/task bundle (SHA-verified sidecar)"
+        "recovered exact Condition.tab from effective document share/task bundle (SHA-verified sidecar)",
+        "Scripts/import_new_rows_4_9.py: appended 133 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/task/Condition.json (sha256:47edaa6a274afbe04c05586fac1a539660b4042f81242ddcc27d912b864b58a7), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -3794,9 +3950,9 @@
     },
     {
       "path": "share/task/Task.tsv",
-      "rows": 13701,
+      "rows": 13842,
       "columns": 24,
-      "contentSha256": "df16f7940ea3b272c0cfb538abc904da5cf4a962c6042c34d940a0b396a2c0e7",
+      "contentSha256": "2736927d4602a1a4a44f8361c479058c6708c7387fef73b25e40846d817ebf8a",
       "naturalKey": "Id",
       "filter": "all installed authored IDs (existing server column projection)",
       "previousRows": 13532,
@@ -3807,14 +3963,15 @@
         "Scripts/scan_client_upgrade.py ExactTable exact typed decode"
       ],
       "transformation": [
-        "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained"
+        "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained",
+        "Scripts/import_new_rows_4_9.py: appended 141 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/task/Task.json (sha256:a5ea29f58056a64b01db64a7a01c5360201bf1c671c4c0f936e48dae0a672daa), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "path": "share/task/TaskTimeLimit.tsv",
-      "rows": 779,
+      "rows": 790,
       "columns": 73,
-      "contentSha256": "5ce9c01c2964e4f7c13116a04d762ec2a1a4e1e3f619c2f044b6dab118921021",
+      "contentSha256": "4773507953aec38a704cd42a6844fecdc47945c31b949ca288b78b77eba38f75",
       "naturalKey": "Id",
       "filter": "all installed authored IDs (existing server column projection)",
       "previousRows": 753,
@@ -3825,7 +3982,8 @@
         "Scripts/scan_client_upgrade.py ExactTable exact typed decode"
       ],
       "transformation": [
-        "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained"
+        "projected all installed rows onto existing TSV schema; preserved legacy nullable blanks and local-only cells; literal TSV quotes and indexed array holes retained",
+        "Scripts/import_new_rows_4_9.py: appended 11 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/task/TaskTimeLimit.json (sha256:801bae7443305c47ded1948727d93ad8933c8dc164c9057288f08467f3559f0e), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -4607,11 +4765,11 @@
     },
     {
       "columns": 6,
-      "contentSha256": "2052843d4c6f69012da6c523d91eee5352941c8ec242c23f4751d9a1bf7b3aec",
+      "contentSha256": "d4d4de76973f87fcc9157268e25a95609f5c6874c70e7d5457c662378d123e6d",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/trust/CharacterTrustExp.tsv",
-      "rows": 680,
+      "rows": 688,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/trust/CharacterTrustExp.tab (sha1:7425400534f60cc89d5e832a4c9e6dcf7bea33f2; 9950 bytes)",
@@ -4619,16 +4777,17 @@
         "Bundle index sha1:4eb94d95dfb90b8bd4ade4ef0b801930cedfbd37"
       ],
       "transformation": [
-        "Scripts/import_roster_life_4_8.py: import_client_tables.project of all source rows onto existing server columns (current rows as defaults; blank cells kept where source decodes 0); every runtime row verified present in source and unchanged except as noted"
+        "Scripts/import_roster_life_4_8.py: import_client_tables.project of all source rows onto existing server columns (current rows as defaults; blank cells kept where source decodes 0); every runtime row verified present in source and unchanged except as noted",
+        "Scripts/import_new_rows_4_9.py: appended 8 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/trust/CharacterTrustExp.json (sha256:e942e11ef9b6fab425ff6f83b73c77d4e43217a1a653e8cf8e7a8d13435c8527), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "columns": 12,
-      "contentSha256": "1cf9766f0d549f91f0a7a83ac47a290172b60696137266795068940f35d58fd8",
+      "contentSha256": "cd85b9ab40c0d717367e37e5d8cf88eec0994f26af9af66b4c18b2afd0257996",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/trust/CharacterTrustItem.tsv",
-      "rows": 54,
+      "rows": 55,
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/trust/CharacterTrustItem.tab (sha1:d5f0ea92dd5edf1e874e7f6682d466b4973240ba; 1051 bytes)",
@@ -4636,7 +4795,8 @@
         "Bundle index sha1:4eb94d95dfb90b8bd4ade4ef0b801930cedfbd37"
       ],
       "transformation": [
-        "Scripts/import_roster_life_4_8.py: import_client_tables.project of all source rows onto existing server columns (current rows as defaults; blank cells kept where source decodes 0); every runtime row verified present in source and unchanged except as noted"
+        "Scripts/import_roster_life_4_8.py: import_client_tables.project of all source rows onto existing server columns (current rows as defaults; blank cells kept where source decodes 0); every runtime row verified present in source and unchanged except as noted",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/trust/CharacterTrustItem.json (sha256:f02b79055d149377e3481da81db518884ad0d488e7e148dccb563ab896108a05), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -4674,9 +4834,9 @@
     },
     {
       "path": "share/draw/DrawServerCatalog.tsv",
-      "rows": 12,
+      "rows": 16,
       "columns": 11,
-      "contentSha256": "66e7d95e9e98da045ca0a93a23151affdac104db3d6d836083f4f8de760ff037",
+      "contentSha256": "49a67b151b23b69b206786f3f3f21adc281df7c438015b19aec056c9628d74f6",
       "source": [
         {
           "path": "client/draw/drawpreview.tab",
@@ -4699,9 +4859,17 @@
         {
           "path": "Resources/Configs/Notices/4.8.0/client/notice/html/6ab46150f1b4a12f7f8a7adb.html",
           "authority": "official 4.8 event schedule; derived server availability windows"
+        },
+        {
+          "path": "Resources/Configs/Notices/4.9.0/client/notice/html/6aebcaeaf1b4a12e73c7b684.html",
+          "authority": "official 4.9 update note: Leia: Fortunaster themed/fate, Edges of the Twisted Ribbon target weapon, Vulpecula CUB target until 2026/12/16 23:00 UTC"
+        },
+        {
+          "path": "Resources/Configs/Notices/4.9.0/client/notice/html/6ae99980f1b4a12e73c7b652.html",
+          "authority": "official 4.9 maintenance 2026/11/4 23:00 - 2026/11/5 05:00 UTC"
         }
       ],
-      "transformation": "4.8 banner IDs/targets from preview and client group rules; window from official 4.8 notice; collab groups 37–40 (draws 5612/5613/381/7068) open at the 4.8 maintenance end 1790226000 (AscNet user-approved early-open policy; retail start 1790676000), end unchanged; Tag 5 on 5612/5613 from client DrawTabs Id=5 (Collab / Kurumi Tokisaki Pool); collab Fate 5613 stays fail-closed (published pity only an 80–100 range)",
+      "transformation": "4.8 banner IDs/targets from preview and client group rules; window from official 4.8 notice; collab groups 37–40 (draws 5612/5613/381/7068) open at the 4.8 maintenance end 1790226000 (AscNet user-approved early-open policy; retail start 1790676000), end unchanged; Tag 5 on 5612/5613 from client DrawTabs Id=5 (Collab / Kurumi Tokisaki Pool); collab Fate 5613 stays fail-closed (published pity only an 80–100 range) | 4.9 banners 1526/2520/384/7073 (targets 1431003/1431003/2706001/16440000 from client DrawScene ModelId and DrawPreview UpGoodsId; group, pity, type, priority, order mirror the 4.8 rows 1516/2510/383/7071 whose DrawProbShow/DrawAimProbability profiles they share); window 1793854800 (maintenance end) - 1797462000 from the official 4.9 notices; Tag 2 = client DrawTabs 'Current Season' (4.9 art UiNewDrawMainV4P9Laya); 80% CUB pool 7074 is not announced and stays unlisted",
       "naturalKey": "Id"
     },
     {
@@ -4728,9 +4896,9 @@
     },
     {
       "path": "share/activity/ActivitySchedule.tsv",
-      "rows": 83,
+      "rows": 84,
       "columns": 4,
-      "contentSha256": "65cb43570b190d60937c92b87ee9d5fe7b266613c49767014588a3212ad42b04",
+      "contentSha256": "3092836fcd23f18f46391c10e377c511b4cb814e8bb2d0ea7706694a06f1dd27",
       "naturalKey": "Id",
       "source": [
         ".runtime/upgrade-4.8/tables/client/fuben/FubenClientConfig.json (sha256:f652fd1ff6abb38182de0cdc9ba2c6e9a414424b4e475c90abf676343b9071fc)",
@@ -4752,24 +4920,30 @@
         ".runtime/upgrade-4.8/tables/share/gacha/GachaFashionSelfChoiceActivity.json (sha256:30ffe2055fd64981e3f097223dec72a4947ef09b8c5074587409d6e9c95947db)",
         ".runtime/upgrade-4.8/tables/share/gacha/GachaFashionSelfChoiceGroup.json (sha256:317fdf780e6746628a28360ac029e85f3b394a6a1ee23ba188d6dc988f675cd0)",
         ".runtime/upgrade-4.8/tables/share/fuben/festival/FestivalActivity.json (sha256:b38adc60205ea05156e5529f0653273cd2bdc11608fb7a6757cdf7b10a786223)",
-        "Resources/table/share/activity/EventCatalog.tsv (sha256:43bdb6eb520776e006174d8b5e0f5f6de29a705afdb596d3cf13f54cab962ed1)"
+        "Resources/table/share/activity/EventCatalog.tsv (sha256:43bdb6eb520776e006174d8b5e0f5f6de29a705afdb596d3cf13f54cab962ed1)",
+        "Resources/Configs/Notices/4.9.0/GameNotice.json (sha256:0c6468bedca76affde27f972a6f912f3f5f629dc9665ef85b926b2d7925a0c04)"
       ],
       "filter": "authored 4.8 source with explicitly preserved historical/local-policy rows",
       "transformation": [
         "Battle promotion calendars use installed FubenClientConfig.MainPanelTimeId, SpecialActivity SkipId joins and FubenActivityTimeTips component names; derive windows from existing feature schedules bounded by the official patch, preserving historical calendars.",
         "Simulated Battlefield shop TimeId 50402 starts at LoginNotice.EndTime and expires at the explicit Activity Id=401 ActivityDes shop deadline, joined through ActivityBriefShop ShopId=1421. Activity panel/task TimeId 50403 follows the same finite bounds by AscNet paired-window policy (inference, not an independently authored retail end).",
-        "Scripts/activity_schedule.py matches explicitly dated article event periods to authored TimeIds; post-update opening equals official LoginNotice.EndTime. Preserves historical bounded windows and existing authorized permanent-mode policies. DrawCanLiverActivity Id=3 TimeId=50938 uses officially dated Adelyde research period. 4.8 banner display TimeIds 50904/50914 and coating presentation TimeIds 50906/50915 use dated article windows. Passport edition Name/TimeId joins the dated official Tactical Assessment Manual article; undated editions are omitted. Standalone TeachingActivity trial Name/TimeId joins the officially dated Character Trial Stage article; calendar-linked teaching trials inherit their authored parent window from NewActivityCalendarActivity and SkipFunctional. GachaFashionSelfChoiceActivity/Group TimeId51001 and its four named coatings join the dedicated Stellar Memories coating research rerun article's explicit Duration; FestivalActivity Id69..72 share that authored TimeId. This calendar window does not imply Gacha requests are implemented. No capture-derived dates."
+        "Scripts/activity_schedule.py matches explicitly dated article event periods to authored TimeIds; post-update opening equals official LoginNotice.EndTime. Preserves historical bounded windows and existing authorized permanent-mode policies. DrawCanLiverActivity Id=3 TimeId=50938 uses officially dated Adelyde research period. 4.8 banner display TimeIds 50904/50914 and coating presentation TimeIds 50906/50915 use dated article windows. Passport edition Name/TimeId joins the dated official Tactical Assessment Manual article; undated editions are omitted. Standalone TeachingActivity trial Name/TimeId joins the officially dated Character Trial Stage article; calendar-linked teaching trials inherit their authored parent window from NewActivityCalendarActivity and SkipFunctional. GachaFashionSelfChoiceActivity/Group TimeId51001 and its four named coatings join the dedicated Stellar Memories coating research rerun article's explicit Duration; FestivalActivity Id69..72 share that authored TimeId. This calendar window does not imply Gacha requests are implemented. No capture-derived dates.",
+        "4.9 passport season TimeId 51912 (PassportActivity Id=48 'The Light's Respite File') dated by activity_schedule._named_event_period against the 4.9 update note; other 4.9 activity windows not yet regenerated"
       ]
     },
     {
-      "columns": 2,
-      "contentSha256": "6894f282cddc6549ac5c68256ab56e7a55b90c2be2e0be46b4f2612fc0509bb4",
+      "columns": 4,
+      "contentSha256": "afe0ae487ee6830f30d0639f8a55ab121284bdbdd62a287a1cfbf4d4ca4e8954",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/fuben/bosssingle/BossSingleChallengeFeature.tsv",
-      "rows": 83,
+      "rows": 85,
       "source": [
         "share/fuben/bosssingle/BossSingleChallengeFeature.json"
+      ],
+      "transformation": [
+        "Name and Desc appended from EN BossSingleChallengeFeature.json for every Id whose FightEventIds match the client row (used by the /ppc intensive commands)",
+        "Scripts/import_new_rows_4_9.py: appended 2 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fuben/bosssingle/BossSingleChallengeFeature.json (sha256:b8e807cb093ca562f5b3d4d5925c3cab93f06a39b3733d858624ffcdf3b0306f), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -4829,13 +5003,16 @@
     },
     {
       "columns": 3,
-      "contentSha256": "d87efa3cdc3de9c1b8d77f10c065a86054c65baa40a79f29bb790825f8bab5d1",
+      "contentSha256": "0027e7d56ea2d8bd72af3c7498008161486df46753896c819bb6dacf3bab4343",
       "filter": "all; imported authoritative columns",
       "naturalKey": "Key",
       "path": "client/wheelchairmanual/WheelchairManualClientConfig.tsv",
-      "rows": 16,
+      "rows": 27,
       "source": [
         "en/bytes/client/wheelchairmanual/WheelchairManualClientConfig.json"
+      ],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 11 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/client/wheelchairmanual/WheelchairManualClientConfig.json (sha256:b9e8fd238c1402b24dfe667fdc5424c3f590918351631c1f8025c5aa8c6b26f2), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -5614,14 +5791,17 @@
     },
     {
       "columns": 4,
-      "contentSha256": "8930086c681de74d18df27e308d8edc000cd541653b360100c81bf585c42167c",
+      "contentSha256": "c9c244b35cdcec801e15667f2e9277555410ee93fa4ef2441d146143fbdab611",
       "filter": "all; runtime-consumed original fields Id, GroupId, Condition, UnLockTime only; empty cells preserve missing values",
       "naturalKey": "Id",
       "path": "share/archive/CGDetail.tsv",
-      "rows": 919,
+      "rows": 936,
       "source": [
         "/Volumes/Lucia/PGR-native-research/PGR_DATA/en/bytes/share/archive/CGDetail.json (sha256:9af0e3cd82d60b8a150327d53dbd45ade664100bfbfc30b60d02f80207496da9)",
         "EN extracted client data; JSON scalar text preserved; arrays flattened in original order"
+      ],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 17 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/archive/CGDetail.json (sha256:f3c9e8d4bc07f78108d1373c796d6b3899f86642a37ca8280605836acfa896da), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -5663,11 +5843,12 @@
         "en/bytes/share/guild/GuildGoods.json": "e0db1f2f56e2e3d7e4e68acb84c9fd98258527233f4de8924a6cd55167c6643f"
       },
       "columns": 4,
-      "rows": 101,
-      "contentSha256": "af273400bdae3113aea69e2deca2c220fddba50b4ee946436d971bc3b97d9cb6",
+      "rows": 103,
+      "contentSha256": "35cfb3e7c85f055169adb99f727ba0031e856d91f4ff5ec759bd697a48c611d6",
       "filter": "all",
       "transformation": [
-        "JSON object field order; arrays flattened to 1-based indexed columns; omitted/null cells blank; booleans encoded 1/0; source strings and hex retained verbatim"
+        "JSON object field order; arrays flattened to 1-based indexed columns; omitted/null cells blank; booleans encoded 1/0; source strings and hex retained verbatim",
+        "Scripts/import_new_rows_4_9.py: appended 2 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/guild/GuildGoods.json (sha256:fd30ab8f10311f147697f58f4ec76e3da49edf23dc4677afc8dea4d022cd472e), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -5851,11 +6032,12 @@
         "en/bytes/share/guild/boss/GuildBossStageRobot.json": "993dd0c44c4a7c7dcc50aa4443e31e4d39ec111cf051344ff0c033400bc2bac7"
       },
       "columns": 4,
-      "rows": 78,
-      "contentSha256": "3cf34dc10a6622dfc39965399c587d52e3490e31afc6849fa4015958c5b5e241",
+      "rows": 79,
+      "contentSha256": "c33bc7492ced34935dd30a783a2900ceb7857b1d5173c9621f0944160b524888",
       "filter": "all",
       "transformation": [
-        "JSON object field order; arrays flattened to 1-based indexed columns; omitted/null cells blank; booleans encoded 1/0; source strings and hex retained verbatim"
+        "JSON object field order; arrays flattened to 1-based indexed columns; omitted/null cells blank; booleans encoded 1/0; source strings and hex retained verbatim",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/guild/boss/GuildBossStageRobot.json (sha256:e6a65e6993a3e531b15969b97bd4ab22bcff5dda416f2d0b678d11fa9fe74c43), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -5868,11 +6050,12 @@
         "en/bytes/share/guilddorm/GuildDormBgm.json": "09a5a5b83b01ae9f880ff92a500a812e6be17604bd823c86ce88b9c6be03fd46"
       },
       "columns": 9,
-      "rows": 124,
-      "contentSha256": "a803e2b62d8145dd76af7b08a52b337199261d93a9106964e402324071439b0c",
+      "rows": 126,
+      "contentSha256": "c882cd721194494d6f522018e1a6f4f3f13093b1379c1add9a183f2dc7d50932",
       "filter": "all",
       "transformation": [
-        "JSON object field order; arrays flattened to 1-based indexed columns; omitted/null cells blank; booleans encoded 1/0; source strings and hex retained verbatim"
+        "JSON object field order; arrays flattened to 1-based indexed columns; omitted/null cells blank; booleans encoded 1/0; source strings and hex retained verbatim",
+        "Scripts/import_new_rows_4_9.py: appended 2 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/guilddorm/GuildDormBgm.json (sha256:1ffcb6d47c611c1cfa010c650e642ad2df344d040656188f10f7292e5aa620c9), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -6176,11 +6359,12 @@
         "en/bytes/share/guilddorm/GuildDormRole.json": "7402d1af2a81bf8c38e52047e1ffb25bc9c3980353c2180c2eca274aad657924"
       },
       "columns": 9,
-      "rows": 92,
-      "contentSha256": "e987f2cb1ce82df716346b7c1035de08452d95808208c972fbce654bc77f0b42",
+      "rows": 93,
+      "contentSha256": "75c5b5d9d2f9d34cdfeafb6e5d47a501cdcc1002cc47933ba4e7587d3ed70a2b",
       "filter": "all",
       "transformation": [
-        "JSON object field order; arrays flattened to 1-based indexed columns; omitted/null cells blank; booleans encoded 1/0; source strings and hex retained verbatim"
+        "JSON object field order; arrays flattened to 1-based indexed columns; omitted/null cells blank; booleans encoded 1/0; source strings and hex retained verbatim",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/guilddorm/GuildDormRole.json (sha256:e45ca472c63e47f390a94e822d300fabe8216c3f5551ef7d3d4954ade595014c), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -6244,13 +6428,14 @@
         "en/bytes/share/guildsign/GuildSign.json": "6d7633d6f675dc5510bf67f17aff68c7a8b47c70b127a9b2a8b17489812b544f"
       },
       "columns": 12,
-      "rows": 34,
-      "contentSha256": "010488eeb443d00ffd5a2cd823d88d48078a05ffa7688f580b4bbdc19c4dd347",
+      "rows": 35,
+      "contentSha256": "b2401964013fe62f5c62e5426acd3c4c51361dad9b7ca3eb3b11e2d223e25728",
       "filter": "all rows; display-only ImageMap omitted",
       "transformation": [
         "JSON object field order; arrays flattened to 1-based indexed columns; omitted/null cells blank; booleans encoded 1/0; source strings and hex retained verbatim",
         "singleton arrays blank-pad second column to retain List API: RewardId,RewardWeight",
-        "excluded display-only fields: ImageMap"
+        "excluded display-only fields: ImageMap",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/guildsign/GuildSign.json (sha256:1ffb357c3db35763bf0477ad813daa4fa805420b6276046997fa325c02718f16), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -6263,11 +6448,12 @@
         "en/bytes/share/guildsign/GuildSignEvent.json": "b914d45aaaf3cbea5474beade9f2e83ba656423569e593c968d0db5a20fbbe08"
       },
       "columns": 4,
-      "rows": 93,
-      "contentSha256": "c326fb15ebeece124b7cbbedfe8780d9582a71770f8039bc2b57c9a16a7721a9",
+      "rows": 94,
+      "contentSha256": "a19291d5034383656c82cfb2a1c9d59b32a658d7cd6ff433c7c2635dbf83e4eb",
       "filter": "all",
       "transformation": [
-        "JSON object field order; arrays flattened to 1-based indexed columns; omitted/null cells blank; booleans encoded 1/0; source strings and hex retained verbatim"
+        "JSON object field order; arrays flattened to 1-based indexed columns; omitted/null cells blank; booleans encoded 1/0; source strings and hex retained verbatim",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/guildsign/GuildSignEvent.json (sha256:d0da38c316f22882ae128ba9c1568770ef9f2b7a3c9240ccbe6d9030393469c4), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -6280,11 +6466,12 @@
         "en/bytes/share/guildsign/GuildSignSpecialDateSign.json": "52b4af328487b371d36a3737312baf9d95babaac7fb0a3f1fb464c5509ac63f4"
       },
       "columns": 4,
-      "rows": 27,
-      "contentSha256": "cd8e4bf76307f98509e9460f9cef35bbd53c871e53dcb4550ad43cd85bc2f9fc",
+      "rows": 28,
+      "contentSha256": "3f5926fe687817f16064e8b0662e2c408f8b42769fee4d843d463ed2a220427f",
       "filter": "all",
       "transformation": [
-        "JSON object field order; arrays flattened to 1-based indexed columns; omitted/null cells blank; booleans encoded 1/0; source strings and hex retained verbatim"
+        "JSON object field order; arrays flattened to 1-based indexed columns; omitted/null cells blank; booleans encoded 1/0; source strings and hex retained verbatim",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/guildsign/GuildSignSpecialDateSign.json (sha256:42c025370d387b8f5b6b09b18fa56fa25717e47d8b28f8058695f82d9434ac35), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -7600,9 +7787,9 @@
     },
     {
       "path": "share/archive/PartnerSetting.tsv",
-      "rows": 205,
+      "rows": 210,
       "columns": 5,
-      "contentSha256": "209d4295eeaab1bafaf60a9bc6ae30f0b8dd7371df9d58e5f9e7d7d7b1d66227",
+      "contentSha256": "c732369492b3956afb4f935f171deb43beb52dff6887647490c5287640664ef5",
       "source": [
         {
           "path": "share/archive/partnersetting.tab",
@@ -7611,7 +7798,10 @@
           "rawTabSha1": "8196b36282eae075308ea40ac01cd57c9f0f40a8"
         }
       ],
-      "transformation": "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+      "transformation": [
+        "exact 4.8 decoded rows projected onto existing TSV schema; preserve server-only columns and nullable sparse cells",
+        "Scripts/import_new_rows_4_9.py: appended 5 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/archive/PartnerSetting.json (sha256:918a90fd825fa51f61e30c5264bdb5edfa57ad0e6747a831f4b76e3c60156bd5), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
       "naturalKey": "Id"
     },
     {
@@ -7666,17 +7856,19 @@
     },
     {
       "path": "share/character/CharacterObsTransform.tsv",
-      "rows": 16,
+      "rows": 17,
       "columns": 4,
       "naturalKey": "Id",
-      "contentSha256": "fbd9276b4ea3c16b260dae6d2cd859fb129e8df94a8cc765bbac0189937b62ee",
+      "contentSha256": "7773e0a2254ac7a386ed2b6327e030c59f498c42833504b336ad846f920c315c",
       "source": [
         "share/character/CharacterObsTransform.tab"
       ],
       "sourceSha1": "c0aa83618b7cc8a0341ec5d9de2bcc23bad576cf",
       "indexSha1": "6404952973afd2eee2321f0c43cae55085eb661e",
       "filter": "all",
-      "transformation": []
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/character/CharacterObsTransform.json (sha256:a41a35f2ada57259add87df536ef3f86874e1caa85bb4b2fb3fe6acad520d8f5), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ]
     },
     {
       "path": "share/character/enhanceskill/EnhanceSkillLevelEffect.tsv",
@@ -7708,17 +7900,19 @@
     },
     {
       "path": "share/character/skill/CharacterSkillType.tsv",
-      "rows": 1118,
+      "rows": 1131,
       "columns": 2,
       "naturalKey": "Id",
-      "contentSha256": "cba750fbe73674b55e0fa9e8092937e686f4fb0734229bee995c9f2224b05390",
+      "contentSha256": "2480ccbae1607014b96ea4098faf3fbea732be2a9cdcb9ead6b92156a4539e38",
       "source": [
         "share/character/skill/CharacterSkillType.tab"
       ],
       "sourceSha1": "fac08fe645bd21bf23b7d3fa0394ce6068937ad2",
       "indexSha1": "d48fea81decf1df43d035ce31076f8bd05bb26b9",
       "filter": "all",
-      "transformation": []
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 13 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/character/skill/CharacterSkillType.json (sha256:e3e65877742be89d7ed127187d3bae5bb06476265ca2c07d945f46db7f8a9490), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ]
     },
     {
       "path": "share/character/skill/CharacterSkillTypePlus.tsv",
@@ -7775,8 +7969,8 @@
     {
       "path": "share/equip/EquipSuit.tsv",
       "columns": 13,
-      "rows": 117,
-      "contentSha256": "4a6f72464910d406812b3771de7707db5f9d3285f351dc141d12ff45496c5277",
+      "rows": 118,
+      "contentSha256": "eb0afb7b7258f55c8f836589523f68e147d8bafb07bc93d1b153b1b06aab8a05",
       "source": [
         "share/equip/EquipSuit.tab"
       ],
@@ -7784,7 +7978,8 @@
       "sourceBundleSha1": "52b005eb7de811dcb565cc7b211574eba403d40f",
       "sourceScope": "document",
       "transformation": [
-        "append-installed-new-ids-preserve-legacy-projection"
+        "append-installed-new-ids-preserve-legacy-projection",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/equip/EquipSuit.json (sha256:9863a20de0a1135e176cf9f92a88829ebbc5b0e89b6d69323d3a657a7fe8e468), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "naturalKey": "Id",
       "filter": "all authored rows projected to server schema"
@@ -7792,8 +7987,8 @@
     {
       "path": "share/equip/EquipSuitEffect.tsv",
       "columns": 2,
-      "rows": 221,
-      "contentSha256": "7083a9dcd2fd68477d6adf3f24246aebd4aaf7393d9b8efbf3e196d02f3023a7",
+      "rows": 223,
+      "contentSha256": "9a6f7e8bda07cb4f647582bf5083e8cf530caf8a911c70d196a8ef95786ded99",
       "source": [
         "share/equip/EquipSuitEffect.tab"
       ],
@@ -7801,7 +7996,8 @@
       "sourceBundleSha1": "52b005eb7de811dcb565cc7b211574eba403d40f",
       "sourceScope": "document",
       "transformation": [
-        "append-installed-new-ids-preserve-legacy-projection"
+        "append-installed-new-ids-preserve-legacy-projection",
+        "Scripts/import_new_rows_4_9.py: appended 2 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/equip/EquipSuitEffect.json (sha256:f45fe4bdc947bf911997215bcc580688426b824b5e76d46306533984175f3e4f), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "naturalKey": "Id",
       "filter": "all authored rows projected to server schema"
@@ -7809,8 +8005,8 @@
     {
       "path": "share/equip/WeaponSkill.tsv",
       "columns": 2,
-      "rows": 276,
-      "contentSha256": "c4530a458d5ba880ed64fa2e7630b2c3da2218524af0bfafed53a2ff8b67e3cf",
+      "rows": 279,
+      "contentSha256": "b4067d0edebd68ac613213c265793a7d4579d05358fa3ae20bf8c4c9b9d65179",
       "source": [
         "share/equip/WeaponSkill.tab"
       ],
@@ -7818,7 +8014,8 @@
       "sourceBundleSha1": "52b005eb7de811dcb565cc7b211574eba403d40f",
       "sourceScope": "document",
       "transformation": [
-        "append-installed-new-ids-preserve-legacy-projection"
+        "append-installed-new-ids-preserve-legacy-projection",
+        "Scripts/import_new_rows_4_9.py: appended 3 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/equip/WeaponSkill.json (sha256:4b9d72aee25e18b3ea19af23438499af6a85bf5a1d9e12504345189f474e5427), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "naturalKey": "Id",
       "filter": "all authored rows projected to server schema"
@@ -7826,8 +8023,8 @@
     {
       "path": "share/equip/equipguide/EquipTarget.tsv",
       "columns": 3,
-      "rows": 183,
-      "contentSha256": "95078a2ad68c46d08246e37ede942fb6fd3d35a5d2d0c88dc251972d240f4baa",
+      "rows": 185,
+      "contentSha256": "72e39b161d9ef1f7cbdef670071f3200b4f4342093f80e7d9e72ef4d922accba",
       "source": [
         "share/equip/equipguide/EquipTarget.tab"
       ],
@@ -7835,7 +8032,8 @@
       "sourceBundleSha1": "9d0ffa640af3690bf32bb889b9d25b724631aa20",
       "sourceScope": "document",
       "transformation": [
-        "append-installed-new-ids-preserve-legacy-projection"
+        "append-installed-new-ids-preserve-legacy-projection",
+        "Scripts/import_new_rows_4_9.py: appended 2 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/equip/equipguide/EquipTarget.json (sha256:81ace8597e7ccff33d80fbee09a68dc136b821e113417edd2d81a6e0fb19e751), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "naturalKey": "Id",
       "filter": "all authored rows projected to server schema"
@@ -8181,14 +8379,15 @@
     },
     {
       "path": "share/teamrecommend/TeamRecommendBaseCharacter.tsv",
-      "rows": 1608,
-      "contentSha256": "73885203fff2953b4d4330aee54a511c97bcf5a96eb56572fb0dc1503704f9e5",
+      "rows": 1610,
+      "contentSha256": "e41e0553b15c5b138762743b5deffefa332f3077a2b7988123269783db5f8454",
       "source": [
         "share/teamrecommend/teamrecommendbasecharacter.tab",
         "installed document assets/temp/bytes/share/teamrecommend.ab (bundle sha1:11fb59f21b1f66baa76e19d163d26cc9c8f58a12; raw table sha1:3853752164bb2ef8a7a61df6a26b836262156c70)"
       ],
       "transformation": [
-        "Exact installed typed rows projected by Scripts/import_team_recommend_4_8.py."
+        "Exact installed typed rows projected by Scripts/import_team_recommend_4_8.py.",
+        "Scripts/import_new_rows_4_9.py: appended 2 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/teamrecommend/TeamRecommendBaseCharacter.json (sha256:43e603315b78653d76ea627c646ca16fc598e0436400412547192a7785075bbd), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "columns": 48,
       "naturalKey": "Id",
@@ -8211,14 +8410,15 @@
     },
     {
       "path": "share/teamrecommend/TeamRecommendCharacterTarget.tsv",
-      "rows": 85,
-      "contentSha256": "37f3cff8dbac5b9184a525a26e9551966cc77652580bb28461c12e1e50245287",
+      "rows": 86,
+      "contentSha256": "9e4d2c178272adc34f01fff8050efe9c69b6f5984c7b321c54a5c14770f96cb5",
       "source": [
         "share/teamrecommend/teamrecommendcharactertarget.tab",
         "installed document assets/temp/bytes/share/teamrecommend.ab (bundle sha1:11fb59f21b1f66baa76e19d163d26cc9c8f58a12; raw table sha1:00c676ae30fe2c5ec14d3bb91002bb8ca70d0fe1)"
       ],
       "transformation": [
-        "Exact installed typed rows projected by Scripts/import_team_recommend_4_8.py."
+        "Exact installed typed rows projected by Scripts/import_team_recommend_4_8.py.",
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/teamrecommend/TeamRecommendCharacterTarget.json (sha256:98b2a89a00aab228d907260d45c1163b7ab4cb23c1a065ad96c51574dbd7e034), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ],
       "columns": 13,
       "naturalKey": "CharacterId",
@@ -8272,9 +8472,9 @@
     },
     {
       "path": "share/fuben/teaching/TeachingTreasure.tsv",
-      "rows": 297,
+      "rows": 304,
       "columns": 5,
-      "contentSha256": "fd923741c7d9606d7320d9b6f2a23b710f5fc22b8121602267c09d1666a2ea0b",
+      "contentSha256": "1f33bdd0e7afd73a11f3355aef99ebd7f7abaf2684d6b8607a3e49d53f5aa88d",
       "source": [
         "Installed document index sha1:b22b87996db98720100e39586167440a005ea531",
         "TextAsset share/fuben/teaching/TeachingTreasure.tab (sha1:b58a8ae84dccd900c23a62593e614686aaa47c20; 4670 bytes)",
@@ -8282,7 +8482,8 @@
         "Bundle index sha1:9c8302cf1a3e8bd6ccd7fbb990b666581b64da66"
       ],
       "transformation": [
-        "All decoded source rows sorted by TreasureId; columns TreasureId,Type,RequireStage,RequireStar,RewardId verbatim (Description/Title are client text, dropped). New server table: previous_rows 0; source delta vs 4.7 baseline adds 284..297."
+        "All decoded source rows sorted by TreasureId; columns TreasureId,Type,RequireStage,RequireStar,RewardId verbatim (Description/Title are client text, dropped). New server table: previous_rows 0; source delta vs 4.7 baseline adds 284..297.",
+        "Scripts/import_new_rows_4_9.py: appended 7 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fuben/teaching/TeachingTreasure.json (sha256:6f7f744d07e6fb3fc30c091f626acbedc7e32ca586e9dbbc02a4909207874624), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -8383,11 +8584,11 @@
     },
     {
       "columns": 5,
-      "contentSha256": "503f2c962b1a946429ec127fd1c98458db7883f808b736f064bfa05dc1a226bc",
+      "contentSha256": "1493ac0c732f4fa82e008f18002b55446a0b670508e880f494bbca2b543d01db",
       "filter": "all",
       "naturalKey": "Id",
       "path": "share/fuben/experiment/ExperimentLevel.tsv",
-      "rows": 97,
+      "rows": 99,
       "source": [
         {
           "path": "share/fuben/experiment/experimentlevel.tab",
@@ -8397,7 +8598,10 @@
           "decodedJsonSha256": "fb452b617f713db62b15be997ddf46642511248f8aeeedc7344100c8cffff15f"
         }
       ],
-      "transformation": "scripts/import_festival_experiment_4_8.py: authored identities and stage links projected onto runtime-required fields; progress remains player-owned"
+      "transformation": [
+        "scripts/import_festival_experiment_4_8.py: authored identities and stage links projected onto runtime-required fields; progress remains player-owned",
+        "Scripts/import_new_rows_4_9.py: appended 2 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/fuben/experiment/ExperimentLevel.json (sha256:e5822a91a0b975d9883bd4fff4c0145f3bd52e1da19a72696b32f64689a68483), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ]
     },
     {
       "columns": 22,
@@ -8419,10 +8623,10 @@
     },
     {
       "path": "share/item/BuyAsset.tsv",
-      "rows": 589,
+      "rows": 595,
       "columns": 15,
       "naturalKey": "Id",
-      "contentSha256": "b114a19caa6eb671540279d20f7fcb59291827ab2c8fd10a06565b6984fc5975",
+      "contentSha256": "8161bbd0a13e197c8eedfa8b835e056c3edfaafa3fc710fdfa8b4942f5c1291b",
       "source": [
         "Installed document index sha1:ae295d0cbef7900280e794cc8361c30577583155",
         "TextAsset share/item/BuyAsset.tab (sha1:d25caa6680e2a82f92317f365d495aea0592d4df; 10936 bytes)",
@@ -8431,15 +8635,16 @@
       ],
       "filter": "all authored 4.8 rows projected onto runtime columns",
       "transformation": [
-        "import_client_tables.project; no captured values"
+        "import_client_tables.project; no captured values",
+        "Scripts/import_new_rows_4_9.py: appended 6 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/item/BuyAsset.json (sha256:c52d0b0c0df55ea27b6c4e08ad90c0631b9b202a65618a8603158d17a8d851f2), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
       "path": "share/item/BuyAssetConfig.tsv",
-      "rows": 611,
+      "rows": 617,
       "columns": 7,
       "naturalKey": "Id",
-      "contentSha256": "af55a4668c2c615581e88ebe469bce97d9abc0058bdd85cd301e9809bdf83697",
+      "contentSha256": "445c7e2e2243413f5b0bca9b25ae7035daedc5e191aa9f91cf5072dca349d8a2",
       "source": [
         "Installed document index sha1:ae295d0cbef7900280e794cc8361c30577583155",
         "TextAsset share/item/BuyAssetConfig.tab (sha1:30055269a2e3cf3e50de5cf43cf9f5de0912a5ff; 9159 bytes)",
@@ -8448,7 +8653,8 @@
       ],
       "filter": "all authored 4.8 rows projected onto runtime columns",
       "transformation": [
-        "import_client_tables.project; no captured values"
+        "import_client_tables.project; no captured values",
+        "Scripts/import_new_rows_4_9.py: appended 6 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/item/BuyAssetConfig.json (sha256:453a0eabb0e3ba41b077c728eb0d32785c54928a708219ccc82ddbf97bcbb563), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
       ]
     },
     {
@@ -8642,6 +8848,66 @@
       "transformation": [
         "all authored rows/columns via import_client_tables.project; lists as 1-based indexed columns"
       ]
+    },
+    {
+      "path": "share/bigworld/common/character/BigWorldCharacter.tsv",
+      "naturalKey": "Id",
+      "filter": "existing rows retained",
+      "source": [],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/bigworld/common/character/BigWorldCharacter.json (sha256:25c4e83cbfc2584a5fa47a4f9dddebd86dbc65fc5a0c10d47e66fe3785e319a2), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
+      "rows": 33,
+      "columns": 8,
+      "contentSha256": "a6baa9e3283c6300441fe47b0644bbcbf0e6922fd61b0b6bf993a0702ab2a508"
+    },
+    {
+      "path": "share/bigworld/common/fashion/BigWorldFashion.tsv",
+      "naturalKey": "Id",
+      "filter": "existing rows retained",
+      "source": [],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 4 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/bigworld/common/fashion/BigWorldFashion.json (sha256:864da6397df604c9acd7c37ceebb559beda094bc137765b997e6ee5de44d6a58), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
+      "rows": 139,
+      "columns": 9,
+      "contentSha256": "4723a7fdac2e5bf8e67ae7343fc8aa16ae0de3efaa6a21c6987b461f25537824"
+    },
+    {
+      "path": "share/bigworld/common/fashion/BigWorldFashionColor.tsv",
+      "naturalKey": "Id",
+      "filter": "existing rows retained",
+      "source": [],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/bigworld/common/fashion/BigWorldFashionColor.json (sha256:64c98bc185c81da07ffd4fab3fada313f6bca73938ba00e7b69d440e12bbff6d), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
+      "rows": 5,
+      "columns": 4,
+      "contentSha256": "7c51fa950c3ac2a53d559fff0ee1fb0985f9dd9bb6eb0088f5072ed93538edcf"
+    },
+    {
+      "path": "share/bigworld/common/photograph/BigWorldPhotographCharacterActions.tsv",
+      "naturalKey": "Id",
+      "filter": "existing rows retained",
+      "source": [],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 1 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/bigworld/common/photograph/BigWorldPhotographCharacterActions.json (sha256:15f7be13b34d426b1416ec8ac0925d67b8a1f5894305d59d02f1e197077ee97c), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
+      "rows": 33,
+      "columns": 6,
+      "contentSha256": "718a2d8db70237b012935409f1e9218fbf442632af6a06d781ae8c28f6800215"
+    },
+    {
+      "path": "share/text/CodeText.tsv",
+      "naturalKey": "Id",
+      "filter": "existing rows retained",
+      "source": [],
+      "transformation": [
+        "Scripts/import_new_rows_4_9.py: appended 84 rows new in 4.9 from alt3ri/PGR_Data@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6 EN/bytes/share/text/CodeText.json (sha256:26660587b94bebfdf4d562a5b119dfbec5ab624e80fe3b19fe233570720f6447), keys absent from baseline @be22832ca7b40e3ea675fa205013ab495db0a047; existing rows unchanged"
+      ],
+      "rows": 6513,
+      "columns": 3,
+      "contentSha256": "36600ad0eaafb2bf934b34db35946da4a34e581ee2a95f879058d84e578bd95c"
     }
   ],
   "validationNotes": [

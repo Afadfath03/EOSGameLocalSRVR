@@ -51,7 +51,7 @@ Id	StartTime	EndTime	Source
 50202	1790676000	1793750340	GameNotice:update-note-html:6ab46150f1b4a12f7f8a7adb.html
 50301	1790226000	1793750340	GameNotice:update-note-html:6ab46150f1b4a12f7f8a7adb.html+SignIn:Id=116
 50401	1790226000	1793854800	client/activitybrief/ActivityBriefGroup:RefreshActivityMainLine2+LoginNotice:EndTime+GameNotice:update-note-EndTime
-50402	1790226000	1793854800	client/activity/Activity:Id=401:ActivityDes:shop-expiry+client/activitybrief/ActivityBriefShop:ShopId=1421:TimeId+LoginNotice:EndTime
+50402	1793854800	1797483600	client/activity/Activity:Id=401:ActivityDes:shop-expiry+client/activitybrief/ActivityBriefShop:ShopId=1421:TimeId+LoginNotice:EndTime
 50403	1790226000	1793854800	client/activity/Activity:Id=401:ActivityDes:shop-expiry+client/activitybrief/ActivityBriefShop:ShopId=1421:TimeId+LoginNotice:EndTime+AscNet-policy:paired-panel-window-inferred-from-shop
 50405	1790226000	1793833200	feature-window:FubenClientConfig.MainPanelTimeId:installed-table:client/fuben/FubenClientConfig.json+SpecialActivity
 50406	1790226000	1790330400	feature-window:FubenActivityTimeTips:installed-table:client/fuben/FubenActivityTimeTips.json+FubenActivity:installed-table:share/fuben/FubenActivity.json+ActivitySchedule:complete-component-segment
@@ -68,7 +68,7 @@ Id	StartTime	EndTime	Source
 50903	1790226000	1793833200	GameNotice:update-note-html:6ab46150f1b4a12f7f8a7adb.html
 50904	1790226000	1793833200	GameNotice:update-note-html:6ab46150f1b4a12f7f8a7adb.html+client/activity/Activity:Id=408,409
 50906	1790226000	1793833200	GameNotice:update-note-html:6ab46150f1b4a12f7f8a7adb.html+client/activity/Activity:Id=412,413
-50909	1790226000	1793854800	client/activitybrief/ActivityBrief+LoginNotice:EndTime+GameNotice:update-note-EndTime
+50909	1793854800	1797483600	client/activitybrief/ActivityBrief+LoginNotice:EndTime+GameNotice:update-note-EndTime+maintenance-duration
 50911	1790226000	1793768400	GameNotice:update-note-html:6ab46150f1b4a12f7f8a7adb.html+SignIn:Id=117
 50912	1790330400	1791090000	GameNotice:update-note-html:6ab46150f1b4a12f7f8a7adb.html+SignIn:Id=118
 50914	1790676000	1793750340	GameNotice:update-note-html:6ab46150f1b4a12f7f8a7adb.html+client/activity/Activity:Id=410,411
@@ -82,3 +82,7 @@ Id	StartTime	EndTime	Source
 50944	1790676000	1793750340	feature-window:SpecialActivity:SkipId=20395+GameNotice:update-note-html:6ab46150f1b4a12f7f8a7adb.html
 50945	1790330400	1792386000	feature-window:SpecialActivity:SkipId=11724+GameNotice:update-note-html:6ab46150f1b4a12f7f8a7adb.html
 51001	1790416800	1793833200	GameNotice:dated-article:6ab45bcaf1b4a12f7f8a7acb.html+GachaFashionSelfChoiceActivity:Id=4+GachaFashionSelfChoiceGroup:Id=5
+51502	1793854800	1797483600	client/activity/Activity:Id=401:ActivityDes:shop-expiry+client/activitybrief/ActivityBriefShop:ShopId=1421:TimeId+LoginNotice:EndTime+AscNet-policy:paired-panel-window-inferred-from-shop
+51903	1793854800	1797483600	client/activitybrief/ActivityBrief+LoginNotice:EndTime+GameNotice:update-note-EndTime+maintenance-duration+ActivityBriefGroup:RefreshActivityMainLine2
+51912	1793854800	1797462000	GameNotice:update-note-html:6aebcaeaf1b4a12e73c7b684.html+PassportActivity:Id=48
+51921	1793854800	1797483600	local-policy:missing-calendar:FubenClientConfig.MainPanelTimeId:EN-LIVE:4.9.0@e7c752ff9914b20272d5dc287e4d0b7c7223d0c6:client/fuben/FubenClientConfig.json+patch-window:LoginNotice:EndTime+GameNotice:update-note-EndTime+maintenance-duration+4.9-SpecialActivity-windows-not-yet-derived

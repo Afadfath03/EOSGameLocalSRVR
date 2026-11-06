@@ -84,6 +84,16 @@ namespace AscNet.GameServer
         internal static object GetPlayerOperationLock(long playerId) =>
             PlayerOperationLocks.GetOrAdd(playerId, static _ => new object());
 
+        // Last client request number the server handled per player. ReconnectResponse.RequestNo
+        // reports it so the client re-sends (XNetwork.ReCall) requests lost with the old socket.
+        private static readonly ConcurrentDictionary<long, int> LastHandledRequestNos = new();
+
+        internal static int GetLastHandledRequestNo(long playerId) =>
+            LastHandledRequestNos.TryGetValue(playerId, out int requestNo) ? requestNo : 0;
+
+        internal static void RecordHandledRequestNo(long playerId, int requestNo) =>
+            LastHandledRequestNos[playerId] = requestNo;
+
         private void InvokeRequestHandler(
             RequestPacketHandlerDelegate requestPacketHandler,
             Packet.Request request)
@@ -105,6 +115,8 @@ namespace AscNet.GameServer
                 if (Volatile.Read(ref disconnectState) == 0)
                 {
                     requestPacketHandler.Invoke(this, request);
+                    if (player is not null)
+                        RecordHandledRequestNo(player.PlayerData.Id, request.Id);
                     if (player is not null && Volatile.Read(ref disconnectState) == 0)
                     {
                         lock (GetPlayerOperationLock(player.PlayerData.Id))
@@ -119,6 +131,9 @@ namespace AscNet.GameServer
 
             if (Volatile.Read(ref disconnectState) != 0)
                 return;
+            // Every path below answers the request; ReconnectRequest reads the previous value first.
+            if (request.Name != "ReconnectRequest")
+                RecordHandledRequestNo(currentPlayer.PlayerData.Id, request.Id);
             // Dispatch already holds MembershipLock. Reject foreign progress before
             // participant recovery or reset can change the pending owner's epoch.
             if (request.Name is not ("LoginRequest" or "HandshakeRequest")
@@ -169,6 +184,8 @@ namespace AscNet.GameServer
                             && Handlers.TheatreModule.IsCommonShop(request.Deserialize<Handlers.BuyRequest>().ShopId)))
                         Handlers.TaskModule.EnsureMissionResets(this);
                     requestPacketHandler.Invoke(this, request);
+                    if (request.Name == "ReconnectRequest" && player is not null)
+                        RecordHandledRequestNo(player.PlayerData.Id, request.Id);
                     if (Volatile.Read(ref disconnectState) == 0)
                     {
                         Handlers.TaskModule.SendSnapshotTaskSync(this);

@@ -66,14 +66,20 @@ internal partial class Program
             AssertEqual(false, ActivityScheduleService.IsOpen(id, DateTimeOffset.FromUnixTimeSeconds(schedule.EndTime)),
                 $"4.8 event {id} closed at exclusive end");
         }
-        // 50402 ends at the authored shop expiry; 50403 shares its bounds by AscNet
-        // paired-ID policy (4.7 precedent), not a separately verified retail task date.
-        foreach (int id in new[] { 50402, 50403 })
+        // The shop timer 50402 ends at the authored shop expiry; the panel timer shares its bounds
+        // by AscNet paired-ID policy (4.7 precedent), not a separately verified retail task date.
+        // 4.8 paired panel 50403 with 50402; 4.9 kept shop timer 50402 and moved the panel to 51502.
+        foreach ((int id, string begin, string end) in new[]
+        {
+            (50403, "2026-09-24T05:00:00Z", "2026-11-05T05:00:00Z"),
+            (50402, "2026-11-05T05:00:00Z", "2026-12-17T05:00:00Z"),
+            (51502, "2026-11-05T05:00:00Z", "2026-12-17T05:00:00Z"),
+        })
         {
             AssertEqual(true, ActivityScheduleService.TryGet(id, out ActivityScheduleEntry battlefield),
                 $"Simulated Battlefield {id} scheduled");
-            AssertEqual(Utc("2026-09-24T05:00:00Z"), battlefield.StartTime, $"Battlefield {id} opens after maintenance");
-            AssertEqual(Utc("2026-11-05T05:00:00Z"), battlefield.EndTime, $"Battlefield {id} closes at shop expiry");
+            AssertEqual(Utc(begin), battlefield.StartTime, $"Battlefield {id} opens after maintenance");
+            AssertEqual(Utc(end), battlefield.EndTime, $"Battlefield {id} closes at shop expiry");
             AssertEqual(false, ActivityScheduleService.IsOpen(id, DateTimeOffset.FromUnixTimeSeconds(battlefield.StartTime - 1)),
                 $"Battlefield {id} locked before maintenance");
             AssertEqual(true, ActivityScheduleService.IsOpen(id, DateTimeOffset.FromUnixTimeSeconds(battlefield.StartTime)),
@@ -233,7 +239,7 @@ internal partial class Program
         List<TimeLimitCtrlConfigList> controls =
             (List<TimeLimitCtrlConfigList>)builder.Invoke(null, [now, false])!;
         AssertEqual(false, controls.Any(control => control.Id == 50302), "Cosmic Wonders has no fabricated login time control");
-        foreach (int id in new[] { 50402, 50403 })
+        foreach (int id in new[] { 50402, 50403, 51502 })
         {
             ActivityScheduleService.TryGet(id, out ActivityScheduleEntry battlefield);
             TimeLimitCtrlConfigList control = controls.Single(control => control.Id == id);

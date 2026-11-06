@@ -522,6 +522,21 @@ internal partial class Program
                 "a forged CharacterData.Ability cache cannot open the battle power condition");
         }
 
+        // Leia: Fortunaster (4.9) has CharacterQuality rows whose Npc/Attrib rows are not in the
+        // decoded tables yet. Power must still be computed (skills etc.) rather than throwing, since
+        // the task/condition hooks run it after requests and a throw stalls every response.
+        using (CharacterTowerCase test = new("power-missing-attrib-rows", 30, [1431003]))
+        {
+            CharacterData leia = test.Owned(1431003);
+            CharacterSkill skill = new() { Id = 143301, Level = 1 }; // CharacterSkillLevelEffect Ability 0 -> 20
+            leia.SkillList.Add(skill);
+            long lowPower = TowerCalculatedPower(test.Session, leia);
+            skill.Level = 5;
+            long skilledPower = TowerCalculatedPower(test.Session, leia);
+            AssertEqual(true, lowPower >= 0 && skilledPower > lowPower,
+                "missing Npc/Attrib rows omit attribute power but keep the remaining power sources");
+        }
+
         using (CharacterTowerCase test = new("condition-stars", 30, [CharacterTowerWatanabeCharacterId]))
         {
             foreach (int stageId in new[] { CharacterTowerWatanabeFirstStageId, 21000101, 21000102, 21000103, 21000104 })

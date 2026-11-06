@@ -5,6 +5,7 @@ using AscNet.Table.V2.client.functional;
 using AscNet.Table.V2.share.functional;
 using AscNet.Table.V2.share.headportrait;
 using MessagePack;
+using MongoDB.Driver;
 
 namespace AscNet.GameServer.Handlers
 {
@@ -225,24 +226,145 @@ namespace AscNet.GameServer.Handlers
         public List<long> DisplayCharIdList;
     }
 
+    // Profile ("UiPlayerInfo") wire contract. Every field below is one the EN client Lua reads:
+    // XPlayerInfoManager.lua (response envelopes), XUiPlayerInfo.lua / XUiPlayerInfoBase.lua /
+    // XUiPanelInfo.lua / XUiPanelCharacterList.lua / XUiPanelFashionPlayerInfo.lua /
+    // XUiPanelCollectionScrollPlayerInfo.lua (Detail and list payloads), XUiPlayerInfoCharacterGrid.lua
+    // and XUiPanelCharPropertyOtherV2P7.lua (character info), XUiPanelSetting.lua (preview + SetAppearance).
     [MessagePackObject(true)]
     public class QueryPlayerDetailRequest
     {
-        public int PlayerId;
+        public long PlayerId;
     }
 
     [MessagePackObject(true)]
     public class QueryPlayerDetailResponse
     {
         public int Code;
+        public PlayerDetail? Detail;
+    }
+
+    [MessagePackObject(true)]
+    public class PlayerDetail
+    {
+        public long Id;
+        public string Name;
+        public long Level;
+        public string Sign;
+        public long Likes;
+        public long CurrHeadPortraitId;
+        public long CurrHeadFrameId;
+        public int CurrentWearNameplate;
+        public Birthday? Birthday;
+        // XExhibitionManager.SetCharacterInfo: the viewed player's claimed GatherReward ids.
+        public List<int> GatherIds = new();
+        public List<NotifyMedalData.NotifyMedalDataMedalInfo> MedalInfos = new();
+        public PlayerDetailAchievement AchievementDetail = new();
+        public long AppearanceShowType;
+        public AppearanceSettingInfo? AppearanceSettingInfo;
+        public PlayerDetailDorm? DormDetail;
+        public PlayerDetailGuild? GuildDetail;
+        public PlayerDetailAssistCharacter? AssistCharacterDetail;
+    }
+
+    [MessagePackObject(true)]
+    public class PlayerDetailAchievement
+    {
+        public int Achievement;
+    }
+
+    [MessagePackObject(true)]
+    public class PlayerDetailDorm
+    {
+        public long DormitoryId;
+        public string DormitoryName;
+    }
+
+    [MessagePackObject(true)]
+    public class PlayerDetailGuild
+    {
+        public long GuildId;
+        public string GuildName;
+        public int GuildRankLevel;
+    }
+
+    [MessagePackObject(true)]
+    public class PlayerDetailAssistCharacter
+    {
+        public long Id;
+    }
+
+    [MessagePackObject(true)]
+    public class QueryPlayerProfileRequest
+    {
+        public long PlayerId;
+    }
+
+    [MessagePackObject(true)]
+    public class QueryPlayerCharacterListResponse
+    {
+        public int Code;
+        public List<CharacterData> CharacterShows = new();
+    }
+
+    [MessagePackObject(true)]
+    public class QueryPlayerFashionResponse
+    {
+        public int Code;
+        public List<long> Fashions = new();
+        // XFashionAgency:IsColorContains reads fashionColors[OriginalFashionId] as a colour-id list.
+        public Dictionary<int, List<int>> FashionColors = new();
+    }
+
+    [MessagePackObject(true)]
+    public class QueryPlayerWeaponFashionResponse
+    {
+        public int Code;
+        public List<int> WeaponFashions = new();
+    }
+
+    [MessagePackObject(true)]
+    public class QueryPlayerTitleResponse
+    {
+        public int Code;
+        public List<NotifyScoreTitleData.NotifyScoreTitleDataTitleInfo> Titles = new();
+        public List<NotifyScoreTitleData.NotifyScoreTitleDataWallInfo> Walls = new();
+    }
+
+    [MessagePackObject(true)]
+    public class QueryCharacterInfoRequest
+    {
+        public long PlayerId;
+        public long CharacterId;
+    }
+
+    [MessagePackObject(true)]
+    public class QueryCharacterInfoResponse
+    {
+        public int Code;
+        public CharacterData? CharacterData;
+        public List<EquipData> EquipData = new();
+        public PartnerData? PartnerData;
+        public int WeaponFashionId;
+        public List<QueryCharacterInfoAssignChapterRecord> AssignChapterRecords = new();
+        // Awareness chapter ids that hold a stationed character (XUiGridEquipOtherV2P7: table.contains).
+        public List<int> AwarenessSetPositions = new();
+    }
+
+    [MessagePackObject(true)]
+    public class QueryCharacterInfoAssignChapterRecord
+    {
+        public int ChapterId;
+        public long CharacterId;
     }
 
     [MessagePackObject(true)]
     public class SetAppearanceRequest
     {
-        public int CharacterAppearanceType;
-        public dynamic? Characters;
-        public AppearanceSettingInfo AppearanceSettingInfo;
+        public int CharactersAppearanceType;
+        // A Lua array; decoded as object so an empty or sparse Lua table (msgpack map) is still accepted.
+        public object? Characters;
+        public AppearanceSettingInfo? AppearanceSettingInfo;
     }
 
     [MessagePackObject(true)]
@@ -709,19 +831,467 @@ namespace AscNet.GameServer.Handlers
             session.SendResponse(new SetDisplayCharIdFirstResponse() { DisplayCharIdList = session.player.PlayerData.DisplayCharIdList }, packet.Id);
         }
 
-        // TODO: "Display Preview" button in Details section of account info menu
+        #region Profile (UiPlayerInfo) and appearance settings
+
+        // CodeText (share/text/CodeText.tsv) identities.
+        private const int ParamsErrorCode = 5;                                  // ParamsError
+        private const int CharacterNotFoundCode = 20009011;                     // CharacterManagerGetCharacterByIdNotFound
+        private const int PersonalInfoQueryPlayerDataFailCode = 20037001;       // PersonalInfoQueryPlayerDataFail
+        private const int PersonalInfoWithoutPermissionCode = 20037002;         // PersonalInfoWithoutPermission
+        private const int PersonalInfoNoShowCharacterCode = 20037003;           // PersonalInfoNoShowCharacterWithThisId
+        private const int PersonalInfoNoCharacterInfoCode = 20037004;           // PersonalInfoNoCharacterInfoWithThisId
+
+        // XPlayerInfoConfigs.CharactersAppearanceType (All = 0, Select = 1).
+        private const int CharactersAppearanceAll = 0;
+        private const int CharactersAppearanceSelect = 1;
+
+        // XUiAppearanceShowType as documented by XUiPanelSetting.lua InitAppearanceSetting:
+        // "1 visible to all, 2 visible to friends, 3 visible to self".
+        private const long AppearanceShowToAll = 1;
+        private const long AppearanceShowToFriend = 2;
+        private const long AppearanceShowToSelf = 3;
+
+        // XUiPanelSetting.lua MAX_CHARACTER: the settings panel exposes five showcase slots.
+        private const int MaxShowCharacters = 5;
+
+        // XTaskManager.TaskType.Achievement; XAchievementManager counts finished tasks of this type.
+        private const int AchievementTaskType = 4;
+
+        private static readonly Lazy<HashSet<int>> AchievementTaskIds = new(() =>
+            TableReaderV2.Parse<AscNet.Table.V2.share.task.TaskTable>()
+                .Where(row => row.Type == AchievementTaskType)
+                .Select(row => row.Id)
+                .ToHashSet());
+
+        internal sealed record ProfileTarget(Player Player, Character? Character, bool IsSelf);
+
+        /// <summary>
+        /// Resolves the profile owner without creating documents: the caller's own session, the owner's
+        /// live session when online (freshest state), otherwise the persisted player/character documents.
+        /// </summary>
+        internal static ProfileTarget? ResolveProfileTarget(Session session, long playerId)
+        {
+            if (playerId == session.player.PlayerData.Id)
+                return new ProfileTarget(session.player, session.character, IsSelf: true);
+            if (playerId <= 0)
+                return null;
+
+            Session? online = Server.Instance.SessionFromUID(playerId);
+            if (online?.player is not null && online.character is not null)
+                return new ProfileTarget(online.player, online.character, IsSelf: false);
+
+            Player? player = Player.TryFromPlayerId(playerId);
+            if (player is null)
+                return null;
+
+            // Read-only lookup (Character.FromUid would create a document for an unknown uid).
+            Character? character = Character.collection.Find(doc => doc.Uid == playerId).FirstOrDefault();
+            return new ProfileTarget(player, character, IsSelf: false);
+        }
+
+        /// <summary>
+        /// AscNet has no persisted friend relation (no friend list store exists), so no viewer can satisfy
+        /// a "visible to friends" setting; such sections are visible to their owner only.
+        /// </summary>
+        private static bool IsFriend(Session viewer, ProfileTarget target) => false;
+
+        /// <summary>
+        /// Mirrors the client's HasPermission checks (XUiPanelCharacterList / XUiPanelFashionPlayerInfo /
+        /// XUiPanelCollectionScrollPlayerInfo / XDormManager.HasDormPermission): the owner always sees
+        /// everything; others need ToAll, or ToFriend plus friendship. Missing settings fall back to
+        /// ToSelf exactly like the client panels do.
+        /// </summary>
+        internal static bool CanViewProfileSection(Session viewer, ProfileTarget target, Func<AppearanceSettingInfo, long> section)
+        {
+            if (target.IsSelf)
+                return true;
+            AppearanceSettingInfo? setting = target.Player.PlayerData.AppearanceSettingInfo;
+            long showType = setting is null ? AppearanceShowToSelf : section(setting);
+            return showType == AppearanceShowToAll
+                || (showType == AppearanceShowToFriend && IsFriend(viewer, target));
+        }
+
+        internal static PlayerDetail BuildPlayerDetail(Session viewer, ProfileTarget target, long nowUnixSeconds)
+        {
+            Player player = target.Player;
+            PlayerData data = player.PlayerData;
+            HashSet<int> achievementTaskIds = AchievementTaskIds.Value;
+
+            return new PlayerDetail
+            {
+                Id = data.Id,
+                Name = data.Name ?? string.Empty,
+                Level = data.Level,
+                Sign = data.Sign ?? string.Empty,
+                Likes = data.Likes,
+                CurrHeadPortraitId = data.CurrHeadPortraitId,
+                CurrHeadFrameId = data.CurrHeadFrameId,
+                CurrentWearNameplate = target.Character?.GetCurrentWearNameplate(nowUnixSeconds) ?? 0,
+                Birthday = data.Birthday,
+                GatherIds = (player.GatherRewards ?? []).Distinct().ToList(),
+                // XMedalManager.CheckMedalIsExpired: KeepTime > 0 expires at Time + KeepTime.
+                MedalInfos = (player.UnlockedMedals ?? [])
+                    .Where(medal => medal.KeepTime <= 0 || medal.Time + medal.KeepTime >= nowUnixSeconds)
+                    .Select(medal => new NotifyMedalData.NotifyMedalDataMedalInfo
+                    {
+                        Id = medal.Id,
+                        Time = medal.Time,
+                        KeepTime = medal.KeepTime
+                    })
+                    .ToList(),
+                AchievementDetail = new PlayerDetailAchievement
+                {
+                    Achievement = (player.MissionProgress?.ClaimedTaskIds ?? [])
+                        .Distinct()
+                        .Count(achievementTaskIds.Contains)
+                },
+                AppearanceShowType = data.AppearanceShowType,
+                AppearanceSettingInfo = data.AppearanceSettingInfo,
+                DormDetail = CanViewProfileSection(viewer, target, setting => setting.DormitoryType)
+                    ? BuildDormDetail(player)
+                    : null,
+                GuildDetail = BuildGuildDetail(data.Id),
+                AssistCharacterDetail = player.AssistCharacterId != 0
+                    && target.Character?.Characters?.Any(character => character.Id == (uint)player.AssistCharacterId) == true
+                        ? new PlayerDetailAssistCharacter { Id = player.AssistCharacterId }
+                        : null
+            };
+        }
+
+        /// <summary>
+        /// The shown dormitory is AppearanceSettingInfo.DormitoryId. When it is unset (0) or not owned,
+        /// the owned room with the lowest Dormitory.InitNumber is used, which is the default the client
+        /// settings panel adopts (XUiPanelSetting.InitDormitoryDrop).
+        /// </summary>
+        private static PlayerDetailDorm? BuildDormDetail(Player player)
+        {
+            List<PlayerDormRoom> rooms = player.Dorm?.Rooms ?? [];
+            if (rooms.Count == 0)
+                return null;
+
+            long selectedId = player.PlayerData.AppearanceSettingInfo?.DormitoryId ?? 0;
+            PlayerDormRoom? room = rooms.FirstOrDefault(candidate => candidate.Id == selectedId);
+            if (room is null)
+            {
+                Dictionary<int, int> initNumbers = TableReaderV2.Parse<AscNet.Table.V2.share.dormitory.DormitoryTable>()
+                    .GroupBy(row => row.Id)
+                    .ToDictionary(group => group.Key, group => group.First().InitNumber);
+                room = rooms
+                    .OrderBy(candidate => initNumbers.TryGetValue((int)candidate.Id, out int number) ? number : int.MaxValue)
+                    .ThenBy(candidate => candidate.Id)
+                    .First();
+            }
+
+            return new PlayerDetailDorm { DormitoryId = room.Id, DormitoryName = room.Name ?? string.Empty };
+        }
+
+        private static PlayerDetailGuild? BuildGuildDetail(long playerId)
+        {
+            Guild? guild = GuildModule.FindMembership(playerId);
+            return guild is null
+                ? null
+                : new PlayerDetailGuild { GuildId = guild.Id, GuildName = guild.Name ?? string.Empty, GuildRankLevel = GuildModule.Rank(guild, playerId) };
+        }
+
         [RequestPacketHandler("QueryPlayerDetailRequest")]
         public static void QueryPlayerDetailRequestHandler(Session session, Packet.Request packet)
         {
-            session.SendResponse(new QueryPlayerDetailResponse(), packet.Id);
+            QueryPlayerDetailRequest request = packet.Deserialize<QueryPlayerDetailRequest>();
+            ProfileTarget? target = ResolveProfileTarget(session, request.PlayerId);
+            if (target is null)
+            {
+                session.SendResponse(new QueryPlayerDetailResponse { Code = PersonalInfoQueryPlayerDataFailCode }, packet.Id);
+                return;
+            }
+
+            session.SendResponse(new QueryPlayerDetailResponse
+            {
+                Detail = BuildPlayerDetail(session, target, DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+            }, packet.Id);
         }
 
-        // TODO: "Save" button in Details section of account info menu
+        /// <summary>
+        /// Shared resolution + permission gate for the four section queries. Returns 0 on success.
+        /// </summary>
+        private static int ResolveProfileSection(Session session, long playerId, Func<AppearanceSettingInfo, long> section, out ProfileTarget? target)
+        {
+            target = ResolveProfileTarget(session, playerId);
+            if (target is null)
+                return PersonalInfoQueryPlayerDataFailCode;
+            return CanViewProfileSection(session, target, section) ? 0 : PersonalInfoWithoutPermissionCode;
+        }
+
+        internal static List<CharacterData> BuildCharacterShows(ProfileTarget target)
+        {
+            List<CharacterData> owned = target.Character?.Characters ?? [];
+            if (target.Player.PlayerData.AppearanceShowType != CharactersAppearanceSelect)
+                return owned.ToList();
+
+            Dictionary<long, CharacterData> byId = owned
+                .GroupBy(character => (long)character.Id)
+                .ToDictionary(group => group.Key, group => group.First());
+            return (target.Player.PlayerData.ShowCharacters ?? [])
+                .Distinct()
+                .Where(byId.ContainsKey)
+                .Select(id => byId[id])
+                .ToList();
+        }
+
+        [RequestPacketHandler("QueryPlayerCharacterListRequest")]
+        public static void QueryPlayerCharacterListRequestHandler(Session session, Packet.Request packet)
+        {
+            QueryPlayerProfileRequest request = packet.Deserialize<QueryPlayerProfileRequest>();
+            int code = ResolveProfileSection(session, request.PlayerId, setting => setting.CharacterType, out ProfileTarget? target);
+            if (code != 0 || target is null)
+            {
+                session.SendResponse(new QueryPlayerCharacterListResponse { Code = code }, packet.Id);
+                return;
+            }
+
+            session.SendResponse(new QueryPlayerCharacterListResponse { CharacterShows = BuildCharacterShows(target) }, packet.Id);
+        }
+
+        [RequestPacketHandler("QueryPlayerFashionRequest")]
+        public static void QueryPlayerFashionRequestHandler(Session session, Packet.Request packet)
+        {
+            QueryPlayerProfileRequest request = packet.Deserialize<QueryPlayerProfileRequest>();
+            int code = ResolveProfileSection(session, request.PlayerId, setting => setting.FashionType, out ProfileTarget? target);
+            if (code != 0 || target is null)
+            {
+                session.SendResponse(new QueryPlayerFashionResponse { Code = code }, packet.Id);
+                return;
+            }
+
+            Character? character = target.Character;
+            session.SendResponse(new QueryPlayerFashionResponse
+            {
+                Fashions = (character?.Fashions ?? []).Select(fashion => fashion.Id).Distinct().ToList(),
+                FashionColors = (character?.FashionColors ?? new Dictionary<int, List<int>>())
+                    .Where(entry => entry.Value is { Count: > 0 })
+                    .ToDictionary(entry => entry.Key, entry => entry.Value.Distinct().ToList())
+            }, packet.Id);
+        }
+
+        [RequestPacketHandler("QueryPlayerWeaponFashionRequest")]
+        public static void QueryPlayerWeaponFashionRequestHandler(Session session, Packet.Request packet)
+        {
+            QueryPlayerProfileRequest request = packet.Deserialize<QueryPlayerProfileRequest>();
+            int code = ResolveProfileSection(session, request.PlayerId, setting => setting.WeaponFashionType, out ProfileTarget? target);
+            if (code != 0 || target is null)
+            {
+                session.SendResponse(new QueryPlayerWeaponFashionResponse { Code = code }, packet.Id);
+                return;
+            }
+
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            session.SendResponse(new QueryPlayerWeaponFashionResponse
+            {
+                WeaponFashions = (target.Character?.WeaponFashions ?? [])
+                    .Where(fashion => fashion.ExpireTime == 0 || fashion.ExpireTime > now)
+                    .Select(fashion => fashion.Id)
+                    .Distinct()
+                    .ToList()
+            }, packet.Id);
+        }
+
+        [RequestPacketHandler("QueryPlayerTitleRequest")]
+        public static void QueryPlayerTitleRequestHandler(Session session, Packet.Request packet)
+        {
+            QueryPlayerProfileRequest request = packet.Deserialize<QueryPlayerProfileRequest>();
+            int code = ResolveProfileSection(session, request.PlayerId, setting => setting.TitleType, out ProfileTarget? target);
+            if (code != 0 || target is null)
+            {
+                session.SendResponse(new QueryPlayerTitleResponse { Code = code }, packet.Id);
+                return;
+            }
+
+            // Walls stay empty: AscNet persists no collection-wall layouts (no wall store or handler exists),
+            // and the client then shows its "CollectionWallEmpty" state.
+            session.SendResponse(new QueryPlayerTitleResponse
+            {
+                Titles = (target.Character?.ScoreTitles ?? []).ToList()
+            }, packet.Id);
+        }
+
+        [RequestPacketHandler("QueryCharacterInfoRequest")]
+        public static void QueryCharacterInfoRequestHandler(Session session, Packet.Request packet)
+        {
+            QueryCharacterInfoRequest request = packet.Deserialize<QueryCharacterInfoRequest>();
+            session.SendResponse(BuildCharacterInfo(session, request, DateTimeOffset.UtcNow.ToUnixTimeSeconds()), packet.Id);
+        }
+
+        internal static QueryCharacterInfoResponse BuildCharacterInfo(Session session, QueryCharacterInfoRequest request, long nowUnixSeconds)
+        {
+            ProfileTarget? target = ResolveProfileTarget(session, request.PlayerId);
+            if (target is null)
+                return new QueryCharacterInfoResponse { Code = PersonalInfoQueryPlayerDataFailCode };
+            if (!CanViewProfileSection(session, target, setting => setting.CharacterType))
+                return new QueryCharacterInfoResponse { Code = PersonalInfoWithoutPermissionCode };
+
+            Character? owner = target.Character;
+            CharacterData? character = owner?.Characters?.FirstOrDefault(candidate => candidate.Id == request.CharacterId);
+            if (owner is null || character is null)
+                return new QueryCharacterInfoResponse { Code = PersonalInfoNoCharacterInfoCode };
+
+            // Others may only open characters the owner exposes in the current showcase mode.
+            if (!target.IsSelf
+                && target.Player.PlayerData.AppearanceShowType == CharactersAppearanceSelect
+                && !(target.Player.PlayerData.ShowCharacters ?? []).Contains(request.CharacterId))
+            {
+                return new QueryCharacterInfoResponse { Code = PersonalInfoNoShowCharacterCode };
+            }
+
+            HashSet<int> assignChapterIds = TableReaderV2.Parse<AscNet.Table.V2.share.fuben.assign.AssignChapterTable>()
+                .Select(row => row.ChapterId)
+                .ToHashSet();
+            HashSet<int> awarenessChapterIds = TableReaderV2.Parse<AscNet.Table.V2.share.fuben.awareness.AwarenessChapterTable>()
+                .Select(row => row.Id)
+                .ToHashSet();
+            int characterId = (int)character.Id;
+
+            return new QueryCharacterInfoResponse
+            {
+                CharacterData = character,
+                EquipData = (owner.Equips ?? []).Where(equip => equip.CharacterId == characterId).ToList(),
+                PartnerData = (owner.Partners ?? []).FirstOrDefault(partner => partner.CharacterId == characterId),
+                // Same selection the PreFight NpcData uses: the unexpired weapon coating applied to this character.
+                WeaponFashionId = (owner.WeaponFashions ?? [])
+                    .FirstOrDefault(fashion => (fashion.ExpireTime == 0 || fashion.ExpireTime > nowUnixSeconds)
+                        && fashion.UseCharacterList.Contains(characterId))
+                    ?.Id ?? 0,
+                AssignChapterRecords = (target.Player.Assign?.Chapters ?? [])
+                    .Where(record => assignChapterIds.Contains(record.ChapterId))
+                    .OrderBy(record => record.ChapterId)
+                    .Select(record => new QueryCharacterInfoAssignChapterRecord { ChapterId = record.ChapterId, CharacterId = record.CharacterId })
+                    .ToList(),
+                AwarenessSetPositions = (target.Player.Awareness?.Chapters ?? [])
+                    .Where(record => record.CharacterId != 0 && awarenessChapterIds.Contains(record.ChapterId))
+                    .Select(record => record.ChapterId)
+                    .Distinct()
+                    .OrderBy(id => id)
+                    .ToList()
+            };
+        }
+
+        /// <summary>
+        /// Reads a Lua integer array. The client encodes a dense table as a msgpack array; an empty or
+        /// sparse table may arrive as a map keyed by Lua index, whose values are taken in index order.
+        /// </summary>
+        internal static bool TryReadLuaIntegerArray(object? value, out List<long> result)
+        {
+            result = new();
+            IEnumerable<object?>? items = value switch
+            {
+                null => Array.Empty<object?>(),
+                object?[] array => array,
+                IDictionary<object, object> map => map
+                    .Select(entry => (Key: TryToInt64(entry.Key, out long key) ? key : long.MaxValue, entry.Value))
+                    .OrderBy(entry => entry.Key)
+                    .Select(entry => (object?)entry.Value),
+                _ => null
+            };
+            if (items is null)
+                return false;
+
+            foreach (object? item in items)
+            {
+                if (!TryToInt64(item, out long number))
+                    return false;
+                result.Add(number);
+            }
+            return true;
+        }
+
+        private static bool TryToInt64(object? value, out long number)
+        {
+            switch (value)
+            {
+                case sbyte or byte or short or ushort or int or uint or long:
+                    number = Convert.ToInt64(value);
+                    return true;
+                case ulong unsigned when unsigned <= long.MaxValue:
+                    number = (long)unsigned;
+                    return true;
+                default:
+                    number = 0;
+                    return false;
+            }
+        }
+
+        private static bool IsAppearanceShowType(long value) => value is AppearanceShowToAll or AppearanceShowToFriend or AppearanceShowToSelf;
+
+        /// <summary>
+        /// Validates a SetAppearanceRequest against the caller's persisted state. Returns 0 when valid.
+        /// Validation order is AscNet policy; every code is a retail CodeText key.
+        /// </summary>
+        internal static int ValidateAppearance(Session session, SetAppearanceRequest request, out List<long> characterIds)
+        {
+            characterIds = new();
+            if (request.CharactersAppearanceType is not (CharactersAppearanceAll or CharactersAppearanceSelect))
+                return ParamsErrorCode;
+
+            AppearanceSettingInfo? setting = request.AppearanceSettingInfo;
+            if (setting is null
+                || !IsAppearanceShowType(setting.TitleType)
+                || !IsAppearanceShowType(setting.CharacterType)
+                || !IsAppearanceShowType(setting.FashionType)
+                || !IsAppearanceShowType(setting.WeaponFashionType)
+                || !IsAppearanceShowType(setting.DormitoryType))
+            {
+                return ParamsErrorCode;
+            }
+
+            // DormitoryId is 0 until the dorm system is unlocked (XUiPanelSetting.InitDormitoryDrop); otherwise
+            // it must name an owned room.
+            if (setting.DormitoryId != 0 && !(session.player.Dorm?.Rooms ?? []).Any(room => room.Id == setting.DormitoryId))
+                return ParamsErrorCode;
+
+            if (!TryReadLuaIntegerArray(request.Characters, out List<long> ids)
+                || ids.Count > MaxShowCharacters
+                || ids.Any(id => id <= 0)
+                || ids.Distinct().Count() != ids.Count)
+            {
+                return ParamsErrorCode;
+            }
+
+            HashSet<long> owned = (session.character.Characters ?? []).Select(character => (long)character.Id).ToHashSet();
+            if (ids.Any(id => !owned.Contains(id)))
+                return CharacterNotFoundCode;
+
+            characterIds = ids;
+            return 0;
+        }
+
         [RequestPacketHandler("SetAppearanceRequest")]
         public static void SetAppearanceRequestHandler(Session session, Packet.Request packet)
         {
-            session.SendResponse(new SetAppearanceResponse() { Code = 1 }, packet.Id);
+            SetAppearanceRequest request = packet.Deserialize<SetAppearanceRequest>();
+            int code = ValidateAppearance(session, request, out List<long> characterIds);
+            if (code != 0)
+            {
+                session.SendResponse(new SetAppearanceResponse { Code = code }, packet.Id);
+                return;
+            }
+
+            AppearanceSettingInfo setting = request.AppearanceSettingInfo!;
+            PlayerData data = session.player.PlayerData;
+            data.AppearanceShowType = request.CharactersAppearanceType;
+            data.ShowCharacters = characterIds;
+            data.AppearanceSettingInfo = new AppearanceSettingInfo
+            {
+                TitleType = setting.TitleType,
+                CharacterType = setting.CharacterType,
+                FashionType = setting.FashionType,
+                WeaponFashionType = setting.WeaponFashionType,
+                DormitoryType = setting.DormitoryType,
+                DormitoryId = setting.DormitoryId
+            };
+            session.player.Save();
+
+            session.SendResponse(new SetAppearanceResponse(), packet.Id);
         }
+
+        #endregion
 
         [RequestPacketHandler("RecordPlayerPointRequest")]
         public static void RecordPlayerPointRequestHandler(Session session, Packet.Request packet)

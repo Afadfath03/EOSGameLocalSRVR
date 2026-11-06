@@ -39,6 +39,32 @@ internal static partial class DrawManager
         throw new InvalidDataException($"Missing base probability for draw {draw.Id}");
     }
 
+    // GM/debug S-rank rate override (/gacharate). AscNet local policy, explicit per-player
+    // opt-in, default off: with no override this is exactly RareProbability(draw). It only
+    // replaces the base per-pull S/6-star roll in RollDraw; hard pity, the A-or-better floor,
+    // target/off-target splits and calibration are unchanged. Non-S outcomes keep their
+    // relative table weights because RollNonRare and DrawMemberReward roll them on their
+    // conditional non-S share, so each becomes (1 - p) * w / sum(non-S w). Draws without an
+    // available pity law (Fate) fail closed before this roll and are never reached.
+    private static double EffectiveRareProbability(Player player, DrawInfo draw) =>
+        GetRareRateOverridePercent(player, draw.Id) is double percent ? percent / 100d : RareProbability(draw);
+
+    public static double? GetRareRateOverridePercent(Player player, int drawId)
+    {
+        PlayerDrawRareRateOverride? value = player.DrawState?.RareRateOverride;
+        if (value is null) return null;
+        return value.ByDrawId.TryGetValue(drawId, out double percent) ? percent : value.AllPercent;
+    }
+
+    // Table per-pull S rate for a draw the override can reach (one with a reward
+    // configuration and lawful pity); null for Fate/unconfigured/unknown draws.
+    public static double? GetTableRareRate(int drawId)
+    {
+        if (!DrawsById.TryGetValue(drawId, out DrawInfo? draw) || !HasRewardConfiguration(drawId)) return null;
+        try { return RareProbability(draw); }
+        catch (Exception exception) when (exception is InvalidDataException or KeyNotFoundException) { return null; }
+    }
+
     // Fate groups publish an integer pity range but no authoritative threshold
     // weights exist, so those groups fail closed rather than run on a substitute
     // distribution. A group with no DrawServerRule row has no pity law at all and
@@ -138,7 +164,7 @@ internal static partial class DrawManager
         var rule = Rule(draw);
         var round = GetPityRound(player, draw, random);
         double rareRoll = random.NextDouble();
-        bool rare = round.Misses + 1 >= round.Limit || rareRoll < RareProbability(draw);
+        bool rare = round.Misses + 1 >= round.Limit || rareRoll < EffectiveRareProbability(player, draw);
         bool lowerDue = rule.LowerPity > 0 && round.LowerMisses + 1 >= rule.LowerPity;
         RewardGoods reward;
         if (draw.GroupId == 1)

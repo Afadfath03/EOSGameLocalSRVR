@@ -3,37 +3,39 @@ using AscNet.GameServer.Handlers;
 namespace AscNet.GameServer.Commands
 {
     [CommandName("warzone")]
-    internal sealed class WarzoneCommand : Command
+    internal class WarzoneCommand : Command
     {
         public WarzoneCommand(Session session, string[] args, bool validate = true) : base(session, args, validate) { }
 
-        public override string Help => "Use /warzone reset, /warzone tiers, /warzone tier <Id|name>, /warzone zones, /warzone zone <AreaId|auto>, or /warzone fluctuation <level>.";
+        public override string Help => "Use /warzone reset, /warzone tiers, /warzone tier <Id|name>, /warzone zones [element|zone name] [boss|duo|mob], "
+            + "/warzone set <element|zone name|AreaId> [boss|duo|mob] (e.g. /warzone set ice, /warzone set plasma duo), /warzone zone <AreaId|auto>, or /warzone fluctuation <level>.";
 
-        [Argument(0, @"^[A-Za-z]+$|^[0-9]+$", "Tier ID/name or 'reset', 'tiers', 'tier', 'zones', 'zone', or 'fluctuation' action", ArgumentFlags.IgnoreCase)]
-        string Operation { get; set; } = string.Empty;
+        [Argument(0, @"^[A-Za-z]+$|^[0-9]+$", "Tier ID/name or 'reset', 'tiers', 'tier', 'zones', 'set', 'zone', or 'fluctuation' action", ArgumentFlags.IgnoreCase)]
+        protected string Operation { get; set; } = string.Empty;
 
-        [Argument(1, @"^(auto|[A-Za-z]+|[0-9]+)$", "Tier ID/name, AreaId, fluctuation level, or 'auto'", ArgumentFlags.Optional | ArgumentFlags.IgnoreCase)]
-        string Value { get; set; } = string.Empty;
+        [Argument(1, @"^[A-Za-z0-9_\-]+$", "Tier ID/name, element or zone name, AreaId, fluctuation level, or 'auto'", ArgumentFlags.Optional | ArgumentFlags.IgnoreCase)]
+        protected string Value { get; set; } = string.Empty;
+
+        [Argument(2, @"^[A-Za-z0-9_\-]+$", "For set/zones: encounter type (boss|duo|mob) or the next word of a zone name", ArgumentFlags.Optional | ArgumentFlags.IgnoreCase)]
+        protected string Type { get; set; } = string.Empty;
+
+        // Words after the action (zone names may contain spaces, e.g. "crimson frostland boss").
+        private string[] Terms => args.Skip(1).ToArray();
 
         public override void Execute()
         {
+            if (Operation.Equals("set", StringComparison.OrdinalIgnoreCase))
+                throw new CommandMessageCallbackException(ArenaModule.SetZoneByQueryFromCommand(session, Terms));
+
+            if (Operation.Equals("zones", StringComparison.OrdinalIgnoreCase))
+                throw new CommandMessageCallbackException(ArenaModule.ListZonesForCommand(session, Terms));
+
             if (Operation.Equals("reset", StringComparison.OrdinalIgnoreCase))
             {
                 if (!string.IsNullOrEmpty(Value))
                     throw new CommandMessageCallbackException("Usage: /warzone reset");
                 ArenaModule.ResetFromCommand(session);
                 return;
-            }
-
-            if (Operation.Equals("zones", StringComparison.OrdinalIgnoreCase))
-            {
-                if (!string.IsNullOrEmpty(Value))
-                    throw new CommandMessageCallbackException("Usage: /warzone zones");
-                IReadOnlyList<(int Id, string Name)> zones = ArenaModule.GetZonesForCommand(session);
-                throw new CommandMessageCallbackException(zones.Count == 0
-                    ? "No zones are available for your current Warzone tier."
-                    : "Available Warzone AreaIds: " + string.Join(", ", zones.Select(zone => $"{zone.Id} ({zone.Name})"))
-                        + ". Use /warzone zone <AreaId> to select one.");
             }
 
             if (Operation.Equals("tiers", StringComparison.OrdinalIgnoreCase))
@@ -55,7 +57,7 @@ namespace AscNet.GameServer.Commands
                     return;
                 }
                 if (!int.TryParse(Value, out int areaId))
-                    throw new CommandMessageCallbackException("Usage: /warzone zone <AreaId|auto>. Use /warzone zones to list IDs.");
+                    throw new CommandMessageCallbackException("Usage: /warzone zone <AreaId|auto>. Use /warzone zones to list IDs, or /warzone set <element> [boss|duo|mob].");
                 ArenaModule.SetZoneFromCommand(session, areaId);
                 return;
             }
@@ -77,8 +79,15 @@ namespace AscNet.GameServer.Commands
             }
 
             if (!string.IsNullOrEmpty(Value))
-                throw new CommandMessageCallbackException("Usage: /warzone tiers, /warzone tier <Id|name>, /warzone zones, /warzone zone <AreaId|auto>, or /warzone fluctuation <level>");
+                throw new CommandMessageCallbackException("Usage: /warzone tiers, /warzone tier <Id|name>, /warzone zones [filter], /warzone set <element> [boss|duo|mob], /warzone zone <AreaId|auto>, or /warzone fluctuation <level>");
             ArenaModule.SetTierFromCommand(session, Operation);
         }
+    }
+
+    // Short alias: /wz set ice == /warzone set ice.
+    [CommandName("wz")]
+    internal sealed class WzCommand : WarzoneCommand
+    {
+        public WzCommand(Session session, string[] args, bool validate = true) : base(session, args, validate) { }
     }
 }

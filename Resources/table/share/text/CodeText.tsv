@@ -6428,3 +6428,87 @@ Id	Key	Text
 40001028	PayPlatformShield	Payment processing method unsupported
 40001029	AccumulatedExtraPayRewardIdIsNotExist	Payment platform settings invalid
 40001030	PayCheckReceiptCurrencyUnMatch	40001026 Currency on the recharge permit mismatched
+20123050	FubenReformBalanceStageDbNotFound	20123050 Limit Break: Stage save data does not exist
+20123051	FubenReformBalanceStageCfgNotFound	20123051 Limit Break: Stage config does not exist
+20123052	FubenReformBalanceDataNotFound	20123052 Limit Break: Pre-battle weight data is empty
+20123053	FubenReformBalancePreFightDataNotFound	20123053 Limit Break: Current pre-battle data does not exist
+20123054	FubenReformBalanceMassIdError	20123054 Limit Break: Invalid Weight ID
+20123055	FubenReformBalanceMassCfgNotFound	20123055 Limit Break: Weight config does not exist
+20123056	FubenReformBalanceMassSideError	20123056 Limit Break: Weight type does not match slot type
+20123057	FubenReformBalanceMassRepeat	20123057 Limit Break: Duplicate weight selected
+20123058	FubenReformBalanceSlotOverMax	20123058 Limit Break: Weight count exceeds slot capacity
+20123059	FubenReformBalanceMassNotEnough	20123059 Limit Break: Insufficient weight count
+20123060	FubenReformBalanceMassCalcError	20123060 Limit Break: Weight Mass calculation error
+20123061	FubenReformBalanceMinQualityNotEnough	20123061 Limit Break: Wish Mass does not meet stage minimum requirements
+20123062	FubenReformBalanceMassTargetError	20123062 Limit Break: Weight associated target config error
+20123063	FubenReformBalanceMassTypeError	20123063 Limit Break: Weight type config error
+20123064	FubenReformBalanceAffixCfgNotFound	20123064 Limit Break: Affix config does not exist
+20123065	FubenReformBalanceEnemyTargetCfgNotFound	20123065 Limit Break: Monster target config does not exist
+20123066	FubenReformBalanceEnemySpawnCfgError	20123066 Limit Break: Monster weight summon config error
+20123067	FubenReformBalanceDifficultyBuffCfgNotFound	20123067 Limit Break: Mass difficulty bonus config does not exist
+20123068	FubenReformBalanceDifficultyCfgCountNotMatch	20123068 Limit Break: Mass difficulty threshold and bonus config count mismatch
+20123069	FubenReformBalanceCharaGroupCfgNotFound	20123069 Limit Break: Selectable character group configuration does not exist
+20123070	FubenReformBalanceEnemyGroupCfgNotFound	20123070 Limit Break: Selectable monster group configuration does not exist
+20123071	FubenReformBalanceAffixGroupCfgNotFound	20123071 Limit Break: Selectable affix group configuration does not exist
+20123072	FubenReformBalanceCharacterOutOfRange	20123072 Limit Break: Character weight not in selectable stage range
+20123073	FubenReformBalanceEnemyOutOfRange	20123073 Limit Break: Monster weight not in selectable stage range
+20123074	FubenReformBalanceAffixOutOfRange	20123074 Limit Break: Affix weight not in selectable stage range
+20123075	FubenReformBalanceFixedEnemyMissing	20123075 Limit Break: Required stage monster weight not selected
+20123076	FubenReformBalanceRobotNotInRange	20123076 Limit Break: Robot is not in Scale whitelist
+20123077	FubenReformBalanceCharacterRepeat	20123077 Limit Break: Duplicate selection of character self-unit and robot
+20123078	FubenReformBalanceTeamSelectNull	20123078 Limit Break: Lineup character selection is empty
+20123079	FubenReformBalanceTeamOutOfRange	20123079 Limit Break: Lineup character is not in selected weight range
+20236019	WheelchairManualNotInBuyTime	20236019 Not within purchase time window
+20434001	SkyTowerActivityNotOpen	Event not yet available
+20434002	SkyTowerActivityCfgNotExist	Event settings not found
+20434003	SkyTowerDataNotExist	20434003通天塔数据不存在
+20434004	SkyTowerInvalidRequest	20434005请求参数错误
+20434005	SkyTowerSettleTimeError	Incorrect result calculation time frame
+20434006	SkyTowerSettleFailed	20434007生产结算失败
+20434007	SkyTowerMetMaxTowerLevel	Highest level reached
+20434008	SkyTowerConfigNotFound	Corresponding configuration not found
+20434009	SkyTowerGoldNotEnough	20434009通天塔金币不足
+20434010	SkyTowerCharacterNotUnlock	Character locked
+20434011	SkyTowerCharacterMetMaxLevel	20434011角色已达最高等级
+20434012	SkyTowerCharacterCannotUpLevel	20434012该角色不可升级
+20434013	SkyTowerCharacterLvUpItemNotEnough	20434013角色券不足
+20434014	SkyTowerCharacterUpLevelConditionNotMet	20434014未满足角色升级条件
+20434015	SkyTowerWorkPosNotUnlock	20434015工位未解锁
+20434016	SkyTowerWorkPosNoCharacter	20434016工位上没有角色
+20434017	SkyTowerCharacterFloorGroupNotMatch	20434017角色无法在该楼层区间工作
+20434018	SkyTowerWorkPosAppointWorkNotMatch	20434018工作内容与工位指定工作不符
+20434019	SkyTowerConditionNotMet	20434019未满足通天塔解锁条件
+20434020	SkyTowerPerformNotExist	20434020通天塔事件不存在或未解锁
+20434021	SkyTowerPerformNotAchieved	20434021通天塔事件目标未达成
+20434022	SkyTowerPerformAlreadyFinish	20434022通天塔事件已领取奖励
+20434023	SkyTowerPerformStoryError	20434023通天塔事件剧情对话数据错误
+20434024	SkyTowerTowerUpLevelConditionNotMet	20434024未满足通天塔大楼升级条件
+20434025	SkyTowerSpeedUpItemNotEnough	20434025通天塔加速道具不足
+20434026	SkyTowerSpeedUpDailyLimitReached	20434026通天塔当日加速次数已达上限
+20434027	SkyTowerWorkPosNotWorking	20434027通天塔工位未在生产，无法加速
+20435001	Regression4NotInRegression	20435001 Returnee 4 - Current player is not in Returnee status
+20435002	Regression4ActivityInvalidId	20435002 Returnee 4 - Invalid Event ID
+20435003	Regression4ActivityNotCurrentId	20435003 Returnee 4 - Event ID is not the current Event ID
+20435004	Regression4SignInInvalidId	20435004 Returnee 4 - Invalid sign-in ID
+20435005	Regression4SignInIdNotInActivity	20435005 Returnee 4 - Sign-in ID does not belong to current event
+20435006	Regression4SignInRewardAlreadyGot	20435006 Returnee 4 - Daily sign-in reward already claimed
+20435007	Regression4SignInUnsatisfied	20435007 Returnee 4 - Daily sign-in reward conditions not met
+20435008	Regression4PassportAidNotFoundForRid	20435008 Returnee 4 - Pass event does not exist
+20435009	Regression4PassportInfoNotExist	20435009 Returnee 4 - Pass info does not exist
+20435010	Regression4PassportNotUnlock	20435010 Returnee 4 - Pass not unlocked
+20435011	Regression4PassportAlreadyUnlocked	20435011 Returnee 4 - Pass already unlocked
+20435012	Regression4PassportInfoActivityIdNotMatch	20435012 Returnee 4 - Pass does not exist in current event
+20435013	Regression4PassportLevelNotEnough	20435013 Returnee 4 - Required level to claim rewards not met
+20435014	Regression4PassportNoRewardCanGet	20435014 Returnee 4 - No rewards available to claim
+20435015	Regression4PassportAlreadyMaxLevel	20435015 Returnee 4 - Max level reached
+20435016	Regression4PassportLevelCfgNotExist	20435016 Returnee 4 - Level info does not exist
+20435017	Regression4PassportRewardTemplateNotExist	20435017 Returnee 4 - Reward does not exist
+20435018	Regression4PassportBuyLevelMustBiggerThanNow	20435018 Returnee 4 - Purchased level cannot be lower than current level
+20435019	Regression4PassportExpConfigError	20435019 Returnee 4 - EXP configuration error
+20435020	Regression4PassportRewardAlreadyGot	20435020 Returnee 4 - Reward already claimed
+20435021	Regression4PassportBuyTimeAlreadyEnd	20435021 Returnee 4 - Purchase period for current event has ended
+20435022	Regression4PassportBuyExpTranscend	20435022 Returnee 4 - Cannot purchase levels in Infinite Zone
+20435023	Regression4ConditionStateNotMatch	20435023 Returnee 4 - Returnee status mismatch
+20435024	Regression4ConditionPassportExpNotEnough	20435024 Returnee 4 - Insufficient Battle Pass EXP
+20435025	PurchaseRegression4NotInRegression	20435025 Player is not in Returnee status
+20435026	PurchaseRegression4ActivityIdNotMatch	20435026 Pack not applicable to current Returnee Event

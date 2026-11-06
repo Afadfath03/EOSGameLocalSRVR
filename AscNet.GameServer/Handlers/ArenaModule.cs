@@ -111,7 +111,7 @@ namespace AscNet.GameServer.Handlers
 #pragma warning restore CS8618
     #endregion
 
-    internal class ArenaModule
+    internal partial class ArenaModule
     {
         private const string ConfigPath = "Configs/simulated_battlefield.json";
         private const int FightFramesPerSecond = 20;
@@ -651,17 +651,6 @@ namespace AscNet.GameServer.Handlers
                 .ToArray();
         }
 
-        internal static IReadOnlyList<(int Id, string Name)> GetZonesForCommand(Session session)
-        {
-            ReconcileLive(session);
-            SimulatedBattlefieldState state = session.player.SimulatedBattlefield!;
-            ChallengeAreaTable challenge = ResolveChallenge(state.ArenaLevel, checked((int)session.player.PlayerData.Level));
-            return GetZoneCandidates(challenge).Where(id => AreaStages.Value.ContainsKey(id))
-                .Select(id => (id, AreaStages.Value[id].Name))
-                .OrderBy(zone => zone.id)
-                .ToArray();
-        }
-
         internal static void SetZoneFromCommand(Session session, int areaId)
         {
             ReconcileLive(session);
@@ -718,24 +707,28 @@ namespace AscNet.GameServer.Handlers
             throw new CommandMessageCallbackException("Warzone reset: tier restored to your initial tier, score/progress cleared, zone set to auto, and fluctuation set to 0.");
         }
 
+        // Every zone a command may select: supported zones from the tier's AreaIdGroup slots, plus (Hero+) any supported
+        // ungrouped AreaStage for the Entropic Distortion slot. AscNet policy: retail rotates that slot per activity, and
+        // ChallengeArea lists only one, so commands may pick any hydratable ungrouped zone.
         private static HashSet<int> GetZoneCandidates(ChallengeAreaTable challenge)
         {
-            HashSet<int> grouped = challenge.AreaIdGroup
-                .Where(group => !string.IsNullOrWhiteSpace(group))
-                .SelectMany(group => group.Split('|', StringSplitOptions.RemoveEmptyEntries))
-                .Select(value => int.TryParse(value, out int id) ? id : 0)
-                .Where(id => id > 0 && AreaStages.Value.TryGetValue(id, out AreaStageTable? area) && IsSupportedArea(area))
+            HashSet<int> groupedAreaIds = GroupedAreaIds(challenge);
+            HashSet<int> candidates = groupedAreaIds
+                .Where(id => AreaStages.Value.TryGetValue(id, out AreaStageTable? area) && IsSupportedArea(area))
                 .ToHashSet();
             if (IsHeroOrHigher(challenge.ArenaLv))
-            {
-                grouped.UnionWith(challenge.AreaId
-                    .Where(id => id > 0 && !grouped.Contains(id))
-                    .Where(id => AreaStages.Value.TryGetValue(id, out AreaStageTable? area) && IsSupportedArea(area)));
-                grouped.UnionWith(ArenaStageDataset.GeneratedAreaIds
-                    .Where(id => AreaStages.Value.TryGetValue(id, out AreaStageTable? area) && IsSupportedArea(area)));
-            }
-            return grouped;
+                candidates.UnionWith(AreaStages.Value.Values
+                    .Where(area => !groupedAreaIds.Contains(area.Id) && IsSupportedArea(area))
+                    .Select(area => area.Id));
+            return candidates;
         }
+
+        private static HashSet<int> GroupedAreaIds(ChallengeAreaTable challenge) => challenge.AreaIdGroup
+            .Where(group => !string.IsNullOrWhiteSpace(group))
+            .SelectMany(group => group.Split('|', StringSplitOptions.RemoveEmptyEntries))
+            .Select(value => int.TryParse(value, out int areaId) ? areaId : 0)
+            .Where(areaId => areaId > 0)
+            .ToHashSet();
 
         private static ChallengeAreaTable ResolveInitialChallenge(int playerLevel)
         {
@@ -752,37 +745,39 @@ namespace AscNet.GameServer.Handlers
 
         private static List<int> SelectedAreas(int activityNo, long playerId, ChallengeAreaTable challenge, int preferredAreaId = 0)
         {
-            HashSet<int> groupedAreaIds = challenge.AreaIdGroup
-                .Where(group => !string.IsNullOrWhiteSpace(group))
-                .SelectMany(group => group.Split('|', StringSplitOptions.RemoveEmptyEntries))
-                .Select(value => int.TryParse(value, out int areaId) ? areaId : 0)
-                .Where(areaId => areaId > 0)
-                .ToHashSet();
-            List<(string Key, List<int> Areas)> groups = challenge.AreaIdGroup
+            HashSet<int> groupedAreaIds = GroupedAreaIds(challenge);
+            // Supported = hydratable (a command may force it); Auto = eligible for the automatic per-activity pick.
+            List<(string Key, List<int> Supported, List<int> Auto)> groups = challenge.AreaIdGroup
                 .Where(group => !string.IsNullOrWhiteSpace(group))
                 .Distinct()
-                .Select(group => (Key: group, Areas: group.Split('|', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(value => int.TryParse(value, out int areaId) ? areaId : 0)
-                    .Where(areaId => areaId > 0 && AreaStages.Value.TryGetValue(areaId, out AreaStageTable? area) && IsSupportedArea(area))
-                    .Distinct()
-                    .ToList()))
-                .Where(group => group.Areas.Count > 0)
+                .Select(group =>
+                {
+                    List<int> supported = group.Split('|', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(value => int.TryParse(value, out int areaId) ? areaId : 0)
+                        .Where(areaId => areaId > 0 && AreaStages.Value.TryGetValue(areaId, out AreaStageTable? area) && IsSupportedArea(area))
+                        .Distinct()
+                        .ToList();
+                    return (Key: group, Supported: supported,
+                        Auto: supported.Where(areaId => IsAutoSelectableArea(AreaStages.Value[areaId])).ToList());
+                })
+                .Where(group => group.Supported.Count > 0)
                 .OrderBy(group => StableGroupHash(activityNo, playerId, group.Key))
                 .ToList();
             List<int> selected = new();
-            int preferredGroupIndex = groups.FindIndex(group => group.Areas.Contains(preferredAreaId));
+            int preferredGroupIndex = preferredAreaId > 0 ? groups.FindIndex(group => group.Supported.Contains(preferredAreaId)) : -1;
             if (preferredGroupIndex >= 0)
             {
                 selected.Add(preferredAreaId);
                 selected.AddRange(groups
-                    .Where((_, index) => index != preferredGroupIndex)
-                    .Select(group => group.Areas.OrderBy(areaId => StableAreaHash(activityNo, playerId, areaId) ^ StableStringHash(group.Key)).First())
+                    .Where((group, index) => index != preferredGroupIndex && group.Auto.Count > 0)
+                    .Select(group => group.Auto.OrderBy(areaId => StableAreaHash(activityNo, playerId, areaId) ^ StableStringHash(group.Key)).First())
                     .Take(Math.Max(0, challenge.DayUnlockNum - 1)));
             }
             else
             {
                 selected.AddRange(groups
-                    .Select(group => group.Areas.OrderBy(areaId => StableAreaHash(activityNo, playerId, areaId) ^ StableStringHash(group.Key)).First())
+                    .Where(group => group.Auto.Count > 0)
+                    .Select(group => group.Auto.OrderBy(areaId => StableAreaHash(activityNo, playerId, areaId) ^ StableStringHash(group.Key)).First())
                     .Take(challenge.DayUnlockNum));
             }
             if (selected.Count != challenge.DayUnlockNum)
@@ -792,13 +787,14 @@ namespace AscNet.GameServer.Handlers
 
             if (IsHeroOrHigher(challenge.ArenaLv))
             {
-                int requestedGeneratedArea = preferredAreaId > 0 && !groupedAreaIds.Contains(preferredAreaId)
-                    && ArenaStageDataset.IsGeneratedArea(preferredAreaId)
+                int requestedSpecialArea = preferredAreaId > 0 && !groupedAreaIds.Contains(preferredAreaId)
+                    && AreaStages.Value.TryGetValue(preferredAreaId, out AreaStageTable? preferredArea)
+                    && IsSupportedArea(preferredArea)
                     ? preferredAreaId
                     : 0;
-                if (requestedGeneratedArea > 0)
+                if (requestedSpecialArea > 0)
                 {
-                    selected.Add(requestedGeneratedArea);
+                    selected.Add(requestedSpecialArea);
                 }
                 else
                 {
@@ -806,7 +802,7 @@ namespace AscNet.GameServer.Handlers
                         .Where(areaId => areaId > 0 && !groupedAreaIds.Contains(areaId))
                         .Distinct()
                         .Where(areaId => AreaStages.Value.TryGetValue(areaId, out AreaStageTable? area)
-                            && IsSupportedArea(area))
+                            && IsAutoSelectableArea(area))
                         .ToList();
                     if (specialAreas.Count != 1)
                         throw new InvalidDataException(
@@ -824,6 +820,11 @@ namespace AscNet.GameServer.Handlers
             area.IsAbandoned == 0
             && ResolveConfiguredStageId(area) is { } stageId
             && ArenaStageDataset.Supports(area.Id, checked((uint)stageId), area.MarkId, area.Desc);
+
+        private static bool IsAutoSelectableArea(AreaStageTable area) =>
+            area.IsAbandoned == 0
+            && ResolveConfiguredStageId(area) is { } stageId
+            && ArenaStageDataset.IsAutoSelectable(area.Id, checked((uint)stageId), area.MarkId, area.Desc);
 
         private static uint StableAreaHash(int activityNo, long playerId, int areaId) =>
             StablePlayerHash(activityNo, playerId) * 16777619u ^ (uint)areaId;

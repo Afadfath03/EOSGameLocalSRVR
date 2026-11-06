@@ -1466,12 +1466,14 @@ namespace AscNet.Test
                        "partner-decompose-partial-reconnect"))
             {
                 recovered.Session.stage = CreateLoginAccountCompatibilityStage(partialUid);
+                const int partialHandledRequestNo = 17_315;
+                Session.RecordHandledRequestNo(partialUid, partialHandledRequestNo);
                 DispatchReconnect(recovered, durablePartialPlayer, partialUid, 17_316, partialLastMsgSeqNo);
                 ReconnectResponse reconnectResponse =
                     ReadReconnectResponseSkippingPushes(recovered, "partial reconnect response");
                 AssertEqual(0, reconnectResponse.Code, "partial reconnect response code");
-                AssertEqual(partialLastMsgSeqNo, reconnectResponse.RequestNo,
-                    "partial reconnect returns the client request sequence");
+                AssertEqual(partialHandledRequestNo, reconnectResponse.RequestNo,
+                    "partial reconnect returns the last handled client request");
                 AssertNoPartnerRecoveryPushes(recovered, "partial reconnect");
                 AssertEqual(true, durablePartialPlayer.PendingPartnerDecompose is not null,
                     "partial reconnect leaves pending request for client replay");
@@ -1623,11 +1625,12 @@ namespace AscNet.Test
                        "partner-decompose-fresh-reconnect"))
             {
                 fresh.Session.stage = freshPersistedStage;
+                int freshHandledRequestNo = Session.GetLastHandledRequestNo(freshUid);
                 DispatchReconnect(fresh, freshPersistedPlayer, freshUid, 17_319, 913);
                     ReconnectResponse reconnectResponse =
                         ReadReconnectResponseSkippingPushes(fresh, "fresh reconnect response");
                     AssertEqual(0, reconnectResponse.Code, "fresh reconnect response code");
-                    AssertEqual(913, reconnectResponse.RequestNo, "fresh reconnect returns client sequence");
+                    AssertEqual(freshHandledRequestNo, reconnectResponse.RequestNo, "fresh reconnect returns last handled client request");
                     AssertEqual(freshUid, fresh.Session.player.PlayerData.Id,
                         "fresh reconnect reloads Player through registered handler");
                     AssertEqual(freshUid, fresh.Session.character.Uid,
@@ -1747,12 +1750,14 @@ namespace AscNet.Test
                            "partner-decompose-completed-response-loss-replay"))
                 {
                     replay.Session.stage = completedReplayStage;
+                    const int completedHandledRequestNo = 17_322;
+                    Session.RecordHandledRequestNo(completedUid, completedHandledRequestNo);
                     DispatchReconnect(replay, completedReplayPlayer, completedUid, 17_323, 1_024);
                     ReconnectResponse reconnectResponse =
                         ReadReconnectResponseSkippingPushes(replay, "completed response-loss reconnect");
                     AssertEqual(0, reconnectResponse.Code, "completed response-loss reconnect succeeds");
-                    AssertEqual(1_024, reconnectResponse.RequestNo,
-                        "completed response-loss reconnect preserves sequence");
+                    AssertEqual(completedHandledRequestNo, reconnectResponse.RequestNo,
+                        "completed response-loss reconnect returns last handled client request");
 
                     InvokeRegisteredRequestHandler(
                         nameof(PartnerDecomposeRequest),

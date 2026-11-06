@@ -264,6 +264,144 @@ internal partial class Program
                 for (int i = 0; i < 20; i++) Roll(new Player(), d, new DrawFixedRandom((i + .5) / 20));
             }
         }
+        ValidateDrawRareRateOverride();
         Console.WriteLine("Draw rules passed; Fate pools fail closed without an authoritative threshold law.");
+    }
+
+    // GM /gacharate override (AscNet local policy): unset keeps table rolls; set, it only
+    // replaces the base S roll while non-S proportions and pity stay table-driven.
+    private static void ValidateDrawRareRateOverride()
+    {
+        Type manager = RequiredAscNetGameServerType("AscNet.GameServer.Game.DrawManager");
+        object? Call(string name, params object?[] args) => manager.GetMethod(name,
+            BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)!.Invoke(null, args);
+        DrawInfo Template(int group) => Version47CatalogTemplates().First(x => x.GroupId == group);
+        RewardGoods roll(Player p, DrawInfo d, Random r) => (RewardGoods)Call("RollDraw", p, d, r)!;
+        Dictionary<int, int> ranks = TableReaderV2.Parse<AscNet.Table.V2.share.character.quality.CharacterQualityTable>()
+            .GroupBy(row => row.CharacterId).ToDictionary(group => group.Key, group => group.Min(row => row.Quality));
+        int characterQuality(int id) => ranks.GetValueOrDefault(id);
+        DrawInfo fate = Template(15), theme = Template(11), weapon = Template(4), member = Template(1), cub = Template(22);
+        bool IsS(DrawInfo d, RewardGoods reward) => d.GroupId == 1
+            ? reward.RewardType == (int)RewardType.Character && characterQuality(reward.TemplateId) == 3
+            : ((int[])Call("RarePool", d)!).Contains(reward.TemplateId);
+        Player WithOverride(double? all, params (int DrawId, double Percent)[] banners)
+        {
+            Player p = new();
+            p.DrawState.RareRateOverride = new() { AllPercent = all };
+            foreach ((int drawId, double percent) in banners) p.DrawState.RareRateOverride.ByDrawId[drawId] = percent;
+            return p;
+        }
+        DrawInfo[] covered = [theme, weapon, member, cub, fate];
+
+        foreach (DrawInfo d in covered)
+        {
+            Player unset = new();
+            AssertEqual(true, Call("GetRareRateOverridePercent", unset, d.Id) is null, $"group {d.GroupId} override defaults off");
+            AssertEqual((double)Call("RareProbability", d)!, (double)Call("EffectiveRareProbability", unset, d)!,
+                $"group {d.GroupId} unset override keeps table rate");
+            AssertEqual(false, IsS(d, roll(unset, d, new DrawFixedRandom(.999))), $"group {d.GroupId} unset high roll stays non-S");
+
+            Player forced = WithOverride(100);
+            for (int i = 0; i < 30; i++)
+            {
+                RewardGoods reward = roll(forced, d, new DrawFixedRandom((i + .5) / 30));
+                AssertEqual(true, IsS(d, reward), $"group {d.GroupId} 100% override yields S on roll {i}");
+                AssertEqual(0, forced.DrawState.PityRounds[Rule(d)].Misses, $"group {d.GroupId} forced S resets pity");
+            }
+        }
+        int Rule(DrawInfo d) => TableReaderV2.Parse<DrawServerRuleTable>().Single(x => x.GroupId == d.GroupId).PityGroupId;
+
+        // Specific percentage: theme base is 0.5%, so 5.4% only becomes S under a 5.5% override.
+        Player custom = WithOverride(5.5);
+        AssertEqual(true, Math.Abs((double)Call("EffectiveRareProbability", custom, theme)! - .055) < 1e-12, "5.5% override is a 0.055 per-pull rate");
+        AssertEqual(true, IsS(theme, roll(custom, theme, new DrawFixedRandom(.054))), "roll under 5.5% override is S");
+        AssertEqual(false, IsS(theme, roll(new Player(), theme, new DrawFixedRandom(.054))), "same roll under table rate is non-S");
+        AssertEqual(false, IsS(theme, roll(custom, theme, new DrawFixedRandom(.056))), "roll above 5.5% override is non-S");
+
+        // Non-S outcomes use the same conditional table weights with or without an override.
+        foreach (DrawInfo d in new[] { theme, weapon, cub })
+            for (int i = 0; i < 20; i++)
+            {
+                double category = (i + .5) / 20;
+                RewardGoods table = roll(new Player(), d, new DrawSequenceRandom([.5, category]));
+                RewardGoods scaled = roll(WithOverride(5.5), d, new DrawSequenceRandom([.5, category]));
+                AssertEqual(table.RewardType, scaled.RewardType, $"group {d.GroupId} non-S category {i} keeps table proportion");
+                // Weapon/CUB-partner picks use the injected random; other item picks use Random.Shared.
+                if (d == weapon && table.RewardType == (int)RewardType.Equip || table.RewardType == (int)RewardType.Partner)
+                    AssertEqual(table.TemplateId, scaled.TemplateId, $"group {d.GroupId} non-S outcome {i} unchanged");
+            }
+
+        // 0% removes only the base roll; the hard pity guarantee still lands.
+        Player none = WithOverride(0);
+        AssertEqual(false, IsS(theme, roll(none, theme, new DrawFixedRandom(0))), "0% override skips the base S roll");
+        PlayerDrawPityRound round = none.DrawState.PityRounds[Rule(theme)];
+        round.Misses = round.Limit - 1;
+        AssertEqual(true, IsS(theme, roll(none, theme, new DrawFixedRandom(0))), "0% override keeps hard pity");
+
+        // A banner-specific value wins over the all-banner value.
+        Player scoped = WithOverride(100, (theme.Id, 0));
+        AssertEqual(0d, (double)Call("GetRareRateOverridePercent", scoped, theme.Id)!, "banner override precedence");
+        AssertEqual(false, IsS(theme, roll(scoped, theme, new DrawFixedRandom(.5))), "banner 0% beats all-banner 100%");
+        AssertEqual(true, IsS(weapon, roll(scoped, weapon, new DrawFixedRandom(.5))), "other banners keep all-banner 100%");
+
+        // Persistence: survives BSON reload; an unset override writes no element.
+        PlayerDrawState reloaded = BsonSerializer.Deserialize<PlayerDrawState>(scoped.DrawState.ToBson());
+        AssertEqual(100d, reloaded.RareRateOverride!.AllPercent!.Value, "override all-banner percent persists");
+        AssertEqual(0d, reloaded.RareRateOverride.ByDrawId[theme.Id], "override banner percent persists");
+        AssertEqual(false, new PlayerDrawState().ToBsonDocument().Contains("gm_rare_rate_override"), "unset override is not persisted");
+
+        // Fate (local fixed-100 pity policy) is reached through the same roll; unknown draws are not.
+        AssertEqual(true, Math.Abs((double)Call("GetTableRareRate", fate.Id)! - .015) < 1e-10, "Fate base rate reported");
+        AssertEqual(true, Call("GetTableRareRate", int.MaxValue) is null, "unknown draw is not an override target");
+        AssertEqual(true, Math.Abs((double)Call("GetTableRareRate", theme.Id)! - .005) < 1e-10, "table rate reported for covered banner");
+
+        // /gacharate command: set, scope, status, persist, reset, and reject bad input.
+        using (MongoCollectionOverride mongo = MongoCollectionOverride.InstallForDailySignInCompatibility(out var playerSaves, out _, out _))
+        {
+            AscNet.GameServer.Commands.CommandFactory.commands.Clear();
+            AscNet.GameServer.Commands.CommandFactory.LoadCommands();
+            const long uid = 47_290;
+            using LoopbackSessionHarness harness = new(CreateDrawCompatibilityCharacter(uid), CreateDrawCompatibilityPlayer(uid),
+                CreateDrawCompatibilityInventory(uid, []), "gacharate-command");
+            string Run(params string[] args)
+            {
+                AscNet.GameServer.Commands.Command command = AscNet.GameServer.Commands.CommandFactory.CreateCommand(
+                    "gacharate", harness.Session, args) ?? throw new InvalidDataException("gacharate command is not registered");
+                try { command.Execute(); }
+                catch (AscNet.GameServer.Commands.CommandMessageCallbackException exception) { return exception.Message; }
+                throw new InvalidDataException("gacharate command returned no reply");
+            }
+            Player player() => harness.Session.player;
+            AssertEqual(true, Run("status").Contains("off"), "status reports off by default");
+            AssertEqual(true, Run("s", "100").Contains("100% on all banners"), "set 100% reply");
+            AssertEqual(100d, player().DrawState.RareRateOverride!.AllPercent!.Value, "set 100% stored");
+            AssertEqual(true, Run("S", "5.5", theme.Id.ToString()).Contains($"5.5% on draw {theme.Id}"), "banner 5.5% reply");
+            Player commandSaved = BsonSerializer.Deserialize<Player>(playerSaves.LastSuccessfulReplacementBson
+                ?? throw new InvalidDataException("gacharate did not persist"));
+            AssertEqual(5.5, commandSaved.DrawState.RareRateOverride!.ByDrawId[theme.Id], "banner override persisted");
+            AssertEqual(100d, commandSaved.DrawState.RareRateOverride.AllPercent!.Value, "all-banner override persisted");
+            string status = Run("s", "status");
+            AssertEqual(true, status.Contains("all banners 100%") && status.Contains($"draw {theme.Id} 5.5% (table 0.5%)"), "status lists overrides");
+            AssertEqual(true, Run("s", "101").Contains("between 0 and 100"), "out-of-range percent rejected");
+            AssertEqual(true, Run("s", "50", int.MaxValue.ToString()).Contains("not a supported banner"), "unknown banner rejected");
+            AssertEqual(100d, player().DrawState.RareRateOverride!.AllPercent!.Value, "rejected input keeps previous override");
+            Run("s", "reset", theme.Id.ToString());
+            AssertEqual(false, player().DrawState.RareRateOverride!.ByDrawId.ContainsKey(theme.Id), "banner reset removes only that banner");
+            AssertEqual(100d, player().DrawState.RareRateOverride!.AllPercent!.Value, "banner reset keeps all-banner override");
+            Run("s", "reset");
+            AssertEqual(true, player().DrawState.RareRateOverride is null, "reset clears every override");
+            AssertEqual(false, BsonSerializer.Deserialize<BsonDocument>(playerSaves.LastSuccessfulReplacementBson!)["draw_state"]
+                .AsBsonDocument.Contains("gm_rare_rate_override"), "reset leaves no persisted override");
+            AssertEqual(true, ThrowsArgument(() => AscNet.GameServer.Commands.CommandFactory.CreateCommand("gacharate", harness.Session, ["s", "abc"])),
+                "non-numeric percent rejected by argument validation");
+        }
+        Console.WriteLine("Draw S-rank rate override passed.");
+    }
+
+    private static bool ThrowsArgument(Func<object?> action)
+    {
+        try { action(); return false; }
+        catch (TargetInvocationException exception) when (exception.InnerException is ArgumentException) { return true; }
+        catch (ArgumentException) { return true; }
     }
 }

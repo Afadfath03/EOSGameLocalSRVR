@@ -13700,3 +13700,144 @@ Id	Type	Priority	Title	Desc	Icon	Condition[1]	Result	RewardId	SkipId	Suffix	Grou
 140374	11	9500	Wrathful Monsoon	Clear [Updraft]	Assets/Product/Texture/Image/IconTask/TaskIconActiveV401.png	140374	1	67455	11724	Event	783	0	0	0	0	0	2026/10/19 5:00	1060038	0		2026/9/23 23:00	0	0
 140375	11	9400	Event - Research Protocol: Part I	Use a total of 10000 Event/Date A Live Construct R&D Tickets	Assets/Product/Texture/Image/IconTask/TaskIconActiveV401.png	140375	10000	67456	20131	Event	783	0	0	0	0	0	2026/11/5 5:00	1060038	0		2026/9/23 23:00	0	0
 140376	11	9300	Event - Research Protocol: Part II	Use a total of 25000 Event/Date A Live Construct R&D Tickets	Assets/Product/Texture/Image/IconTask/TaskIconActiveV401.png	140376	25000	67457	20131	Event	783	0	0	0	0	0	2026/11/5 5:00	1060038	0		2026/9/23 23:00	0	0
+11645	116	9741		1		571	1	3300		Collect													
+11646	116	9741		1		571	1	3300		Collect													
+12561	117	9260	Homecoming Missions	Login for a total of 1 day	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	80219	1	68880		Event	789							845031					
+12562	117	9250	Homecoming Missions	Login for a total of 3 days	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	80220	3	68890		Event	789							845031					
+12563	117	9240	Homecoming Missions	Login for a total of 7 days	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	80221	7	68900		Event	789							845031					
+12564	117	9230	Homecoming Missions	Use a total of 500 Serum	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	80222	500	68910	40756	Event	789							845031					
+12565	117	9220	Homecoming Missions	Use a total of 800 Serum	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	80223	800	68920	40756	Event	789							845031					
+12566	117	9210	Homecoming Missions	Use a total of 1200 Serum	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	80224	1200	68930	40756	Event	789							845031					
+22201	115	10000	Homecoming Daily I	Daily 1st Login	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22101	1	69713		Daily													
+22202	115	9990	Homecoming Daily II	Use 300ml of Serum	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22102	300	69714	2014	Daily													
+22203	115	9970	Homecoming Daily III	Total Activity has reached 100 points today	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22203	100	69715	20033	Daily													
+22301	115	9900	Homecoming Long-Term	幻痛囚笼首通3次（1/6)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22301	3	69716	30001	Long-Term													
+22302	115	9890	Homecoming Long-Term	幻痛囚笼首通6次（2/6)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22302	6	69717	30001	Long-Term				22301									
+22303	115	9880	Homecoming Long-Term	幻痛囚笼首通9次（3/6)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22303	9	69718	30001	Long-Term				22302									
+22304	115	9870	Homecoming Long-Term	幻痛囚笼首通12次（4/6)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22304	12	69719	30001	Long-Term				22303									
+22305	115	9860	Homecoming Long-Term	幻痛囚笼首通15次（5/6)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22305	15	69720	30001	Long-Term				22304									
+22306	115	9850	Homecoming Long-Term	幻痛囚笼首通18次（6/6)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22306	18	69721	30001	Long-Term				22305									
+22307	115	9840	Homecoming Long-Term	纷争战区首通1次（1/4)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22307	1	69722	30013	Long-Term													
+22308	115	9830	Homecoming Long-Term	纷争战区首通2次（2/4)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22308	2	69723	30013	Long-Term				22307									
+22309	115	9820	Homecoming Long-Term	纷争战区首通3次（3/4)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22309	3	69724	30013	Long-Term				22308									
+22310	115	9810	Homecoming Long-Term	纷争战区首通4次（4/4)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22310	4	69725	30013	Long-Term				22309									
+22311	115	9800	Homecoming Long-Term	累计消耗1000血清（1/4)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22311	1000	69726	2014	Long-Term													
+22312	115	9790	Homecoming Long-Term	累计消耗2000血清（2/4)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22312	2000	69727	2014	Long-Term				22311									
+22313	115	9780	Homecoming Long-Term	累计消耗3000血清（3/4)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22313	3000	69728	2014	Long-Term				22312									
+22314	115	9770	Homecoming Long-Term	累计消耗4000血清（4/4)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22314	4000	69729	2014	Long-Term				22313									
+22315	115	9760	Homecoming Long-Term	首通拟真围剿关卡3次（1/2)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22315	3	69730	15001	Long-Term													
+22316	115	9750	Homecoming Long-Term	首通拟真围剿关卡6次（2/2)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22316	6	69731	15001	Long-Term				22315									
+22317	115	9740	Homecoming Long-Term	累计参与维系者行动8次（1/4)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22317	8	69732	11737	Long-Term													
+22318	115	9730	Homecoming Long-Term	累计参与维系者行动16次（2/4)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22318	16	69733	11737	Long-Term				22317									
+22319	115	9720	Homecoming Long-Term	累计参与维系者行动24次（3/4)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22319	24	69734	11737	Long-Term				22318									
+22320	115	9710	Homecoming Long-Term	累计参与维系者行动32次（4/4)	Assets/Product/Texture/Image/UiRegression/UiRegressionTask.png	22320	32	69735	11737	Long-Term				22319									
+80256	51	10000	Munchy Pixels	Clear 9 stages with any number of stars for the first time	Assets/Product/Texture/Image/IconTask/TaskIconLifu1.png	80256	1	800037	90025	Event													
+80257	51	9900	Dreamhouse Tycoon	Upgrade Kuroro Building to Lv.15	Assets/Product/Texture/Image/IconTask/TaskIconLifu1.png	80257	55	800038	90082	Event													
+80258	51	9800	Dreamscape Disequilibrium	Accumulate 3,000 Wish Mass in Hard mode	Assets/Product/Texture/Image/IconTask/TaskIconLifu1.png	80258	3000	800039	81104	Event													
+4536	4	25131	Where the Light Clears I	Upgrade Fortunaster to Lv.10	Assets/Product/Texture/Image/IconTask/TaskIconR3Laiya.png	4536	1	34300	3430	Train									3				
+4537	4	25130	Where the Light Clears II	Upgrade Fortunaster to Lv.20	Assets/Product/Texture/Image/IconTask/TaskIconR3Laiya.png	4537	1	34310	3431	Train				4536					3				
+4538	4	25129	Where the Light Clears III	Upgrade Fortunaster to Lv.30	Assets/Product/Texture/Image/IconTask/TaskIconR3Laiya.png	4538	1	34320	3432	Train				4537					3				
+4539	4	25128	Where the Light Clears IV	Upgrade Fortunaster to Lv.40	Assets/Product/Texture/Image/IconTask/TaskIconR3Laiya.png	4539	1	34330	3433	Train				4538					3				
+4540	4	25127	Where the Light Clears V	Upgrade Fortunaster to Lv.50	Assets/Product/Texture/Image/IconTask/TaskIconR3Laiya.png	4540	1	34340	3434	Train				4539					3				
+4541	4	25126	Where the Light Clears VI	Upgrade Fortunaster to Lv.60	Assets/Product/Texture/Image/IconTask/TaskIconR3Laiya.png	4541	1	34350	3435	Train				4540					3				
+4542	4	25125	Where the Light Clears VII	Upgrade Fortunaster to Lv.70	Assets/Product/Texture/Image/IconTask/TaskIconR3Laiya.png	4542	1	34360	3436	Train				4541					3				
+4543	4	25124	Where the Light Clears VIII	Upgrade Fortunaster to Lv.80	Assets/Product/Texture/Image/IconTask/TaskIconR3Laiya.png	4543	1	34370	3437	Train				4542					3				
+21058611	4	25629	The True Power of Fortunaster I	Evolve Fortunaster to SS	Assets/Product/Texture/Image/IconTask/TaskIconR3Laiya.png	21058611	1	37086	3300	Train									3				
+21058612	4	25628	The True Power of Fortunaster II	Evolve Fortunaster to SSS	Assets/Product/Texture/Image/IconTask/TaskIconR3Laiya.png	21058612	1	37186	3300	Train									3				
+21078601	4	25414	Fortunaster: Ultima Awaken	Awaken Fortunaster's Ultima Rank	Assets/Product/Texture/Image/IconTask/TaskIconR3Laiya.png	21078601	1	37286	19085	Train									3				
+21088601	4	24916	Fortunaster: Infinitas Awaken	Awaken Fortunaster's Infinitas Rank	Assets/Product/Texture/Image/IconTask/TaskIconR3Laiya.png	21088601	1	37500	19085	Train									3				
+23014401	4	24727	Vulpecula Deployed I	Upgrade Vulpecula to Lv.10	Assets/Product/Texture/Image/UIAchievemen/UIAchievementTaskPet45.png	23014301	1	374211	20110	Train									3				
+23014402	4	24726	Vulpecula Deployed II	Upgrade Vulpecula to Lv.15	Assets/Product/Texture/Image/UIAchievemen/UIAchievementTaskPet45.png	23014302	1	374212	20110	Train				23014401					3				
+23014403	4	24725	Vulpecula Deployed III	Upgrade Vulpecula to Lv.25	Assets/Product/Texture/Image/UIAchievemen/UIAchievementTaskPet45.png	23014303	1	374213	20110	Train				23014402					3				
+23014404	4	24724	Vulpecula Deployed IV	Upgrade Vulpecula to Lv.30	Assets/Product/Texture/Image/UIAchievemen/UIAchievementTaskPet45.png	23014304	1	374214	20110	Train				23014403					3				
+23044401	4	24413	Leave That Vulpecula to Me I	Evolve Vulpecula to SS	Assets/Product/Texture/Image/UIAchievemen/UIAchievementTaskPet45.png	23044401	1	37419	20110	Train									3				
+23044402	4	24412	Leave That Vulpecula to Me II	Evolve Vulpecula to SSS	Assets/Product/Texture/Image/UIAchievemen/UIAchievementTaskPet45.png	23044402	1	37543	20110	Train									3				
+31098601	4	19516	Fortunaster's Gift	Fortunaster's Affection reaches Lv.8	Assets/Product/Texture/Image/IconTask/TaskIconR3Laiya.png	31098601	1	37386	3653	Challenge									2				
+99052	94	10000	Leia Affection 1	Clear Story 3		99073	1	64880		Event													
+99053	94	9900	Leia Affection 2	Clear Story 6		99074	1	64881		Event													
+131011	111	9990	Phylotree Dossier	Unlock Dossier - Leia: Fortunaster	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	131011	1	69080	20419	Phylotree													
+91192	11	9000	Permanent Material	Use a total of 240 Serum in material stages	Assets/Product/Texture/Image/IconTask/TaskIconActiveMainLineV212.png	91192	240	67001	20017	Event													
+91193	11	8900	Permanent Material	Use a total of 840 Serum in material stages	Assets/Product/Texture/Image/IconTask/TaskIconActiveMainLineV212.png	91193	840	67002	20017	Event													
+91194	11	8800	Permanent Material	Use a total of 1710 Serum in material stages	Assets/Product/Texture/Image/IconTask/TaskIconActiveMainLineV212.png	91194	1710	67003	20017	Event													
+91195	11	8700	Permanent Material	Use a total of 2820 Serum in material stages	Assets/Product/Texture/Image/IconTask/TaskIconActiveMainLineV212.png	91195	2820	67004	20017	Event													
+91196	11	8600	Permanent Material	Use a total of 4050 Serum in material stages	Assets/Product/Texture/Image/IconTask/TaskIconActiveMainLineV212.png	91196	4050	67005	20017	Event													
+120766	11	10000	Simulated Battlefield	Clear [Simulated Battlefield] 1 time	Assets/Product/Texture/Image/IconTask/TaskIconActiveMainLinev409.png	120766	1	15215	20017	Event													
+120767	11	9900	Simulated Battlefield	Clear [Simulated Battlefield] 5 times	Assets/Product/Texture/Image/IconTask/TaskIconActiveMainLinev409.png	120767	5	15215	20017	Event													
+120768	11	9800	Munchy Pixels	Clear 2 stages with any number of stars for the first time	Assets/Product/Texture/Image/IconTask/TaskIconActiveMainLinev409.png	120768	2	15216	90025	Event													
+120769	11	9700	Dreamhouse Tycoon	Upgrade Kuroro Building to Lv.5	Assets/Product/Texture/Image/IconTask/TaskIconActiveMainLinev409.png	120769	5	15216	90082	Event													
+120770	11	9600	Dreamscape Disequilibrium	通关简单模式第一关	Assets/Product/Texture/Image/IconTask/TaskIconActiveMainLinev409.png	120770	1	15216	81104	Event													
+120771	11	9500	Astral Obscura	通关【氦闪】	Assets/Product/Texture/Image/IconTask/TaskIconActiveMainLinev409.png	120771	1	15219	11724	Event													
+120772	11	9400	尽心者尽美Ⅰ	Complete Character Challenge Stage [Nebula Promenade] Stage 1	Assets/Product/Texture/Image/IconTask/TaskIconActiveCharacterTryv409.png	120772	1	15217	20235	Event													
+120773	11	9300	尽心者尽美Ⅱ	Complete Character Challenge Stage [Nebula Promenade] Stage 2	Assets/Product/Texture/Image/IconTask/TaskIconActiveCharacterTryv409.png	120773	1	15217	20235	Event													
+120774	11	9200	尽心者尽美Ⅲ	Complete Character Challenge Stage [Nebula Promenade] Stage 3	Assets/Product/Texture/Image/IconTask/TaskIconActiveCharacterTryv409.png	120774	1	15217	20235	Event													
+120775	11	9100	Adaptation Fitting - Vulpecula	Complete [Adaptation Fitting: Vulpecula]	Assets/Product/Texture/Image/IconTask/TaskIconActivePartnerTryv409.png	120775	1	15218	7107	Event													
+120776	11	9000	Brilliant Instant	Clear the [Brilliant Instant] Coating trial stage	Assets/Product/Texture/Image/IconTask/TaskIconActiveLeiaEffectCoatingv409.png	120776	1	15215	10035	Event						49002							
+120777	11	8900	Cradled Moonfrost	Clear the [Cradled Moonfrost] Coating trial stage	Assets/Product/Texture/Image/IconTask/TaskIconActiveIshmaelEffectCoatingv409.png	120777	1	15216	10035	Event						49003							
+140400	118	0	Dreamhouse Tycoon	制作1个<Icon=IconFoodA|35|35|0.5/>暮紫花结		140400	1										2026/12/16 5:00						
+140401	118	0	Dreamhouse Tycoon	Sell <Icon=IconFoodA|35|35|0.5/>Twilight Bloom Knot x1		140401	1										2026/12/16 5:00						
+140402	118	0	Dreamhouse Tycoon	任意已解锁员工达到3级		140402	3										2026/12/16 5:00						
+140403	118	0	Dreamhouse Tycoon	Sell <Icon=IconFoodC|35|35|0.5/>Lingering Interlude x1		140403	1										2026/12/16 5:00						
+140404	118	0	Dreamhouse Tycoon	制作1个<Icon=IconFoodE|35|35|0.5/>星海花影		140404	1										2026/12/16 5:00						
+140405	118	0	Dreamhouse Tycoon	售出360个<Icon=IconFoodF|35|35|0.5/>晨辉安瓶		140405	360										2026/12/16 5:00						
+140406	118	0	Dreamhouse Tycoon	售出180个<Icon=IconFoodG|35|35|0.5/>舒缓蜂蜜		140406	180										2026/12/16 5:00						
+140407	118	0	Dreamhouse Tycoon	售出90个<Icon=IconFoodI|35|35|0.5/>晨星元气		140407	90										2026/12/16 5:00						
+140408	118	0	Dreamhouse Tycoon	售出90个<Icon=IconFoodI|35|35|0.5/>晨星元气		140408	90										2026/12/16 5:00						
+140409	118	0	Dreamhouse Tycoon	售出200个<Icon=IconFoodJ|35|35|0.5/>甜美月雾		140409	200										2026/12/16 5:00						
+140410	118	0	Dreamhouse Tycoon	售出100个<Icon=IconFoodK|35|35|0.5/>暮色调和		140410	100										2026/12/16 5:00						
+140411	118	0	Dreamhouse Tycoon	售出50个<Icon=IconFoodL|35|35|0.5/>绯露晶石		140411	50										2026/12/16 5:00						
+140412	118	0	Dreamhouse Tycoon	售出50个<Icon=IconFoodL|35|35|0.5/>绯露晶石		140412	50										2026/12/16 5:00						
+140413	118	0	Dreamhouse Tycoon	售出1个<Icon=IconFoodB|35|35|0.5/>绮光花冠		140413	1										2026/12/16 5:00						
+140414	118	0	Dreamhouse Tycoon	售出2个<Icon=IconFoodC|35|35|0.5/>幕间余影		140414	2										2026/12/16 5:00						
+140415	118	0	Dreamhouse Tycoon	Craft <Icon=IconFoodE|35|35|0.5/>Starlit Blossoms x1		140415	2										2026/12/16 5:00						
+140416	118	0	Dreamhouse Tycoon	售出5个<Icon=IconFoodE|35|35|0.5/>星海花影		140416	5										2026/12/16 5:00						
+140417	118	0	Dreamhouse Tycoon	寰宇漫游最高收益达到2800筑梦资金/小时		140417	2800										2026/12/16 5:00						
+140418	118	0	Dreamhouse Tycoon	Craft <Icon=IconFoodG|35|35|0.5/>Soothing Honey x8		140418	8										2026/12/16 5:00						
+140419	118	0	Dreamhouse Tycoon	Sell <Icon=IconFoodI|35|35|0.5/>Morningstar Spark x4		140419	4										2026/12/16 5:00						
+140420	118	0	Dreamhouse Tycoon	Level up Kamui to Lv.8		140420	8										2026/12/16 5:00						
+140421	118	0	Dreamhouse Tycoon	Level up Chrome to Lv.8		140421	8										2026/12/16 5:00						
+140422	118	0	Dreamhouse Tycoon	Reach a peak Life's Luminance income of 7,600 Dream Funds/hour		140422	7600										2026/12/16 5:00						
+140423	118	0	Dreamhouse Tycoon	Craft <Icon=IconFoodK|35|35|0.5/>Twilight Blend x4		140423	4										2026/12/16 5:00						
+140424	118	0	Dreamhouse Tycoon	Sell <Icon=IconFoodL|35|35|0.5/>Crimson Dewstone x2		140424	2										2026/12/16 5:00						
+140425	118	0	Dreamhouse Tycoon	Craft <Icon=IconFoodL|35|35|0.5/>Crimson Dewstone x2		140425	2										2026/12/16 5:00						
+140426	118	0	Dreamhouse Tycoon	Craft <Icon=IconFoodM|35|35|0.5/>Moontear Blossom x2		140426	2										2026/12/16 5:00						
+140427	118	0	Dreamhouse Tycoon	Reach a peak Astrology Night income of 10,000 Dream Funds/hour		140427	10000										2026/12/16 5:00						
+140428	118	0	Dreamhouse Tycoon	Sell <Icon=IconFoodN|35|35|0.5/>Opening Score x60		140428	60										2026/12/16 5:00						
+140429	118	0	Dreamhouse Tycoon	Sell <Icon=IconFoodO|35|35|0.5/>Tipsy Night x20		140429	20										2026/12/16 5:00						
+140430	118	0	Dreamhouse Tycoon	Sell <Icon=IconFoodN|35|35|0.5/>Opening Score x60		140430	60										2026/12/16 5:00						
+140431	118	0	Dreamhouse Tycoon	Sell <Icon=IconFoodP|35|35|0.5/>Groove Rhythm x30		140431	30										2026/12/16 5:00						
+140432	118	0	Dreamhouse Tycoon	Sell <Icon=IconFoodO|35|35|0.5/>Tipsy Night x20		140432	20										2026/12/16 5:00						
+140433	118	0	Dreamhouse Tycoon	Sell <Icon=IconFoodN|35|35|0.5/>Opening Score x60		140433	60										2026/12/16 5:00						
+140434	118	0	Dreamhouse Tycoon	Sell <Icon=IconFoodQ|35|35|0.5/>Neon Night Finale x10		140434	10										2026/12/16 5:00						
+140435	11	10000	Dreamscape Disequilibrium I	Clear Stage 1 in Normal mode	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	140435	1	69780															
+140436	11	9900	Dreamscape Disequilibrium II	Clear Stage 2 in Normal mode	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	140436	1	69781															
+140437	11	9800	Dreamscape Disequilibrium III	Clear Stage 3 in Normal mode	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	140437	1	69782															
+140438	11	9700	Dreamscape Disequilibrium IV	Clear Stage 4 in Normal mode	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	140438	1	69783															
+140439	11	9600	Dreamscape Disequilibrium V	Clear Stage 5 in Normal mode	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	140439	1	69784															
+140440	11	9500	Dreamscape Disequilibrium VI	Clear Stage 6 in Normal mode	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	140440	1	69785															
+140441	11	9400	Dreamscape Disequilibrium VII	Accumulate 800 Wish Mass in Hard mode	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	140441	800	69786															
+140442	11	9300	Dreamscape Disequilibrium VIII	Accumulate 1,600 Wish Mass in Hard mode	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	140442	1600	69787															
+140443	11	9200	Dreamscape Disequilibrium IX	Accumulate 3,000 Wish Mass in Hard mode	Assets/Product/Texture/Image/IconTask/TaskIconCommon.png	140443	3000	69788															
+140444	11	10000	筑梦大亨1	Upgrade Kuroro Building to Lv.5		140444	5	69789															
+140445	11	9900	筑梦大亨2	Upgrade Kuroro Building to Lv.10		140445	10	69790															
+140446	11	9800	筑梦大亨3	Upgrade Kuroro Building to Lv.15		140446	15	69791															
+140447	11	9700	筑梦大亨4	Upgrade Kuroro Building to Lv.20		140447	20	69792															
+140448	11	9600	筑梦大亨5	Upgrade Kuroro Building to Lv.25		140448	25	69793															
+140449	11	9500	筑梦大亨6	Upgrade Kuroro Building to Lv.30		140449	30	69794															
+140450	11	9400	筑梦大亨7	Upgrade Kuroro Building to Lv.35		140450	35	69795															
+140451	11	9300	筑梦大亨8	Upgrade Kuroro Building to Lv.40		140451	40	69796															
+140452	11	9200	筑梦大亨9	Upgrade Kuroro Building to Lv.45		140452	45	69797															
+140453	11	9100	筑梦大亨10	Upgrade Kuroro Building to Lv.50		140453	50	69798															
+140454	11	9000	筑梦大亨11	Have 1 staff reach Lv.15		140454	1	69799															
+140455	11	8900	筑梦大亨12	Have 2 staff reach Lv.15		140455	2	69800															
+140456	11	8800	筑梦大亨13	Have 2 staff reach Lv.30		140456	2	69801															
+140457	11	8700	筑梦大亨14	Have 5 staff reach Lv.30		140457	5	69802															
+140458	11	8600	筑梦大亨15	Have 10 staff reach Lv.30		140458	10	69803															
+140459	11	8500	筑梦大亨16	完成2次事件		140459	2	69804															
+140460	11	8400	筑梦大亨17	完成4次事件		140460	4	69805															
+140461	11	8300	筑梦大亨18	完成6次事件		140461	6	69806															
+140462	11	8200	筑梦大亨19	完成8次事件		140462	8	69807															
+140463	11	8100	筑梦大亨20	完成10次事件		140463	10	69808															
+140464	11	10000	Dreamhouse Tycoon - Daily	Obtain 100 Dream Funds		140464	100	69809															
+140465	11	9900	Dreamhouse Tycoon - Daily	Use 3 Dispatch Orders		140465	3	69810															
+140466	118	0	Dreamhouse Tycoon	Craft <Icon=IconFoodF|35|35|0.5/>Dawnlight Ampoule x5		140466	5										2026/12/16 5:00						
+140467	118	0	Dreamhouse Tycoon	Craft <Icon=IconFoodJ|35|35|0.5/>Sweet Moonmist x5		140467	5										2026/12/16 5:00						

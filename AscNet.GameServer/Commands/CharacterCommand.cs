@@ -1,4 +1,5 @@
-﻿using AscNet.Common.Database;
+﻿using System.Text.RegularExpressions;
+using AscNet.Common.Database;
 using AscNet.Common.Util;
 using AscNet.Common.MsgPack;
 using AscNet.GameServer.Handlers;
@@ -12,29 +13,24 @@ namespace AscNet.GameServer.Commands
     {
         public CharacterCommand(Session session, string[] args, bool validate = true) : base(session, args, validate) { }
 
-        public override string Help => "Use /character add <id|all> or /character rank <id> <SSS3|SSS6|SSS+|quality> [star 0-9].";
+        public override string Help => "Use /character add <frame name|id|all>, /character rank <frame name|id> <B|A|S|SS|SSS|SSS3|SSS6|SSS+|quality> [star 0-9], or /character find <name>. Frame names may contain spaces, e.g. /character rank lucia pyroath SSS+ or /character rank pyroath SS 2.";
 
-        [Argument(0, @"^add$|^rank$", "The operation selected (add, rank)", ArgumentFlags.IgnoreCase)]
+        [Argument(0, @"^add$|^rank$|^find$", "The operation selected (add, rank, find)", ArgumentFlags.IgnoreCase)]
         string Op { get; set; } = string.Empty;
 
-        [Argument(1, @"^[0-9]+$|^all$", "The target character, value is character id or 'all'")]
+        [Argument(1, @"^\S+$", "The target character: frame name (e.g. Pyroath, Lucia Pyroath, Lucia: Pyroath), character id, or 'all' for add")]
         string Target { get; set; } = string.Empty;
 
-        [Argument(2, @"^[0-6]$|^(B|A|S|SS|SSS|SSS3|SSS6|SSS\+)$", "Target rank or character quality value", ArgumentFlags.Optional | ArgumentFlags.IgnoreCase)]
-        string Rank { get; set; } = string.Empty;
-
-        [Argument(3, @"^[0-9]$", "Target evolution stars (0-9)", ArgumentFlags.Optional)]
-        string Star { get; set; } = string.Empty;
+        private static readonly Regex RankToken = new(@"^([0-6]|B|A|S|SS|SSS|SSS3|SSS6|SSS\+)$", RegexOptions.IgnoreCase);
+        private static readonly Regex StarToken = new(@"^[0-9]$");
 
         public override void Execute()
         {
-            int id = Miscs.ParseIntOr(Target);
-
             switch (Op.ToLowerInvariant())
             {
                 case "add":
                     RewardApplicationResult result;
-                    if (Target == "all")
+                    if (Target.Equals("all", StringComparison.OrdinalIgnoreCase))
                     {
                         HashSet<uint> ownedCharacterIds = session.character.Characters
                             .Select(character => character.Id)
@@ -48,7 +44,8 @@ namespace AscNet.GameServer.Commands
                     }
                     else
                     {
-                        result = RewardHandler.ApplyRewards([ new Reward() { Id = id, Type = RewardType.Character } ], session);
+                        CharacterTable added = ResolveCharacter(args[1..], ownedOnly: false);
+                        result = RewardHandler.ApplyRewards([ new Reward() { Id = added.Id, Type = RewardType.Character } ], session);
                     }
                     session.inventory.SaveChecked();
                     session.character.SaveChecked();
@@ -57,24 +54,93 @@ namespace AscNet.GameServer.Commands
                     result.SendPushes(session);
                     break;
                 case "rank":
-                    SetRank(id);
+                    SetRank();
+                    break;
+                case "find":
+                    FindCharacters();
                     break;
                 default:
                     throw new InvalidOperationException("Invalid operation!");
             }
         }
 
-        private void SetRank(int characterId)
+        private static IEnumerable<string?> CharacterNames(CharacterTable row) =>
+        [
+            row.LogName,
+            row.TradeName,
+            $"{row.Name} {row.TradeName}",
+            $"{row.TradeName} {row.Name}"
+        ];
+
+        // Resolves a frame name (TradeName such as "Pyroath", "Lucia Pyroath", LogName "Lucia: Pyroath") or an id.
+        private CharacterTable ResolveCharacter(string[] tokens, bool ownedOnly)
         {
-            if (Target == "all" || string.IsNullOrWhiteSpace(Rank))
-                throw new CommandMessageCallbackException("Usage: /character rank <characterId> <SSS3|SSS6|SSS+|quality> [star 0-9]");
+            string query = string.Join(' ', tokens);
+            if (tokens.Length == 0)
+                throw new CommandMessageCallbackException("Specify a frame name or character id.");
+            HashSet<uint> owned = session.character.Characters.Select(character => character.Id).ToHashSet();
+            IEnumerable<CharacterTable> rows = TableReaderV2.Parse<CharacterTable>()
+                .Where(row => Character.IsOwnableCharacter((uint)row.Id) && (!ownedOnly || owned.Contains((uint)row.Id)));
+            NameLookup.Result<CharacterTable> result = NameLookup.Resolve(rows, row => row.Id, CharacterNames, tokens);
+            if (result.Match is null)
+                throw new CommandMessageCallbackException(int.TryParse(query, out _)
+                    ? $"Character {query} is not {(ownedOnly ? "on this account" : "a playable character")}."
+                    : NameLookup.FormatSuggestions(ownedOnly ? "owned frame" : "frame", query, result.Suggestions));
+            if (result.Suggestions.Count > 0)
+                throw new CommandMessageCallbackException($"\"{query}\" matches several frames: "
+                    + string.Join(", ", new[] { result.Match }.Concat(result.Suggestions).Select(candidate => $"{candidate.Row.LogName} ({candidate.Id})"))
+                    + ". Type more of the name, e.g. character and frame together.");
+            return result.Match.Row;
+        }
 
+        private void FindCharacters()
+        {
+            if (args.Length < 2)
+                throw new CommandMessageCallbackException("Usage: /character find <name>");
+            NameLookup.Result<CharacterTable> result = NameLookup.Resolve(
+                TableReaderV2.Parse<CharacterTable>().Where(row => Character.IsOwnableCharacter((uint)row.Id)),
+                row => row.Id, CharacterNames, args[1..]);
+            List<NameLookup.Candidate<CharacterTable>> found = result.Match is null
+                ? result.Suggestions.ToList()
+                : [result.Match, .. result.Suggestions];
+            HashSet<uint> owned = session.character.Characters.Select(character => character.Id).ToHashSet();
+            throw new CommandMessageCallbackException(found.Count == 0
+                ? $"No frame matches \"{string.Join(' ', args[1..])}\"."
+                : "Frames: " + string.Join(", ", found.Take(10).Select(candidate =>
+                    $"{candidate.Row.LogName} ({candidate.Id}{(owned.Contains((uint)candidate.Id) ? ", owned" : string.Empty)})")));
+        }
+
+        private void SetRank()
+        {
+            const string usage = "Usage: /character rank <frame name|id> <B|A|S|SS|SSS|SSS3|SSS6|SSS+|quality> [star 0-9]";
+            string[] tokens = args[1..];
+            if (tokens.Length < 2)
+                throw new CommandMessageCallbackException(usage);
+
+            // The frame name may span several words; the rank and an optional star are the trailing tokens.
+            string rankText, starText = string.Empty;
+            int nameLength;
+            if (tokens.Length >= 3 && StarToken.IsMatch(tokens[^1]) && RankToken.IsMatch(tokens[^2]))
+            {
+                rankText = tokens[^2];
+                starText = tokens[^1];
+                nameLength = tokens.Length - 2;
+            }
+            else if (RankToken.IsMatch(tokens[^1]))
+            {
+                rankText = tokens[^1];
+                nameLength = tokens.Length - 1;
+            }
+            else
+                throw new CommandMessageCallbackException(usage);
+
+            CharacterTable table = ResolveCharacter(tokens[..nameLength], ownedOnly: true);
+            int characterId = table.Id;
             CharacterData? character = session.character.Characters.FirstOrDefault(candidate => candidate.Id == (uint)characterId);
-            CharacterTable? table = TableReaderV2.Parse<CharacterTable>().FirstOrDefault(candidate => candidate.Id == characterId);
-            if (character is null || table is null)
-                throw new CommandMessageCallbackException($"Character {characterId} is missing from this account or character table. Use /character add {characterId} if needed.");
+            if (character is null)
+                throw new CommandMessageCallbackException($"{table.LogName} (ID {characterId}) is not on this account. Use /character add {table.TradeName} first.");
 
-            string selectedRank = Rank.ToUpperInvariant();
+            string selectedRank = rankText.ToUpperInvariant();
             int quality = selectedRank switch
             {
                 "B" => 1,
@@ -83,20 +149,20 @@ namespace AscNet.GameServer.Commands
                 "SS" => 4,
                 "SSS" or "SSS3" or "SSS6" => 5,
                 "SSS+" => 6,
-                _ => Miscs.ParseIntOr(Rank)
+                _ => Miscs.ParseIntOr(rankText)
             };
             bool supportedQuality = TableReaderV2.Parse<CharacterQualityTable>()
                 .Any(row => row.CharacterId == characterId && row.Quality == quality);
             if (!supportedQuality)
-                throw new CommandMessageCallbackException($"Quality {quality} is not available for character {characterId}.");
+                throw new CommandMessageCallbackException($"Quality {quality} is not available for {table.LogName} (ID {characterId}).");
 
-            int star = string.IsNullOrWhiteSpace(Star) ? selectedRank switch
+            int star = string.IsNullOrWhiteSpace(starText) ? selectedRank switch
             {
                 "SSS" or "SSS3" => 3,
                 "SSS6" => 6,
                 "SSS+" => 0,
                 _ => character.Star
-            } : Miscs.ParseIntOr(Star);
+            } : Miscs.ParseIntOr(starText);
             if (quality == 6)
                 star = 0;
             if (star < 0 || star > 9)
@@ -109,7 +175,7 @@ namespace AscNet.GameServer.Commands
             session.SendPush(new NotifyCharacterDataList { CharacterDataList = { character } });
             string rank = quality switch { 1 => "B", 2 => "A", 3 => "S", 4 => "SS", 5 => "SSS", 6 => "SSS+", _ => $"quality {quality}" };
             string evolution = star > 0 ? $"{rank}{star}" : rank;
-            throw new CommandMessageCallbackException($"{table.Name} (ID {characterId}) set to {evolution}.");
+            throw new CommandMessageCallbackException($"{table.LogName} (ID {characterId}) set to {evolution}.");
         }
     }
 }

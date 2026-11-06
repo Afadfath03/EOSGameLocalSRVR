@@ -297,7 +297,9 @@
       "AreaId": 131,
       "MarkId": 5,
       "Archetype": "Desperate Fight: Refresh only 1 enemy per wave",
-      "ReusableArchetype": false,
+      "ReusableArchetype": true,
+      "ArchetypeAliases": ["Desperate Fight: Only 1 enemy spawns per wave."],
+      "CommandSelectOnly": true,
       "NpcGroupRefs": [0],
       "Generator": {
         "Mode": "SingleEnemyPerWave",
@@ -349,7 +351,7 @@
         "WaveCostTimes": "[]",
         "TimePointScore": "[]"
       },
-      "PolicyNote": "AscNet test generator profile. NPC templates use representative existing table variants, not verified Warzone zone-131 levels/buffs. WaveCount is a local test default. Repeat BossNpcIds entries to schedule the same NPC in multiple waves."
+      "PolicyNote": "AscNet test generator profile. NPC templates use representative existing table variants, not verified Warzone zone-131 levels/buffs. WaveCount is a local test default. Repeat BossNpcIds entries to schedule the same NPC in multiple waves. AscNet policy: reused for every MarkId 5 Desperate Fight AreaStage (both Desc wordings) but CommandSelectOnly, so those zones appear only after /warzone zone|set selects them; automatic weekly selection is unchanged."
     }
   ]
 }

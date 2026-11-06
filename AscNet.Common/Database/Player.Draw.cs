@@ -130,11 +130,33 @@ namespace AscNet.Common.Database
         [BsonElement("pending_free_draw")]
         public PlayerPendingDraw? PendingDraw { get; set; }
 
+        // GM/debug S-rank rate override set by /gacharate (AscNet local policy, explicit
+        // opt-in). Null means every banner uses its table rate.
+        [BsonElement("gm_rare_rate_override")]
+        [BsonIgnoreIfNull]
+        public PlayerDrawRareRateOverride? RareRateOverride { get; set; }
+
         // In-memory only: set when a pity round is created, cleared by
         // Player.Save/SaveChecked only after an acknowledged write matched a stored
         // document. Keeps initialization retriable after a failed or non-durable save.
         [BsonIgnore]
         public bool HasUnsavedPityRounds { get; set; }
+    }
+
+    public class PlayerDrawRareRateOverride
+    {
+        // Per-pull S-rank percent (0..100) for every covered banner; null = no global override.
+        [BsonElement("all_percent")]
+        [BsonIgnoreIfNull]
+        public double? AllPercent { get; set; }
+
+        // Per-draw-id percent (0..100); takes precedence over AllPercent.
+        [BsonElement("by_draw_id")]
+        [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
+        public Dictionary<int, double> ByDrawId { get; set; } = new();
+
+        [BsonIgnore]
+        public bool IsEmpty => AllPercent is null && ByDrawId.Count == 0;
     }
 
     public class PlayerDrawPityRound

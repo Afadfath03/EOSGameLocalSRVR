@@ -382,3 +382,6 @@ CloudGameRefundMailId	13
 CloudGameRefundNegativeMailId	14
 LittleYKPurchasePackageId	10006
 YKPurchasePackageEnCID	90032
+UseItemSpecialDropItemId	40693
+UseItemSpecialDropId	1050
+UseItemSpecialDropTimeId	50114

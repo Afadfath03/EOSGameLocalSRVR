@@ -22,3 +22,5 @@ Id	Priority	Name	NameEN	SkipId	TimeId	Conditions[1]	BtnIcon	LeftTimeFun	EventId	
 24		Auspicious Treasury	Auspicious Treasury	1300626		774800	Assets/Product/Texture/Image/UiMain/MainAccumulateExpend.png	GetAccumulateExpendShopLeftTime		CONDITION_ACCUMULATE_EXPEND_SHOP_NOTIFY					
 25		Wishing Target	Wishing Target	20361	46712	770402	Assets/Product/Texture/Image/UiMain/MainBtnSummerSign306.png								
 26		Strings Workshop	Strings Workshop	189072	49651		Assets/Product/Texture/Image/UiMain/Main407MusicH501.png			CONDITION_DAILY_RESET					
+28	97	Welcome Back	WELCOME BACK	89115	14103	845031	Assets/Product/Texture/Image/UiMain/MainSpRegression0301.png	GetRegression4	EVENT_REGRESSION4_ACTIVITY_STATUS_CHANGE	CONDITION_REGRESSION4_ALL					
+29	99	Homeward-Bound Voyage	WELCOME BACK	189074	51021	774800	Assets/Product/Texture/Image/UiMain/MainHoldRegression.png	GetReCall		CONDITION_RECALL_H5_RED_POINT	CONDITION_ACTIVITY_BTN_ONCE				

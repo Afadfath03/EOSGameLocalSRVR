@@ -142,6 +142,11 @@ namespace AscNet.Test
                     ValidateDrawRules();
                     return;
                 }
+                if (args.Contains("--draw-rare-rate-override-only"))
+                {
+                    ValidateDrawRareRateOverride();
+                    return;
+                }
                 if (args.Contains("--guild-compat-only"))
                 {
                     ValidateGuildMembershipCompatibility();
@@ -177,6 +182,11 @@ namespace AscNet.Test
                 if (args.Contains("--loading-option-compat-only"))
                 {
                     ValidateLoadingOptionCompatibility();
+                    return;
+                }
+                if (args.Contains("--player-profile-only"))
+                {
+                    ValidatePlayerProfileCompatibility();
                     return;
                 }
                 if (args.Contains("--store-purchases-only"))
@@ -821,13 +831,27 @@ namespace AscNet.Test
                 {
                     ValidateBossSingleCompatibility();
                     ValidateBossSingleIntensiveStageHydration();
+                    ValidateBossSingleIntensiveCommands();
                     ValidateBossSingleCycleStageScoreSync();
+                    return;
+                }
+
+                if (args.Contains("--boss-single-intensive-only"))
+                {
+                    ValidateBossSingleIntensiveStageHydration();
+                    ValidateBossSingleIntensiveCommands();
                     return;
                 }
 
                 if (args.Contains("--simulated-battlefield-compat-only"))
                 {
                     ValidateSimulatedBattlefieldCompatibility();
+                    return;
+                }
+
+                if (args.Contains("--warzone-command-only"))
+                {
+                    ValidateWarzoneZoneCommands();
                     return;
                 }
 
@@ -1204,6 +1228,7 @@ namespace AscNet.Test
                 ValidateBossActivityCompatibility();
                 ValidateBossSingleCompatibility();
                 ValidateBossSingleIntensiveStageHydration();
+                ValidateBossSingleIntensiveCommands();
                 ValidateBossSingleCycleStageScoreSync();
                 ValidateSimulatedBattlefieldCompatibility();
                 ValidateCurrentClientGuideTableCompatibility();
@@ -24071,14 +24096,14 @@ namespace AscNet.Test
                 BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
                 [typeof(int), typeof(uint), typeof(int), typeof(string), typeof(PreFightResponse.PreFightResponseFightData)]);
             MethodInfo selectArenaAreas = RequiredMethod(arenaModule, "SelectedAreas", BindingFlags.Static | BindingFlags.NonPublic,
-                [typeof(int), typeof(long), typeof(ChallengeAreaTable)]);
+                [typeof(int), typeof(long), typeof(ChallengeAreaTable), typeof(int)]);
             foreach (ArenaLevelTable rank in arenaLevels)
             {
                 ChallengeAreaTable rankChallenge = challenges
                     .Where(row => row.ArenaLv == rank.Id && player.PlayerData.Level >= row.MinLv && player.PlayerData.Level <= row.MaxLv)
                     .OrderBy(row => row.ChallengeId)
                     .First();
-                List<int> rankAreas = (List<int>?)selectArenaAreas.Invoke(null, [1, playerId, rankChallenge])
+                List<int> rankAreas = (List<int>?)selectArenaAreas.Invoke(null, [1, playerId, rankChallenge, 0])
                     ?? throw new InvalidDataException($"War Zone {rank.Name} selection returned nil.");
                 int expectedCount = rank.Id >= heroArenaLevel ? rankChallenge.DayUnlockNum + 1 : rankChallenge.DayUnlockNum;
                 AssertEqual(expectedCount, rankAreas.Count, $"War Zone {rank.Name} selected area count");

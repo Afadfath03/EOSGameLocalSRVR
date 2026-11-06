@@ -3433,3 +3433,31 @@ SkipId	Origin	UiName	ParamId	Explain	FunctionalId	IsHideFunc	CustomParams[1]	Cus
 1300651	7	OpenUiPaintingExperiencePass		涂装试玩-4.7露娜涂鸦			133					1050153							
 1300652	7	OpenUiPaintingExperiencePass	0	涂装试玩-4.8阿德莱德试玩	0	0	139					1050153	0	0					
 1300653	7	OpenUiPaintingExperiencePass	0	涂装试玩-4.8涅缇娅试玩	0	0	138					1050153	0	0					
+40205	2	UiRegression4AutoWindow	206	Reserved String		1													
+40206	2	UiAutoWindow	207	4.8跨4.9预热打脸		1						1050153							
+40207	2	UiAutoWindow	208	4.9莱亚特效皮		1						1050153							
+40208	2	UiAutoWindow	209	4.9小梅特效皮		1						1050153							
+50128	2	UiSignBanner	120	Reserved String		1								51910					
+538	7	SkipToMainLine2		Reserved String	10308	1	1044					1050153							
+7146	7	SkipToPartnerTeachingChapter		To CUB Tutorial Trial - Chapter 39	1801	1	39												
+19085	7	SkipToCharacterV2P6		Go to Members	101	1	1431003												
+20414	7	OpenLotto		Reserved String		1	23												
+20415	6	UiFavorabilityStory		Go to Leia Affection Story		1	1431003					1050153	1						
+20416	6	UiFubenPracticeStageListRoot		Reserved String	10325	1	53						1						
+20417	7	SkipToNewDrawMain		Reserved String	401	1												2026/8/19 0:00	2026/11/5 5:00
+20418	6	UiPurchase		Reserved String	3	1	2	0	5									2026/8/19 0:00	2026/11/5 5:00
+20419	7	SkipToMainLine2				1	1044					1050153							
+20420	7	SkipToCharacterV2P6			101	1	1431003												
+20421	7	SkipToAnniversaryPreHeating			10522	1													
+80330	6	UiPurchase		Purchase Coating Supply Pack	5	1	2	0	5									2026/11/5 0:00	2026/12/16 23:00
+80331	6	UiShop	3	Coating Shop	1001	1	1	0	504									2026/12/16 23:00	
+80332	6	UiPurchase		Purchase Coating Supply Pack	5	1	2	0	5									2026/11/5 0:00	2026/12/16 23:00
+80333	6	UiShop	3	Coating Shop	1001	1	1	0	502									2026/12/16 23:00	
+80334	6	UiPurchase		Purchase Coating Supply Pack	5	1	2	0	5									2026/11/5 0:00	2026/12/16 23:00
+189074	9		19	Reserved String															
+89115	7	SkipToRegression4		Reserved String		1													
+90082	7	SkipToSkyTowerMain		Reserved String	10514	1						774800	1	51011					
+1300718	6	UiActivityBriefBase		EN4.9活动主题面板deeplink	10303	1	0	0	0					2160723					
+1300719	7	SkipToNewDrawMain		EN4.9莱亚卡池deeplink	401	1	1526							2160724					
+1300654	7	OpenUiPaintingExperiencePass		涂装试玩-4.9莱亚			141					1050153							
+1300655	7	OpenUiPaintingExperiencePass		涂装试玩-4.9小梅			140					1050153							

@@ -1,6 +1,7 @@
 using AscNet.Common.Database;
 using AscNet.Common.MsgPack;
 using AscNet.GameServer;
+using AscNet.GameServer.Game;
 using AscNet.GameServer.Handlers;
 using AscNet.Common.Util;
 using AscNet.Table.V2.share.equip;
@@ -193,7 +194,99 @@ internal partial class Program
                 "duplicate Border Pact reward does not save inventory");
             AssertEqual(characterSavesBeforeReward + 1, characterSaves.ReplaceOneCalls,
                 "duplicate Border Pact reward does not save character");
+
+            ValidateBorderPactCommand(harness, character, playerSaves);
         }
+    }
+
+    private static void ValidateBorderPactCommand(LoopbackSessionHarness harness, Character character, RecordingMongoCollectionProxy<Player> playerSaves)
+    {
+        Session session = harness.Session;
+        string status = RunBorderPactCommand(session, "borderpact status");
+        AssertEqual(true, status.Contains("2001: groups 3/3, reward claimed, occupant Selena: Pianissimo (1531005)"), "/borderpact status reports a completed, claimed, occupied chapter");
+        AssertEqual(true, status.Contains("2002: groups 0/3, reward locked, occupant none"), "/borderpact status reports an untouched chapter");
+
+        int savesBeforeComplete = playerSaves.ReplaceOneCalls;
+        AssertEqual(true, RunBorderPactCommand(session, "borderpact complete 2").Contains("Completed Border Pact chapters 2002"), "/borderpact complete accepts a chapter index");
+        AssertEqual(savesBeforeComplete + 1, playerSaves.ReplaceOneCalls, "/borderpact complete persists once");
+        AssignInfo completed = AssignInfoPayload(harness, 88_115);
+        foreach (int groupId in new[] { 201, 202, 203 })
+        {
+            AssignGroupInfo group = completed.GroupRecords.Single(record => record.GroupId == groupId);
+            AssertEqual(1, group.Count, $"/borderpact complete clears group {groupId} like a settle");
+            AssertEqual(true, group.IsPerfect, $"/borderpact complete marks group {groupId} perfect");
+            AssertEqual(0, group.FinishStageIds.Count, $"/borderpact complete leaves no partial stages in group {groupId}");
+        }
+        AssignChapterInfo completedChapter = completed.ChapterRecords.Single(record => record.ChapterId == 2_002);
+        AssertEqual(false, completedChapter.IsGetReward, "/borderpact complete leaves the chapter reward claimable");
+        AssertEqual(0L, completedChapter.CharacterId, "/borderpact complete does not occupy the chapter");
+        AssertEqual(0, completed.GroupRecords.Single(record => record.GroupId == 301).Count, "/borderpact complete 2002 leaves other chapters untouched");
+        AssertEqual(2, InvokeAssignLoginRecords(session).Count, "NotifyLogin includes the command-completed chapter");
+        int savesBeforeRepeat = playerSaves.ReplaceOneCalls;
+        string repeated = RunBorderPactCommand(session, "assign complete 2002");
+        AssertEqual(true, repeated.Contains("already complete"), $"/assign alias reports an already completed chapter ({repeated})");
+        AssertEqual(savesBeforeRepeat, playerSaves.ReplaceOneCalls, "repeated /borderpact complete does not persist");
+
+        // The command-completed chapter unlocks its successor group exactly like a real clear.
+        CharacterData lotus = character.AddCharacter(1_021_001).Character;
+        InvokeRegisteredRequestHandler("AssignSetTeamRequest", session, 88_116, new AssignSetTeamRequest
+        {
+            GroupId = 301,
+            FirstFightPosList = [1, 1, 1],
+            TeamList = [[1_021_001], [1_531_005], [1_011_004, 1_021_005, 1_321_003]],
+            CaptainPosList = [1, 1, 1]
+        });
+        AssertEqual(0, ReadResponsePayload<AssignSetTeamResponse>(harness, 88_116, "AssignSetTeamResponse", "successor AssignSetTeamResponse").Code,
+            "command-completed chapter unlocks the next chapter's first group");
+
+        AssertEqual(true, RunBorderPactCommand(session, "borderpact assign 2001 none").Contains("no longer occupied"), "/borderpact assign none clears the occupant");
+        AssertEqual("{}", AssignFightSkillPlus(harness, 88_117, lotus), "unoccupied Border Pact sends no fight skill plus");
+
+        string ambiguous = RunBorderPactCommand(session, "borderpact assign 2001 lucia");
+        AssertEqual(true, ambiguous.Contains("ambiguous") && ambiguous.Contains("1021001") && ambiguous.Contains("1021005"), "/borderpact assign lists ambiguous owned characters");
+        AssertEqual(true, RunBorderPactCommand(session, "borderpact assign 2001 Selena: Pianissimo").Contains("now occupies chapter 2001"), "/borderpact assign resolves a multi-word LogName");
+        AssertEqual(1_531_005L, session.player.Assign.Chapters.Single(record => record.ChapterId == 2_001).CharacterId, "/borderpact assign persists the occupant");
+        Dictionary<int, int> expectedPlus = CharacterPower.GetAssignmentLevels(session, lotus);
+        AssertEqual(true, expectedPlus.Count > 0, "occupied Border Pact chapter grants skill plus levels");
+        AssertEqual(Newtonsoft.Json.JsonConvert.SerializeObject(expectedPlus),
+            AssignFightSkillPlus(harness, 88_118, lotus), "occupied Border Pact sends NpcData.CharacterSkillPlus");
+
+        RunBorderPactCommand(session, "borderpact assign 2002 pianissimo");
+        AssertEqual(0L, session.player.Assign.Chapters.Single(record => record.ChapterId == 2_002).CharacterId, "a character cannot occupy two Border Pact chapters");
+
+        string auto = RunBorderPactCommand(session, "borderpact autoassign");
+        AssertEqual(true, auto.Contains("Not completed (use /borderpact complete): 2003"), "/borderpact autoassign reports incomplete chapters");
+        List<long> occupants = session.player.Assign.Chapters.Where(record => record.CharacterId > 0).Select(record => record.CharacterId).ToList();
+        AssertEqual(occupants.Count, occupants.Distinct().Count(), "/borderpact autoassign keeps one chapter per character");
+        AssertEqual(1_531_005L, session.player.Assign.Chapters.Single(record => record.ChapterId == 2_001).CharacterId, "/borderpact autoassign keeps existing occupants");
+
+        RunBorderPactCommand(session, "borderpact reset");
+        AssignInfo reset = AssignInfoPayload(harness, 88_119);
+        AssertEqual(0, reset.ChapterRecords.Count + reset.GroupTeamRecords.Count + reset.GroupRecords.Sum(record => record.Count), "/borderpact reset clears Border Pact progress");
+    }
+
+    private static string RunBorderPactCommand(Session session, string line)
+    {
+        if (!AscNet.GameServer.Commands.CommandFactory.commands.ContainsKey("borderpact"))
+            AscNet.GameServer.Commands.CommandFactory.LoadCommands();
+        string[] parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        AscNet.GameServer.Commands.Command command = AscNet.GameServer.Commands.CommandFactory.CreateCommand(parts[0], session, parts[1..])
+            ?? throw new InvalidDataException($"Command {parts[0]} is not registered.");
+        try { command.Execute(); return "Command executed!"; }
+        catch (AscNet.GameServer.Commands.CommandMessageCallbackException ex) { return ex.Message; }
+    }
+
+    private static string AssignFightSkillPlus(LoopbackSessionHarness harness, int packetId, CharacterData subject)
+    {
+        InvokeRegisteredRequestHandler(nameof(PreFightRequest), harness.Session, packetId,
+            new PreFightRequest { PreFightData = new() { StageId = 14_010_311, CardIds = [subject.Id], CaptainPos = 1, FirstFightPos = 1 } });
+        PreFightResponse response = ReadResponsePayload<PreFightResponse>(harness, packetId, nameof(PreFightResponse), "Border Pact skill plus pre-fight");
+        AssertEqual(0, response.Code, "Border Pact skill plus pre-fight code");
+        Newtonsoft.Json.Linq.JObject payload = Newtonsoft.Json.Linq.JObject.Parse(MessagePackSerializer.ConvertToJson(MessagePackSerializer.Serialize(response)));
+        Newtonsoft.Json.Linq.JToken npc = payload["FightData"]!["RoleData"]!.Single()!["NpcData"]!.Children<Newtonsoft.Json.Linq.JProperty>()
+            .Select(property => property.Value)
+            .Single(value => value["Character"]!.Value<uint>("Id") == subject.Id);
+        return npc["CharacterSkillPlus"]!.ToString(Newtonsoft.Json.Formatting.None);
     }
 
     private static AssignInfo AssignInfoPayload(LoopbackSessionHarness harness, int packetId)
