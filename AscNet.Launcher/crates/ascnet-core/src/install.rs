@@ -1,5 +1,7 @@
 use crate::package::{client_region, compare_versions, sha256_file, validate_server_origin, PatchPackage, Region, KRSDK};
 use anyhow::{bail, Context, Result};
+#[cfg(all(windows, test))]
+use std::process::Command;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::fs::{self, File, OpenOptions};
