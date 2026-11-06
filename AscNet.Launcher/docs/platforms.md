@@ -1,89 +1,130 @@
-# Launcher platforms (Windows and Linux)
+# Launcher platforms: Windows and Linux
 
-Status: implemented. Replaces the Win32-only launcher; the on-disk schemas are unchanged.
+Status: implemented. This replaces the old Win32-only launcher. On-disk state formats are unchanged, so existing
+installations keep their settings, patch state, and downloads.
 
-## Layout
+## At a glance
 
-| Path | Contents |
+| | Windows | Linux |
+| --- | --- | --- |
+| Window | native egui window (`AscNetLauncher.exe`) | native egui window inside an AppImage |
+| Game client | `PGR.exe` runs natively | `PGR.exe` runs through Wine or a Steam Proton prefix |
+| Server + MongoDB | native | native |
+| Patch DLLs | Windows DLLs | the same Windows DLLs, loaded by `PGR.exe` under Wine |
+| Elevation | only for protected game folders (consented `--patch-worker`) | never; the user owns the prefix |
+
+The retail client is a Windows binary. There is no native Linux build, so "Linux support" means the launcher, server,
+and MongoDB are native while the client runs under Wine/Proton.
+
+## Components
+
+| Path | Responsibility |
 | --- | --- |
-| `crates/ascnet-platform` | OS boundary: data roots, permissions, elevation hooks, process groups, game launch, Steam/Proton discovery, disk space |
+| `crates/ascnet-platform` | OS boundary: data roots, permissions, process groups, game launch, Steam/Proton discovery, disk space |
 | `crates/ascnet-core` | Engine: client download/repair/update, patch package, install state and rollback, local server runtime, self-update |
-| `crates/ascnet-gui` | egui window (Home, Get game, Settings, Logs) |
-| `crates/ascnet-cli` | `ascnet-launcher` binary: GUI with no arguments, CLI parity with the old launcher otherwise |
+| `crates/ascnet-gui` | Window: Home, Get game, Settings, Logs |
+| `crates/ascnet-cli` | `ascnet-launcher` binary; GUI with no arguments, CLI parity otherwise |
 
-The engine keeps the previous behaviour: `state.json`/`journal.json` under `.ascnet-launcher/`, downloads under
-`.ascnet-download/`, settings at `LOCALAPPDATA/AscNet/Launcher/settings.json` (Windows) or
-`$XDG_DATA_HOME/AscNetLauncher/settings.json` (Linux), and `build-state.json` with the same fields.
+The window drops the old animated video background and launcher music. It uses a plain dark theme and ships no media
+assets. Retired keys in an existing `settings.json` are ignored.
 
-## Windows
+## Requirements
 
-`PGR.exe` runs natively. Installing into a protected folder still uses the consented `--patch-worker`
-elevation path, including the document-directory ACL grant. Self-update replaces `AscNetLauncher.exe` and
-the flat launcher files from `AscNetLauncher.zip`.
+Windows: nothing beyond the shipped files; the launcher installs the .NET 8 SDK and MongoDB through
+`setup-local.ps1` when they are missing.
 
-## Linux
+Linux, for the launcher and server:
 
-The retail client is a Windows binary, so it runs through Wine or Proton. The launcher itself, MongoDB and
-the AscNet server are native.
+- `wine` (or Steam with a Proton build) to run the client
+- `bash`, `git`, `curl`, `tar`, `sha256sum`, `flock`, and Python 3.8+ for `setup-local.sh`
 
-**Runtime.** `GameRuntime` is chosen per game folder:
+None of these need root.
 
-- `Proton` when the folder belongs to a Steam library entry with `steamapps/compatdata/<appid>/pfx` and a
-  Proton build under `steamapps/common` or `compatibilitytools.d`. Launch goes through
+## First run
+
+1. **Select game.** Point the launcher at an existing PGR folder, or use *Get game* to download, verify, repair,
+   update, or adopt an official/Steam copy.
+2. **Setup.** Builds the local server and installs the patch. On Linux this runs `setup-local.sh`; on Windows,
+   `setup-local.ps1`.
+3. **Play.** Starts MongoDB, the AscNet server, the patch check, and finally the game.
+
+State locations:
+
+- patch state and backups: `<game>/.ascnet-launcher/`
+- resumable client download: `<game>/.ascnet-download/`
+- settings: `%LOCALAPPDATA%\AscNet\Launcher\settings.json` (Windows) or
+  `$XDG_DATA_HOME/AscNetLauncher/settings.json` (Linux)
+- local build: `%LOCALAPPDATA%\AscNetLauncher\local` or `$XDG_DATA_HOME/AscNetLauncher/local`,
+  with the same `build-state.json` fields on both platforms
+
+## How the client is started
+
+The launcher picks a runtime per game folder:
+
+- **Proton**, when the folder belongs to a Steam library entry and `steamapps/compatdata/<appid>/pfx` exists with a
+  Proton build in `steamapps/common` or `compatibilitytools.d`. Launch:
   `<proton> waitforexitandrun PGR.exe` with `STEAM_COMPAT_DATA_PATH` and `STEAM_COMPAT_CLIENT_INSTALL_PATH`.
-- `ManagedWine` otherwise: the launcher initialises `$XDG_DATA_HOME/AscNetLauncher/wine/ascnet` with
-  `wineboot -i` on first use and launches through the detected `wine`/`wine64`.
+- **Managed Wine**, otherwise. The launcher creates `$XDG_DATA_HOME/AscNetLauncher/wine/ascnet` with `wineboot -i` on
+  first use and runs `wine PGR.exe`.
 
-Both paths set `WINEDLLOVERRIDES=version=n,b;d3d11,dxgi=n,b` and `ASCNET_PATCH_ORIGIN`, so `version.dll` and
-`lucia.dll` load exactly as on Windows. `ASCNET_WINE` overrides the Wine binary; `ASCNET_PATCH_FPS` and
-`ASCNET_PATCH_NOFADE` come from Settings.
+Both paths set `WINEDLLOVERRIDES=version=n,b;d3d11,dxgi=n,b`, `WINEDEBUG=-all`, and `ASCNET_PATCH_ORIGIN`, so
+`version.dll` and `lucia.dll` load exactly as on Windows. Settings map to `ASCNET_PATCH_FPS` and
+`ASCNET_PATCH_NOFADE`. `ASCNET_WINE` overrides the Wine binary; `ASCNET_PATCH_DIR` supplies local patch DLLs.
 
-**Permissions.** Wine runs as the same user, so no ACL grant or elevation is needed. The launcher only checks
-that the game folder is writable. `PGR.exe` is detected by scanning `/proc` instead of ToolHelp.
+On Linux, Wine runs as the same user, so there is no ACL grant. The launcher only checks that the game folder is
+writable, and detects `PGR.exe` by scanning `/proc` instead of ToolHelp.
 
-**Provisioning prerequisites.** `bash`, `git`, `curl`, `tar`, `sha256sum`, `flock` and Python 3.8+
-(the launcher invokes `setup-local.sh` itself; none of these need root).
+## Provisioning
 
-`setup-local.sh` is the Linux counterpart of `setup-local.ps1`: it installs the .NET 8 SDK
-user-space under `tools/dotnet`, resolves and SHA-256 verifies a portable `mongod`, clones the distributor
-checkout, publishes the server, and assembles the patch directory. It never invokes `sudo` and writes the same
-`build-state.pending.json`.
+`setup-local.sh` mirrors `setup-local.ps1` and writes the same `build-state.pending.json`. It:
 
-Patch DLLs stay Windows binaries. `setup-local.sh` copies them from `ASCNET_PATCH_DIR` when set (development),
-otherwise downloads `ascnet-patch.zip` from the release named in `patch-manifest.json` and verifies its SHA-256.
-`patch-manifest.json` is generated by the Windows CI job and embedded in the AppImage.
+1. installs the .NET 8 SDK user-space under `tools/dotnet` (`dotnet-install.sh`) when no 8.x SDK is found;
+2. resolves a portable `mongod` from MongoDB's official metadata and verifies its SHA-256 (a pinned executable from an
+   older build state is reused; it never silently upgrades a database engine);
+3. clones or fast-forwards the distributor checkout and records its revision;
+4. publishes the server with `dotnet publish` and copies the persistent `config.json` next to it;
+5. assembles the patch directory from `ASCNET_PATCH_DIR` (development) or from `ascnet-patch.zip`, verified against the
+   SHA-256 in `patch-manifest.json`.
 
-## Window
+Patch DLLs are always Windows binaries. `patch-manifest.json` is generated by the Windows CI job and embedded in both
+release artifacts; a branch build has an empty manifest, so setup fails with an actionable message instead of
+downloading a release that does not exist.
 
-The egui window intentionally drops the Win32 launcher's animated video background and background music;
-it uses a plain dark theme with no external asset files. `settings.json` keeps the previous fields so an
-existing Windows installation upgrades in place; the retired `musicMuted` key is ignored when present.
+## Builds and releases
 
-## Builds
+`.github/workflows/launcher.yml` produces three artifacts:
 
-`.github/workflows/launcher.yml` produces:
+- `AscNetLauncher.zip`: `AscNetLauncher.exe`, `launcher.json`, `patch-manifest.json`, `setup-local.ps1`,
+  `supported-client.json`. Exactly these five members are accepted by the updater.
+- `AscNetLauncher-x86_64.AppImage`: the launcher plus `supported-client.json`, `setup-local.sh`, and
+  `patch-manifest.json` beside the binary. Built on Ubuntu 22.04 to keep an old glibc baseline.
+- `ascnet-patch.zip`: `version.dll`, `lucia.dll`, `KRSDK.dll`, `libraries.txt`, `supported-client.json`.
 
-- `AscNetLauncher.zip` — `AscNetLauncher.exe`, `launcher.json`, `patch-manifest.json`, `setup-local.ps1`,
-  `supported-client.json` (exactly the five members the updater accepts).
-- `AscNetLauncher-x86_64.AppImage` — launcher plus `supported-client.json`, `setup-local.sh` and
-  `patch-manifest.json` beside the binary. Built on Ubuntu 22.04 so the glibc baseline is old enough.
-- `ascnet-patch.zip` — `version.dll`, `lucia.dll`, `KRSDK.dll`, `libraries.txt`, `supported-client.json`.
+Tagged builds attach all three to the GitHub release.
 
-Tagged builds attach all three to the GitHub release and the updater picks the asset for its own platform.
+Local Linux build:
+
+```bash
+cargo build --release -p ascnet-cli
+bash packaging/build-appimage.sh      # needs appimagetool on PATH
+```
 
 ## Self-update
 
-- Windows: unchanged helper process; `AscNetLauncher.zip` is verified, staged and swapped after the launcher
-  exits.
-- Linux: the new AppImage is downloaded, digest-verified, marked executable and renamed atomically over
-  `$APPIMAGE`; the running process keeps the old inode. Apply it from the footer; the next start uses the new
-  file. `ASCNET_DISABLE_AUTOMATIC_UPDATES=1` still suppresses checks.
+- **Windows:** unchanged helper flow. `AscNetLauncher.zip` is verified, staged, and swapped after the launcher exits.
+- **Linux:** the new AppImage is downloaded, digest-verified, marked executable, and renamed atomically over
+  `$APPIMAGE`; the running process keeps the old inode and the next start uses the new file. Apply it from the footer.
+
+`ASCNET_DISABLE_AUTOMATIC_UPDATES=1` suppresses checks. `--self-update-health` and rollback markers still work on both
+platforms.
 
 ## Troubleshooting
 
-- **No Wine**: install the distribution's `wine` package, or point `ASCNET_WINE` at a Wine binary.
-- **Game renders nothing under Wine**: check the graphics stack (Vulkan drivers, DXVK) and read
-  `ascnet-patch.log` beside `PGR.exe` as described in `player-diagnostics.md`.
-- **AppImage does not start**: some distributions lack FUSE; run it with `--appimage-extract-and-run`.
-- **Patch bundle missing**: run with `ASCNET_PATCH_DIR` pointing at a directory containing the three DLLs and
-  `libraries.txt`.
+| Symptom | Cause and fix |
+| --- | --- |
+| `Wine is not installed` | Install the distribution's `wine` package or set `ASCNET_WINE`. |
+| Game starts but renders nothing | Graphics stack issue (Vulkan drivers, DXVK). Read `ascnet-patch.log` beside `PGR.exe` per `player-diagnostics.md`. |
+| AppImage will not start | FUSE is missing: run with `--appimage-extract-and-run`, or install `libfuse2`. |
+| `lucia.dll is missing` during Setup | No patch bundle: set `ASCNET_PATCH_DIR` to a folder with `version.dll`, `lucia.dll`, `KRSDK.dll`, `libraries.txt`. |
+| Game folder reported unwritable | Fix permissions on the folder or its `PGR_Data/StreamingAssets/document` directory. |
+| `PGR.exe is already running` | Close the game; the launcher refuses to patch a running client. |

@@ -1,22 +1,22 @@
 # Player diagnostics (lucia / KRSDK)
 
-Both native patches (`lucia.dll`, `PGR_Data/Plugins/KRSDK.dll`) append every diagnostic line to one file
-beside `PGR.exe`:
+Both native patches (`lucia.dll` and `PGR_Data/Plugins/KRSDK.dll`) append every diagnostic line to one file beside
+`PGR.exe`:
 
 ```
 <client folder>\ascnet-patch.log
 ```
 
-(The same lines are also printed to stdout, which only exists when `PGR.exe` is started from a console or
-Wine.) The file is cut when it grows past 1 MiB. Each launch appends, so send the **last launch**: everything
-from the last `[lucia] OK KRSDK.bin identity` / `[lucia] FAILED KRSDK.bin identity` line to the end.
+On Linux the same file sits in the game folder, next to `PGR.exe`. The same lines are also printed to stdout, which
+only exists when `PGR.exe` is started from a console (or from Wine). The file is truncated at 1 MiB, and every launch
+appends to it. Send the **last launch** only: everything from the last `[lucia] OK KRSDK.bin identity` (or
+`[lucia] FAILED KRSDK.bin identity`) line to the end.
 
-## What to send back
+## What to send
 
-1. The region you play (EN / TW / KR / JP / CN).
-2. All lines of `ascnet-patch.log` starting with `[lucia]` or `[KRSDK]` that contain `OK` or `FAILED`
-   (or just the whole file).
-3. If a line says `FAILED`, nothing else is needed: the reason and the looked-up name are in that line.
+1. The region you play: EN, TW, KR, JP, or CN.
+2. All `[lucia]` and `[KRSDK]` lines containing `OK` or `FAILED` (or simply the whole file).
+3. If a line says `FAILED`, that is usually enough: the reason and the name that was looked up are in the line.
 
 ## Healthy launch (KR example)
 
@@ -34,15 +34,15 @@ from the last `[lucia] OK KRSDK.bin identity` / `[lucia] FAILED KRSDK.bin identi
 [lucia] OK first client config request: package=com.kurogame.punishing.grayraven.kr cdn_key=jqlCmYRizwT76uvX
 ```
 
-What each region must show (from the client's own files, not from the server):
+What each region must show, taken from the client's own files rather than from the server:
 
 | Region | `KRSDK.bin` `game` / `app` | `first client config request` package |
 | ------ | -------------------------- | ------------------------------------- |
 | KR | `G286` / `A1794`, channel `240` | `com.kurogame.punishing.grayraven.kr` |
 | JP | `G282` / `A1778`, channel `240` | `com.kurogame.punishing.grayraven.jp` |
 
-If `first client config request` is missing, the game never asked for `client/config/...`: the hook is
-not active, or the client talks to a host the patch does not route.
+If `first client config request` is missing, the game never asked for `client/config/...`: the hook is not active, or
+the client is talking to a host the patch does not route.
 
 ## Failure lines
 
@@ -50,14 +50,14 @@ Format: `[lucia|KRSDK] FAILED <what was looked up>: <reason> | send: ascnet-patc
 
 | Line starts with | Meaning |
 | ---------------- | ------- |
-| `[lucia] FAILED KRSDK.bin identity` | `PGR_Data/Plugins/KRSDKRes/KRSDK.bin` is missing/unreadable or lacks a `KR_*` key (the key is named). Client install incomplete. |
+| `[lucia] FAILED KRSDK.bin identity` | `PGR_Data/Plugins/KRSDKRes/KRSDK.bin` is missing, unreadable, or lacks a `KR_*` key (the key is named). The client install is incomplete. |
 | `[lucia] FAILED GameAssembly.dll module lookup` | `lucia.dll` was loaded outside `PGR.exe`'s IL2CPP process. |
-| `[lucia] FAILED native routing ...: ... GameAssembly.dll does not export `il2cpp_...`` | The named IL2CPP export is missing: not the 4.8.0 client, or `GameAssembly.dll` was modified. |
-| `[lucia] FAILED native routing ...: il2cpp_domain_assembly_open could not open assembly ...` | The assembly named in the line is not in this client's metadata. |
-| `[lucia] FAILED native routing ...: il2cpp_class_from_name: type ...` / `method ...` | The class or method named in the line is missing or has another signature: Unity build differs from 4.8.0. |
-| `[lucia] FAILED native routing ...: installing the InternalSetUrl detour failed` | Another injector/overlay hooked the same function. Send the list of overlays/injectors you run. |
+| `[lucia] FAILED native routing ...: ... GameAssembly.dll does not export \`il2cpp_...\`` | The named IL2CPP export is missing: not the 4.8.0 client, or `GameAssembly.dll` was modified. |
+| `[lucia] FAILED native routing ...: il2cpp_domain_assembly_open could not open assembly ...` | The named assembly is not in this client's metadata. |
+| `[lucia] FAILED native routing ...: il2cpp_class_from_name: type ...` / `method ...` | The named class or method is missing or has a different signature: the Unity build differs from 4.8.0. |
+| `[lucia] FAILED native routing ...: installing the InternalSetUrl detour failed` | Another injector or overlay hooked the same function. Send the list of overlays/injectors you run. |
 | `[lucia] FAILED il2cpp domain ready` | IL2CPP still had no assemblies after 60 s (lucia keeps waiting). |
-| `[KRSDK] FAILED lucia.dll routing initialization` | `lucia.dll` is missing next to `PGR.exe`, blocked (antivirus), is an old build, or its own `[lucia] FAILED` line (above in the same file) explains why. |
+| `[KRSDK] FAILED lucia.dll routing initialization` | `lucia.dll` is missing next to `PGR.exe`, blocked by antivirus, is an old build, or its own `[lucia] FAILED` line earlier in the same file explains why. |
 | `[KRSDK] FAILED KRSDK.bin identity` / `kurosdk_getConfigInfo packaged config` | Same as the `[lucia] FAILED KRSDK.bin identity` row; login is refused without a channel. |
 | `[KRSDK] FAILED login channel from KRSDK.bin` | `KR_ChannelID` could not be read at login. |
 
@@ -66,13 +66,15 @@ When `lucia` fails, native routing stays off and the client talks to the retail 
 ## China (CN) client
 
 The CN client (战双帕弥什) has no `KRSDK.dll` and no `KRSDK.bin`; it ships the official SDK
-(`PGR_Data/Plugins/KRSDKEx.dll`, `libkrsdkcurl.dll`, `KRSDKRes/KRSDKConfig.json`). The Launcher installs only
-`version.dll`, `lucia.dll`, `libraries.txt` and the generated `PGRBase.dll`; `PGR.exe`, `GameAssembly.dll`, `KRSDKEx.dll`
-and `libkrsdkcurl.dll` are only hash-checked against `supported-client.json` (never modified or backed up), and
-an unknown hash is reported as unsupported with the observed SHA-256. `lucia` redirects the SDK's `/sdkcom/*` requests in
-process (a hook on `libkrsdkcurl.dll!kr_sdk_curl_easy_setopt`), so the official login UI stays in use.
+(`PGR_Data/Plugins/KRSDKEx.dll`, `libkrsdkcurl.dll`, `KRSDKRes/KRSDKConfig.json`). The launcher installs only
+`version.dll`, `lucia.dll`, `libraries.txt`, and the generated `PGRBase.dll`. `PGR.exe`, `GameAssembly.dll`,
+`KRSDKEx.dll`, and `libkrsdkcurl.dll` are only hash-checked against `supported-client.json` (never modified or backed
+up); an unknown hash is reported as unsupported together with the observed SHA-256. `lucia` redirects the SDK's
+`/sdkcom/*` requests in-process by hooking `libkrsdkcurl.dll!kr_sdk_curl_easy_setopt`, so the official login UI stays
+in use.
 
-Healthy CN lines in `ascnet-patch.log` (the same `routed` line appears per redirected SDK request, query strings are never logged):
+Healthy CN lines in `ascnet-patch.log` (the same `routed` line appears per redirected SDK request; query strings are
+never logged):
 
 ```
 [lucia] OK KRSDKConfig.json identity: package=com.kurogame.haru.hero game=G148 app=A1393 channel=19 channel_name=国内PC source=PGR_Data/Plugins/KRSDKRes/KRSDKConfig.json
@@ -82,21 +84,22 @@ Healthy CN lines in `ascnet-patch.log` (the same `routed` line appears per redir
 
 | Line starts with | Meaning |
 | ---------------- | ------- |
-| `[lucia] FAILED KRSDKConfig.json identity` | `KRSDKConfig.json` is missing/unreadable. |
+| `[lucia] FAILED KRSDKConfig.json identity` | `KRSDKConfig.json` is missing or unreadable. |
 | `[lucia] FAILED CN SDK routing (login stays on retail servers)` | `libkrsdkcurl.dll` could not be loaded or lacks `kr_sdk_curl_easy_setopt` (not the verified 4.8.0 CN SDK), or another injector hooked the same function. |
 
-No `routed ... /sdkcom/...` line after the login window opens means the SDK never reached the hook. The SDK also keeps
-its own cache under `%APPDATA%\KR_G148\A1393\` (agreement, `KRSDKCache.json`) and logs/cache under
-`%USERPROFILE%\AppData\LocalLow\kurogame\战双帕弥什` (per the real player log); include them when reporting a CN login problem.
+No `routed ... /sdkcom/...` line after the login window opens means the SDK never reached the hook. The SDK keeps its
+own cache under `%APPDATA%\KR_G148\A1393\` (agreement, `KRSDKCache.json`) and logs/cache under
+`%USERPROFILE%\AppData\LocalLow\kurogame\战双帕弥什` (per the real player log). Include them when reporting a CN login
+problem.
 
 ## No camera fade option
 
-Launcher > Settings > **No camera fade** (off by default, saved in the launcher settings) starts `PGR.exe` with
-`ASCNET_PATCH_NOFADE=1`. `lucia` then disables the character/camera proximity fade natively (no game bundle is
-edited): `XCameraDitherDetector.UseCameraDither=false` and `XNpcDither.SetPlayerSelfDitherParameter` with opaque
-values, re-applied every 2 s. Dying-enemy dissolves (`XDitherHelper`) are not touched. It supersedes
-`tools/apply_pgr_nofade.py`; both set the same values, so having both active is harmless. Same on EN/TW/KR/JP
-(all four `GameAssembly.dll` export every `il2cpp_*` function it needs).
+**Settings → No camera fade** (off by default, saved in launcher settings) starts `PGR.exe` with
+`ASCNET_PATCH_NOFADE=1`. `lucia` then disables the character/camera proximity fade natively (no game bundle is edited):
+`XCameraDitherDetector.UseCameraDither=false` and `XNpcDither.SetPlayerSelfDitherParameter` with opaque values,
+re-applied every 2 s. Dying-enemy dissolves (`XDitherHelper`) are not touched. This supersedes
+`tools/apply_pgr_nofade.py`; both set the same values, so having both active is harmless. The same applies on EN/TW/KR/JP
+(all four `GameAssembly.dll` files export every `il2cpp_*` function it needs).
 
 Healthy lines (option on):
 
@@ -112,27 +115,27 @@ Healthy lines (option on):
 [lucia] OK apply XNpcDither.SetPlayerSelfDitherParameter(opaque): re-applied every 2 s
 ```
 
-With the option off none of these lines appear. Every failure is a `[lucia] FAILED no camera fade` /
-`lookup XCameraDitherDetector...` / `lookup XNpcDither...` / `write ...` / `apply ...` line naming the missing
-class, field or method (client build differs from 4.8.0); the game keeps its default fade and routing is unaffected.
-If only the `XNpcDither` lines fail, the camera fade is still disabled. `write`/`apply` lines are logged on the first
-result and on every later change, not every 2 s.
+With the option off, none of these lines appear. Every failure is a `[lucia] FAILED no camera fade` /
+`lookup XCameraDitherDetector...` / `lookup XNpcDither...` / `write ...` / `apply ...` line naming the missing class,
+field, or method (client build differs from 4.8.0). The game keeps its default fade and routing is unaffected. If only
+the `XNpcDither` lines fail, the camera fade is still disabled. `write`/`apply` lines are logged on the first result and
+on every later change, not every 2 s.
 
 ## FPS unlock option
 
-Launcher > Settings > **FPS unlock** + frame-rate field + **Apply** (off by default, 240 FPS suggested; saved in the
-launcher settings) starts `PGR.exe` with `ASCNET_PATCH_FPS=<n>` (any positive whole number; absent = the game's own
-frame rate). `lucia` then calls `UnityEngine.Application.set_targetFrameRate(n)` natively every 2 s (the game may
-reset it). No game bundle is edited. Unity ignores `targetFrameRate` while `QualitySettings.vSyncCount > 0` (the game's
-own VSync option sets it), so with the unlock on `lucia` sets `vSyncCount=0` and logs the change. The status text in the
-launcher shows the saved setting (`At launch: ...`); a change takes effect at the next game launch. Same on EN/TW/KR/JP.
+**Settings → FPS unlock** plus a frame-rate value and **Apply** (off by default, 240 FPS suggested, saved in launcher
+settings) starts `PGR.exe` with `ASCNET_PATCH_FPS=<n>` (any positive whole number; absent means the game's own frame
+rate). `lucia` then calls `UnityEngine.Application.set_targetFrameRate(n)` natively every 2 s, because the game may
+reset it. No game bundle is edited. Unity ignores `targetFrameRate` while `QualitySettings.vSyncCount > 0` (the game's
+own VSync option sets it), so with the unlock on `lucia` sets `vSyncCount=0` and logs the change. The launcher status
+text shows the saved setting (`At launch: ...`); a change takes effect at the next launch. Same on EN/TW/KR/JP.
 
-**Migration from the old bundle patch.** Earlier launchers injected a Lua hook (`PgrNativeFpsTimer`) into
-`matrix.ab`'s `XUiMain.lua`. On every Check/startup the launcher looks for that hook; if found, and PGR.exe is not
-running, it removes it (the usual same-size rewrite, original kept under `.ascnet-launcher/fps-backups/`), turns the
-native FPS unlock on with the hook's old value, and logs `Removed the old bundle FPS patch ...`. While PGR.exe is
-running it logs `the old bundle FPS patch (N FPS) is still installed; close PGR.exe and press Check to remove it`
-(the hook keeps working until then). Afterwards only the native path exists; the launcher never writes the bundle again.
+**Migration from the old bundle patch.** Earlier launchers injected a Lua hook (`PgrNativeFpsTimer`) into `matrix.ab`'s
+`XUiMain.lua`. On every check/startup the launcher looks for that hook. If found and `PGR.exe` is not running, it
+removes it (same-size rewrite, original kept under `.ascnet-launcher/fps-backups/`), turns the native FPS unlock on
+with the hook's old value, and logs `Removed the old bundle FPS patch ...`. While `PGR.exe` is running it logs
+`the old bundle FPS patch (N FPS) is still installed; close PGR.exe and press Check to remove it` (the hook keeps
+working until then). Afterwards only the native path exists; the launcher never writes the bundle again.
 
 Healthy lines (option on):
 
@@ -146,15 +149,15 @@ Healthy lines (option on):
 [lucia] OK apply Application.targetFrameRate=240: re-applied every 2 s
 ```
 
-With the option off none of these lines appear. Failures are `[lucia] FAILED FPS unlock` (bad `ASCNET_PATCH_FPS`, missing
-export, class or method: client differs from 4.8.0), `lookup ...`, `read/write QualitySettings.vSyncCount` (the unlock
-may then be capped by vsync) or `apply Application.targetFrameRate=...` (call threw, or the value read back differently);
-the game keeps its own frame rate and routing is unaffected. Lines are logged on the first result and on every later
-change, not every 2 s.
+With the option off, none of these lines appear. Failures are `[lucia] FAILED FPS unlock` (bad `ASCNET_PATCH_FPS`,
+missing export, class, or method: client differs from 4.8.0), `lookup ...`, `read/write QualitySettings.vSyncCount`
+(the unlock may then be capped by vsync), or `apply Application.targetFrameRate=...` (call threw, or the value read
+back differently). The game keeps its own frame rate and routing is unaffected. Lines are logged on the first result
+and on every later change, not every 2 s.
 
 ## Optional trace (developers)
 
-`ASCNET_PATCH_TRACE=1` (the Launcher clears it, so set it only when running `PGR.exe` by hand) adds
+`ASCNET_PATCH_TRACE=1` (the launcher clears it, so set it only when running `PGR.exe` by hand) adds
 `[lucia] OK lookup XRemoteConfig: assembly=... class=XRemoteConfig` / `[lucia] FAILED lookup XRemoteConfig ...`
 (`XRemoteConfig` is a metadata dump only; no hook is installed on it and routing does not depend on it),
-`remote-config ...` field/method dumps and the first 64 `InternalSetUrl call url=...` lines.
+`remote-config ...` field/method dumps, and the first 64 `InternalSetUrl call url=...` lines.

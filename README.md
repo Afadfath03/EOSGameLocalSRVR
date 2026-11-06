@@ -1,72 +1,98 @@
 # PGR Local Server
 
-Server lokal pribadi untuk **Punishing: Gray Raven (PGR)**, berbasis [AscNet](https://github.com/rafi1212122/AscNet) dan disesuaikan untuk eksperimen client PC/Steam. Proyek ini berjalan di komputer sendiri dengan MongoDB lokal; ini bukan server resmi Kuro Games.
+A personal, local-only server for **Punishing: Gray Raven (PGR)**, built on
+[AscNet](https://github.com/rafi1212122/AscNet) and adapted for PC/Steam client experiments. It runs on your own
+machine against a local MongoDB. It is not an official Kuro Games service.
 
-> Target konfigurasi saat ini: client PC/Steam **4.8.0** (document version **4.8.12**), channel **205**. Dukungan protokol dan gameplay berbeda-beda per fitur dan belum setara dengan server retail.
+**Current target:** PC/Steam client **4.8.0** (document version **4.8.12**), channel **205**. Protocol and gameplay
+support differ per feature; nothing here is a claim of parity with the retail service.
 
-## Fitur saat ini
+## What works
 
-- Server SDK/HTTP dan game TCP dengan akun lokal, login, konfigurasi client, notice, serta data pemain yang tersimpan di MongoDB.
-- Bridge client Steam/PC melalui `run_steam.py` dan `proxy.py`: menjalankan server, pengecekan konfigurasi, opsi MongoDB lokal, routing traffic, dan peluncuran client.
-- Sistem akun dan progres pemain: karakter, level/skill, senjata, memori, item, stage, event, hadiah, serta notifikasi login.
-- Dukungan kompatibilitas untuk draw dan pity, event, sign-in, equipment, dorm, mission, dan beberapa mode permainan.
-- Mode yang sudah memiliki implementasi server mencakup Theatre, Theatre3–6, Circuit Connect, dan Babylonia. Kedalaman implementasi dan batas kompatibilitas setiap mode tidak sama.
-- Launcher native untuk konfigurasi client yang didukung. Dukungan targetnya mencakup EN, TW, KR, JP, dan CN; ketersediaan konfigurasi tidak berarti semua region telah diuji dengan client aslinya.
+- SDK/HTTP and game TCP server: local accounts, login, client configuration, notices, and player data in MongoDB.
+- Steam/PC bridge through `run_steam.py` and `proxy.py`: starts the server, checks configuration, optionally manages a
+  local MongoDB, routes traffic, and launches the client.
+- Account and progression: characters, level/skills, weapons, memories, items, stages, events, rewards, login notices.
+- Compatibility work for draws and pity, events, sign-in, equipment, dorm, missions, and several game modes.
+- Implemented modes: Theatre, Theatre3–6, Circuit Connect, and Babylonia. Depth and known limits differ per mode.
+- Native launcher for supported clients, targeting EN, TW, KR, JP, and CN. A supported configuration is not proof that
+  every region has been tested against the real client.
 
-Banyak fitur menggunakan tabel client sebagai sumber data; beberapa aturan server yang tidak tersedia memakai kebijakan lokal AscNet. Contohnya, leaderboard hanya berlaku di server lokal. Banner Fate yang aturan pity/odds-nya belum diketahui dinonaktifkan. Implementasi lokal bukan klaim bahwa perilakunya sama dengan retail.
+Many features read the client tables directly. Where no server rule exists, AscNet's own policy is used and marked as
+such in the relevant document (for example, leaderboards are local-only, and Fate draw rules are documented local
+policy rather than recovered retail odds). See `Resources/Configs/draw-rules-source.md` and
+`Resources/Configs/purchase-rules-source.md`.
 
-## Kebutuhan
+## Requirements
 
 - .NET SDK 8
 - MongoDB
-- Python 3.10 atau lebih baru untuk bridge
-- mitmproxy/mitmdump untuk mode bridge
-- Client PGR PC/Steam yang sesuai dengan target kompatibilitas
+- Python 3.10+ (bridge)
+- mitmproxy/mitmdump (bridge mode)
+- A PGR PC/Steam client matching the pinned version
 
-## Menjalankan server
+## Run the server
 
-Jalankan MongoDB terlebih dahulu, lalu dari folder proyek:
+Start MongoDB first, then from the repository root:
 
 ```bash
 dotnet run --project AscNet/AscNet.csproj -- --urls http://127.0.0.1:8080
 ```
 
-Pengaturan utama tersedia di `Resources/Configs/config.json`. Tanpa override, server game memakai `127.0.0.1:2335`, MongoDB `127.0.0.1:27017`, dan database `asc_net`.
+Configuration lives in `Resources/Configs/config.json`. Defaults: game server `127.0.0.1:2335`, MongoDB
+`127.0.0.1:27017`, database `asc_net`.
 
-## Menjalankan bridge Steam/PC
+## Run the Steam/PC bridge
 
 ```bash
 python3 run_steam.py --with-mongo
 ```
 
-Untuk menjalankan client setelah server dan proxy siap:
+Start the client after the server and proxy are ready:
 
 ```bash
 python3 run_steam.py --with-mongo --launch-cmd ./launch-pgr-ascnet.sh
 ```
 
-Lihat semua opsi dengan `python3 run_steam.py --help`. Contoh launcher `.sh` memakai path workstation macOS/CrossOver dan perlu disesuaikan sebelum digunakan di mesin lain. Di Windows, gunakan path cache KRSDK client yang benar bila mengaktifkan opsi perbaikan/seeding cache.
+See all options with `python3 run_steam.py --help`. The example `launch-pgr-ascnet.sh` contains macOS/CrossOver paths
+and must be adjusted on other machines. On Windows, point the launcher at the correct KRSDK cache path when using the
+cache repair/seeding options.
 
-## GM Tool
+## Launcher
 
-[PGR GM Tool](../pgr-gm-tool/README.md) adalah dashboard terpisah untuk mengelola akun dan data pemain di database lokal yang sama. Jalankan dan konfigurasikan tool itu secara terpisah; tool ini tidak terhubung ke akun server resmi.
+`AscNet.Launcher` is a Rust workspace with a cross-platform window and CLI. It downloads and verifies the official
+client, installs the AscNet patch, and runs the local server on demand.
 
-## Verifikasi
+- **Windows:** the client runs natively; installing into a protected folder uses the consented elevation path.
+- **Linux:** the launcher is a native AppImage; the Windows client runs through Wine or an adopted Steam Proton prefix.
+  The server and MongoDB stay native.
 
-Harness kompatibilitas:
+Build and packaging details, prerequisites, and troubleshooting: `AscNet.Launcher/docs/platforms.md`.
+
+## GM tool
+
+[PGR GM Tool](../pgr-gm-tool/README.md) is a separate dashboard for accounts and player data in the same local
+database. Run and configure it independently; it does not connect to any official account.
+
+## Verify
+
+Compatibility harness:
 
 ```bash
 dotnet run --project AscNet.Test/AscNet.Test.csproj
 ```
 
-Harness menyediakan pemeriksaan terfokus melalui opsi `--...-only`; daftar opsi tersedia di `AscNet.Test/Program.cs`. Build proyek utama dengan `dotnet build AscNet.sln`.
+The harness exposes focused switches (`--...-only`); the full list is in `AscNet.Test/Program.cs`, with examples in
+this README's history. Build the server with `dotnet build AscNet.sln`.
 
-Hasil pemeriksaan kompatibilitas tidak sama dengan playthrough native penuh. Pertarungan retail, tampilan UI yang dirender, dan pemutaran movie belum semuanya diverifikasi.
+A green harness is not a full native playthrough: retail combat, rendered UI, and movie playback are not all verified.
 
-## Data lokal
+## Local data
 
-Jangan commit data runtime seperti `.runtime/`, file database MongoDB, log proxy/server, packet capture, binary client, atau kredensial. Folder build `bin/` dan `obj/` juga merupakan output lokal.
+Do not commit runtime data such as `.runtime/`, MongoDB files, proxy/server logs, packet captures, client binaries, or
+credentials. `bin/` and `obj/` are build output and stay local as well.
 
-## Kredit
+## Credits
 
-Proyek ini merupakan pengembangan lokal berbasis [AscNet](https://github.com/rafi1212122/AscNet). Tabel dan kontrak client berasal dari resource client PGR; hak atas game dan asetnya tetap milik pemegang hak masing-masing.
+This project is local development based on [AscNet](https://github.com/rafi1212122/AscNet). Tables and client contracts
+come from PGR client resources; the game and its assets remain the property of their respective rights holders.
