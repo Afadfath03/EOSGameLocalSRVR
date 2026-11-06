@@ -4,6 +4,13 @@
 * text=auto
 
 ###############################################################################
+# Files whose bytes are embedded into shipped binaries or compared verbatim.
+# Keep them identical on every checkout platform (no CRLF conversion).
+###############################################################################
+AscNet.Launcher/supported-client.json -text
+AscNet.Patch/krsdk/assets/*.json -text
+
+###############################################################################
 # Set default behavior for command prompt diff.
 #
 # This is need for earlier builds of msysgit that does not have it on by
