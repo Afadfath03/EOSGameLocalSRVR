@@ -420,14 +420,6 @@ pub fn wine_candidates() -> Vec<PathBuf> {
     found
 }
 
-/// Pinned portable Wine/DXVK runtime. Both fields must be filled by a release; empty values mean
-/// "no downloadable runtime is published for this build", never "skip verification".
-#[derive(serde::Deserialize)]
-pub struct ManagedWineManifest {
-    pub url: String,
-    pub sha256: String,
-}
-
 /// Creates the launcher-owned prefix on first use and returns the runtime to launch with.
 pub fn ensure_managed_wine(progress: &mut dyn FnMut(&str)) -> Result<GameRuntime> {
     let wine = wine_candidates()

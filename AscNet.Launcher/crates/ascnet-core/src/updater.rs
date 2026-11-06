@@ -271,18 +271,8 @@ pub fn launch_update(staged: StagedUpdate) -> Result<()> {
     #[cfg(unix)]
     {
         let install = install_dir()?;
-        ensure!(staged.root.parent() == Some(install.as_path()), "staging directory is not beside launcher");
-        let journal = read_journal(&staged.root, "staged.json")?;
-        verify_files(&staged.root.join("new"), &journal.files)?;
-        let name = ascnet_platform::release_asset_name();
-        let new = staged.root.join("new").join(name);
-        verify_version(&new, &journal.release.version)?;
-        use std::os::unix::fs::PermissionsExt;
-        fs::set_permissions(&new, fs::Permissions::from_mode(0o755))?;
         let target = appimage_path()?;
-        ensure!(target.parent() == Some(install.as_path()), "AppImage is not in the launcher directory");
-        ascnet_platform::atomic_replace(&new, &target)?;
-        return Ok(());
+        return apply_appimage_update(&staged, &install, &target);
     }
     #[cfg(windows)] {
         let install = install_dir()?;
@@ -298,6 +288,23 @@ pub fn launch_update(staged: StagedUpdate) -> Result<()> {
         }
         Ok(())
     }
+}
+
+/// Replaces the running AppImage with the staged one. A same-directory rename is atomic, and the
+/// running process keeps the old inode until it exits.
+#[cfg(unix)]
+fn apply_appimage_update(staged: &StagedUpdate, install: &Path, target: &Path) -> Result<()> {
+    ensure!(staged.root.parent() == Some(install), "staging directory is not beside launcher");
+    ensure!(target.parent() == Some(install), "AppImage is not in the launcher directory");
+    let journal = read_journal(&staged.root, "staged.json")?;
+    verify_files(&staged.root.join("new"), &journal.files)?;
+    let name = ascnet_platform::release_asset_name();
+    let new = staged.root.join("new").join(name);
+    verify_version(&new, &journal.release.version)?;
+    use std::os::unix::fs::PermissionsExt;
+    fs::set_permissions(&new, fs::Permissions::from_mode(0o755))?;
+    ascnet_platform::atomic_replace(&new, target)?;
+    Ok(())
 }
 
 #[cfg(windows)]
@@ -610,5 +617,69 @@ mod tests {
         fs::write(root.join("old/background.bmp"), b"corrupt").unwrap();
         assert!(rollback(&install, &root, &journal).is_err());
         fs::remove_dir_all(install).unwrap();
+    }
+
+    #[cfg(unix)]
+    fn stage_fake_appimage(install: &Path, marker: &str, release_version: &str) -> StagedUpdate {
+        let name = ascnet_platform::release_asset_name();
+        let root = install.join(format!(".ascnet-stage-{}", uuid::Uuid::new_v4()));
+        fs::create_dir_all(root.join("new")).unwrap();
+        let file = root.join("new").join(name);
+        let mut payload = b"\x7fELF".to_vec();
+        payload.extend_from_slice(format!("ASCNET_LAUNCHER_VERSION={marker}\0").as_bytes());
+        fs::write(&file, &payload).unwrap();
+        let files = BTreeMap::from([(name.to_owned(), sha256_file(&file).unwrap())]);
+        let journal = Journal {
+            release: Release { version: release_version.into(), url: String::new(), digest: String::new(), size: 0 },
+            files,
+            old: BTreeMap::new(),
+        };
+        fs::write(root.join("staged.json"), serde_json::to_vec(&journal).unwrap()).unwrap();
+        StagedUpdate { root, version: release_version.into() }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn appimage_update_replaces_the_target_atomically() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let install = std::env::temp_dir().join(format!("ascnet-appimage-{}", uuid::Uuid::new_v4()));
+        fs::create_dir_all(&install).unwrap();
+        let install = fs::canonicalize(install).unwrap();
+        let name = ascnet_platform::release_asset_name();
+        let target = install.join(name);
+        fs::write(&target, b"old launcher").unwrap();
+        fs::set_permissions(&target, fs::Permissions::from_mode(0o755)).unwrap();
+
+        let staged = stage_fake_appimage(&install, "1.1.0", "1.1.0");
+        let expected = fs::read(staged.root.join("new").join(name)).unwrap();
+        apply_appimage_update(&staged, &install, &target).unwrap();
+
+        assert_eq!(fs::read(&target).unwrap(), expected);
+        assert_ne!(fs::metadata(&target).unwrap().permissions().mode() & 0o111, 0);
+        assert!(!staged.root.join("new").join(name).exists(), "staged file must be moved, not copied");
+        fs::remove_dir_all(install).unwrap();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn appimage_update_refuses_a_mismatched_build_version() {
+        let install = std::env::temp_dir().join(format!("ascnet-appimage-bad-{}", uuid::Uuid::new_v4()));
+        fs::create_dir_all(&install).unwrap();
+        let install = fs::canonicalize(install).unwrap();
+        let target = install.join(ascnet_platform::release_asset_name());
+        fs::write(&target, b"old launcher").unwrap();
+
+        let staged = stage_fake_appimage(&install, "9.9.9", "1.1.0");
+        assert!(apply_appimage_update(&staged, &install, &target).is_err());
+        assert_eq!(fs::read(&target).unwrap(), b"old launcher");
+        fs::remove_dir_all(install).unwrap();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn release_member_is_the_platform_asset() {
+        assert_eq!(files(), vec![ascnet_platform::release_asset_name()]);
+        assert!(ascnet_platform::release_asset_name().ends_with(".AppImage"));
     }
 }
