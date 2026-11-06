@@ -1,6 +1,7 @@
 # macOS port (parked design note)
 
-Status: design agreed 2026-09-27; not implemented. Related: `client-download.md`.
+Status: design agreed 2026-09-27; not implemented. The Linux port now implements the same shape
+(cross-platform UI, managed Wine/Proton, native server) — see `platforms.md`. Related: `client-download.md`.
 
 ## Decisions
 - **UI:** cross-platform Rust UI, shared with Windows. No SwiftUI.

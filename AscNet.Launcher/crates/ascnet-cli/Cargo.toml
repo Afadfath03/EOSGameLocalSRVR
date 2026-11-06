@@ -1,0 +1,17 @@
+[package]
+name = "ascnet-cli"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "ascnet-launcher"
+path = "src/main.rs"
+
+[dependencies]
+ascnet-core.workspace = true
+ascnet-platform.workspace = true
+ascnet-gui.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+reqwest.workspace = true

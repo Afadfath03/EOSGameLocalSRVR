@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=AscNet Launcher
+Comment=Local Punishing: Gray Raven server and client patcher
+Exec=ascnet-launcher
+Icon=ascnet-launcher
+Terminal=false
+Categories=Game;Utility;
+StartupWMClass=ascnet-launcher

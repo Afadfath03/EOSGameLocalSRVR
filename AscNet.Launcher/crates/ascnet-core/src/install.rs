@@ -5,7 +5,6 @@ use std::collections::BTreeMap;
 use std::fs::{self, File, OpenOptions};
 use std::io::Write;
 use std::path::{Component, Path, PathBuf};
-use std::process::Command;
 use uuid::Uuid;
 
 const STATE_DIR: &str = ".ascnet-launcher";
@@ -280,22 +279,23 @@ pub fn install_with_consent(
     package: &PatchPackage,
     progress: &mut dyn FnMut(String),
 ) -> Result<PathBuf> {
-    #[cfg(windows)]
-    if inspect(client, package)? == PatchState::Current && crate::access::document_writable(client)? {
+    if inspect(client, package)? == PatchState::Current && ascnet_platform::document_writable(client)? {
         return Ok(client.join(STATE_DIR).join(STATE_FILE));
     }
     #[cfg(windows)]
-    if needs_elevation(client)? || !crate::access::document_writable(client)? {
+    if needs_elevation(client)? || !ascnet_platform::document_writable(client)? {
         let expected = package_fingerprint(package)?;
         elevate(client, Some((&package.directory, &expected)), progress)?;
         if inspect(client, package)? != PatchState::Current {
             bail!("elevated installation did not produce the verified prepared patch");
         }
-        if !crate::access::document_writable(client)? {
+        if !ascnet_platform::document_writable(client)? {
             bail!("resource document directory remains inaccessible to this user after approval");
         }
         return Ok(client.join(STATE_DIR).join(STATE_FILE));
     }
+    #[cfg(unix)]
+    ascnet_platform::prepare_document_for_caller(client, 0, 0)?;
     install(client, package, progress)
 }
 
@@ -386,7 +386,7 @@ fn elevate(client: &Path, package: Option<(&Path, &str)>, progress: &mut dyn FnM
     if let Some((path, fingerprint)) = package {
         args.push(fs::canonicalize(path)?.to_string_lossy().into_owned());
         args.push(fingerprint.to_owned());
-        let (pid, creation) = crate::access::caller_identity()?;
+        let (pid, creation) = ascnet_platform::caller_identity()?;
         args.push(pid.to_string());
         args.push(creation.to_string());
     }
@@ -462,6 +462,7 @@ fn elevate(client: &Path, package: Option<(&Path, &str)>, progress: &mut dyn FnM
     result
 }
 
+#[cfg(windows)]
 fn quote_windows_arg(value: &str) -> String {
     let mut output = String::from("\"");
     let mut slashes = 0;
@@ -506,7 +507,7 @@ pub fn patch_worker(args: &[String]) -> i32 {
             let package = crate::package::load_package(directory)?;
             if package_fingerprint(&package)? != args[4] { bail!("prepared package changed before approval"); }
             install(&client, &package, &mut |line| lines.push(line))?;
-            crate::access::prepare_document_for_caller(&client, args[5].parse()?, args[6].parse()?)?;
+            ascnet_platform::prepare_document_for_caller(&client, args[5].parse()?, args[6].parse()?)?;
         } else {
             restore(&client, &mut |line| lines.push(line))?;
         }
@@ -874,120 +875,34 @@ fn remove_rollback_directory(path: &Path) {
     let _ = fs::remove_dir_all(path);
 }
 
-/// Whether a `PGR.exe` process exists. A ToolHelp process snapshot: cheap enough for the UI thread to poll
-/// (the launcher's music follows the game), unlike spawning `tasklist.exe`.
+/// Whether a `PGR.exe` process exists. The platform layer uses ToolHelp on Windows and `/proc`
+/// on Linux; both are cheap enough for the UI thread to poll.
 pub fn game_running() -> Result<bool> {
-    #[cfg(windows)]
-    {
-        use windows::Win32::Foundation::{CloseHandle, ERROR_NO_MORE_FILES, HANDLE};
-        use windows::Win32::System::Diagnostics::ToolHelp::{
-            CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS,
-        };
-        struct Snapshot(HANDLE);
-        impl Drop for Snapshot {
-            fn drop(&mut self) {
-                unsafe {
-                    let _ = CloseHandle(self.0);
-                }
-            }
-        }
-        let snapshot = Snapshot(
-            unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) }.context("querying running processes")?,
-        );
-        let mut entry = PROCESSENTRY32W { dwSize: std::mem::size_of::<PROCESSENTRY32W>() as u32, ..Default::default() };
-        let mut next = unsafe { Process32FirstW(snapshot.0, &mut entry) };
-        loop {
-            match next {
-                Ok(()) => {
-                    let length = entry.szExeFile.iter().position(|&c| c == 0).unwrap_or(entry.szExeFile.len());
-                    if String::from_utf16_lossy(&entry.szExeFile[..length]).eq_ignore_ascii_case("PGR.exe") {
-                        return Ok(true);
-                    }
-                }
-                Err(e) if e.code() == ERROR_NO_MORE_FILES.to_hresult() => return Ok(false),
-                Err(e) => return Err(e).context("listing running processes; refusing to assume the game is stopped"),
-            }
-            next = unsafe { Process32NextW(snapshot.0, &mut entry) };
-        }
-    }
-    #[cfg(not(windows))]
-    {
-        Ok(false)
-    }
+    ascnet_platform::game_running()
 }
 
-pub fn launch(client: &Path, origin: &str, no_camera_fade: bool, fps: Option<i32>) -> Result<()> {
+pub fn launch(
+    client: &Path,
+    origin: &str,
+    no_camera_fade: bool,
+    fps: Option<i32>,
+    runtime: &ascnet_platform::GameRuntime,
+) -> Result<()> {
     let _lock = OperationLock::acquire()?;
     if game_running()? {
         bail!("PGR.exe is already running");
     }
     let client = checked_client(client)?;
     let origin = validate_server_origin(origin)?;
-    let executable = client.join("PGR.exe");
-    if !executable.is_file() {
+    if !client.join("PGR.exe").is_file() {
         bail!("PGR.exe is missing");
     }
-    let mut command = launch_command(&client, executable, origin, no_camera_fade, fps);
-    if running_under_wine() {
-        let old = std::env::var("WINEDLLOVERRIDES").unwrap_or_default();
-        let merged = if old.is_empty() {
-            "version=n,b".into()
-        } else {
-            format!("{old};version=n,b")
-        };
-        command.env("WINEDLLOVERRIDES", merged);
-    }
-    command.spawn().context("launching PGR.exe")?;
-    Ok(())
-}
-
-/// Region-neutral: every supported client (EN/TW/KR/JP/CN) gets the same environment (CN's gate path comes from AscNet's config.tab).
-/// `ASCNET_PATCH_NOFADE=1` (lucia disables the camera/character proximity fade) and
-/// `ASCNET_PATCH_FPS=<n>` (lucia sets Application.targetFrameRate) are set only on request.
-fn launch_command(client: &Path, executable: PathBuf, origin: String, no_camera_fade: bool, fps: Option<i32>) -> Command {
-    let mut command = Command::new(executable);
-    command.current_dir(client).env("ASCNET_PATCH_ORIGIN", origin);
-    if no_camera_fade {
-        command.env("ASCNET_PATCH_NOFADE", "1");
-    } else {
-        command.env_remove("ASCNET_PATCH_NOFADE");
-    }
-    match fps {
-        Some(fps) => command.env("ASCNET_PATCH_FPS", fps.to_string()),
-        None => command.env_remove("ASCNET_PATCH_FPS"),
+    let options = ascnet_platform::LaunchOptions {
+        origin,
+        fps,
+        no_camera_fade,
     };
-    for key in [
-        "ASCNET_PATCH_TRACE",
-        "ASCNET_PATCH_PROBE",
-        "HTTP_PROXY",
-        "HTTPS_PROXY",
-        "ALL_PROXY",
-        "NO_PROXY",
-        "http_proxy",
-        "https_proxy",
-        "all_proxy",
-        "no_proxy",
-    ] {
-        command.env_remove(key);
-    }
-    command
-}
-#[cfg(windows)]
-fn running_under_wine() -> bool {
-    use windows::core::{s, w};
-    use windows::Win32::System::LibraryLoader::{GetModuleHandleW, GetProcAddress};
-
-    unsafe {
-        GetModuleHandleW(w!("ntdll.dll"))
-            .ok()
-            .and_then(|module| GetProcAddress(module, s!("wine_get_version")))
-            .is_some()
-    }
-}
-
-#[cfg(not(windows))]
-fn running_under_wine() -> bool {
-    false
+    ascnet_platform::launch_game(&client, &options, runtime)
 }
 
 fn checked_client(client: &Path) -> Result<PathBuf> {
@@ -1562,34 +1477,6 @@ mod tests {
         let p = std::env::temp_dir().join(format!("ascnet-install-test-{}", Uuid::new_v4()));
         fs::create_dir_all(&p).unwrap();
         p
-    }
-    #[test]
-    fn launch_command_sets_origin_clears_overrides_and_is_region_neutral() {
-        let client = temp();
-        for (key, value) in [("ASCNET_PATCH_TRACE", "1"), ("HTTPS_PROXY", "http://proxy"), ("KEEP_ME", "x")] {
-            std::env::set_var(key, value);
-        }
-        std::env::set_var("ASCNET_PATCH_NOFADE", "1");
-        std::env::set_var("ASCNET_PATCH_FPS", "30");
-        for region in ["kr", "jp", "cn"] {
-            let dir = client.join(region);
-            let command = launch_command(&dir, dir.join("PGR.exe"), "http://127.0.0.1:5000".into(), false, None);
-            let envs: BTreeMap<_, _> = command.get_envs().collect();
-            assert_eq!(command.get_program(), dir.join("PGR.exe").as_os_str());
-            assert_eq!(command.get_current_dir(), Some(dir.as_path()));
-            assert_eq!(command.get_args().count(), 0);
-            assert_eq!(envs["ASCNET_PATCH_ORIGIN".as_ref() as &std::ffi::OsStr], Some("http://127.0.0.1:5000".as_ref()));
-            assert_eq!(envs["ASCNET_PATCH_TRACE".as_ref() as &std::ffi::OsStr], None);
-            assert_eq!(envs["HTTPS_PROXY".as_ref() as &std::ffi::OsStr], None);
-            // Off by default, and never inherited from the launcher's own environment.
-            assert_eq!(envs["ASCNET_PATCH_NOFADE".as_ref() as &std::ffi::OsStr], None);
-            assert_eq!(envs["ASCNET_PATCH_FPS".as_ref() as &std::ffi::OsStr], None);
-            let enabled = launch_command(&dir, dir.join("PGR.exe"), "http://127.0.0.1:5000".into(), true, Some(144));
-            assert_eq!(enabled.get_envs().find(|(k, _)| *k == "ASCNET_PATCH_NOFADE").unwrap().1, Some("1".as_ref()));
-            assert_eq!(enabled.get_envs().find(|(k, _)| *k == "ASCNET_PATCH_FPS").unwrap().1, Some("144".as_ref()));
-            assert!(!envs.contains_key("KEEP_ME".as_ref() as &std::ffi::OsStr));
-        }
-        fs::remove_dir_all(client).unwrap();
     }
     #[test]
     fn rollback_preserves_previous_managed_state() {

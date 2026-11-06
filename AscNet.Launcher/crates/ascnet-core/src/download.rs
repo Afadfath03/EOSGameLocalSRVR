@@ -784,22 +784,8 @@ fn free_space(path: &Path) -> Result<u64> {
     while !existing.exists() {
         existing = existing.parent().context("the folder has no existing parent")?;
     }
-    #[cfg(windows)]
-    {
-        use std::os::windows::ffi::OsStrExt;
-        use windows::{core::PCWSTR, Win32::Storage::FileSystem::GetDiskFreeSpaceExW};
-        let wide: Vec<u16> = existing.as_os_str().encode_wide().chain(Some(0)).collect();
-        let mut free = 0u64;
-        unsafe { GetDiskFreeSpaceExW(PCWSTR(wide.as_ptr()), Some(&mut free), None, None) }
-            .with_context(|| format!("reading free space of {}", existing.display()))?;
-        Ok(free)
-    }
-    // ponytail: the launcher is Windows-only; other hosts (tests) report unlimited space.
-    #[cfg(not(windows))]
-    {
-        let _ = existing;
-        Ok(u64::MAX)
-    }
+    ascnet_platform::free_space(existing)
+        .with_context(|| format!("reading free space of {}", existing.display()))
 }
 
 // ───────────────────────────── paths ─────────────────────────────
@@ -817,14 +803,7 @@ fn check_rel(rel: &str) -> Result<()> {
 }
 
 fn is_link(meta: &fs::Metadata) -> bool {
-    #[cfg(windows)]
-    {
-        use std::os::windows::fs::MetadataExt;
-        if meta.file_attributes() & 0x400 != 0 {
-            return true;
-        }
-    }
-    meta.file_type().is_symlink()
+    ascnet_platform::metadata_is_link(meta)
 }
 
 /// `root/rel` after validating `rel` and refusing links/reparse points in every existing component.
@@ -1954,7 +1933,7 @@ mod tests {
 
     #[test]
     fn pinned_sources_cover_all_regions_and_match_the_supported_version() {
-        let found = sources(&Path::new(env!("CARGO_MANIFEST_DIR")).join("supported-client.json")).unwrap();
+        let found = sources(&Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../../")).join("supported-client.json")).unwrap();
         assert_eq!(found.iter().map(|s| s.region()).collect::<Vec<_>>(), Region::ALL);
         for s in &found {
             assert_eq!(s.version(), "4.8.0");
@@ -2503,7 +2482,7 @@ mod tests {
     #[test]
     #[ignore]
     fn live_cdn_index_and_small_files() {
-        let found = sources(&Path::new(env!("CARGO_MANIFEST_DIR")).join("supported-client.json")).unwrap();
+        let found = sources(&Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/../../")).join("supported-client.json")).unwrap();
         for source in found {
             let net = Net::new(&source.data).unwrap();
             let cancel = no_cancel();

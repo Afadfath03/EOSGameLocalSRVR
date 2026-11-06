@@ -1,26 +1,16 @@
 #![cfg_attr(windows, windows_subsystem = "windows")]
 
-#[cfg(windows)]
-mod animation;
-mod steam;
-#[cfg(windows)]
-mod ui;
-
 use anyhow::{Context, Result};
-use ascnet_launcher::{install, local, package};
-use serde::Deserialize;
-use serde_json::json;
+use ascnet_core::{install, local, package, updater};
+use ascnet_gui::settings::DistributorConfig;
 use std::{
     env, fs,
     path::{Path, PathBuf},
 };
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct DistributorConfig {
-    repository_url: String,
-    branch: String,
-}
+/// Kept in the executable so a downloaded release can prove its version without being run.
+#[used]
+static VERSION_MARKER: &str = concat!("ASCNET_LAUNCHER_VERSION=", env!("CARGO_PKG_VERSION"), "\0");
 
 fn main() {
     #[cfg(windows)]
@@ -31,40 +21,41 @@ fn main() {
         }
     }
     if let Err(error) = run() {
-        #[cfg(windows)]
-        if env::args_os().len() == 1 {
-            ui::show_fatal(&format!("{error:#}"));
-        }
         eprintln!("{}", local::logged_error(&format!("{error:#}")));
         std::process::exit(1);
     }
 }
 
 fn run() -> Result<()> {
-    if ascnet_launcher::updater::startup()? {
+    if updater::startup()? {
         return Ok(());
     }
     local::launcher_log("Launcher started")?;
-    let args: Vec<String> = env::args().skip(1)
-        .filter(|arg| arg != "--self-update-health" && arg != "--self-update-rolled-back").collect();
+    let args: Vec<String> = env::args()
+        .skip(1)
+        .filter(|arg| arg != "--self-update-health" && arg != "--self-update-rolled-back")
+        .collect();
     if args.is_empty() {
-        #[cfg(windows)]
-        {
-            return ui::run();
-        }
-        #[cfg(not(windows))]
-        anyhow::bail!("the graphical launcher is available on Windows only");
+        return ascnet_gui::run();
     }
     match args[0].as_str() {
         "--setup" => {
             require_len(&args, 2, "--setup <game-directory>")?;
             let game = PathBuf::from(&args[1]);
-            if !steam::valid_game_directory(&game) { anyhow::bail!("game directory does not contain PGR.exe") }
-            if install::game_running()? { anyhow::bail!("close PGR.exe before setup") }
+            if !Path::new(&game).join("PGR.exe").is_file() {
+                anyhow::bail!("game directory does not contain PGR.exe");
+            }
+            if install::game_running()? {
+                anyhow::bail!("close PGR.exe before setup");
+            }
             let config: DistributorConfig = serde_json::from_slice(
-                &fs::read(executable_dir()?.join("launcher.json")).context("launcher.json is missing")?,
-            ).context("launcher.json is invalid")?;
-            let build = local::prepare(&config.repository_url, &config.branch, &game, &mut |line| eprintln!("{line}"))?;
+                &fs::read(executable_dir()?.join("launcher.json"))
+                    .context("launcher.json is missing")?,
+            )
+            .context("launcher.json is invalid")?;
+            let build = local::prepare(&config.repository_url, &config.branch, &game, &mut |line: &str| {
+                eprintln!("{line}")
+            })?;
             println!("{}", build.revision);
         }
         "--inspect" => {
@@ -76,7 +67,9 @@ fn run() -> Result<()> {
         "--install" => {
             require_len(&args, 2, "--install <game-directory>")?;
             let package = built_package()?;
-            let backup = install::install_with_consent(Path::new(&args[1]), &package, &mut |line| eprintln!("{line}"))?;
+            let backup = install::install_with_consent(Path::new(&args[1]), &package, &mut |line| {
+                eprintln!("{line}")
+            })?;
             println!("{}", backup.display());
         }
         "--restore" => {
@@ -86,12 +79,18 @@ fn run() -> Result<()> {
         "--check-server" => {
             require_len(&args, 2, "--check-server <origin>")?;
             let origin = package::validate_server_origin(&args[1])?;
-            let response = reqwest::blocking::Client::builder().no_proxy().build()?
-                .get(format!("{origin}/api/launcher/status")).send()?.error_for_status()?;
-            let value: serde_json::Value = response.json()?;
-            println!("{}", serde_json::to_string_pretty(&value)?);
+            let status = reqwest::blocking::Client::builder()
+                .no_proxy()
+                .build()?
+                .get(format!("{origin}/api/launcher/status"))
+                .send()?
+                .error_for_status()?
+                .text()?;
+            println!("{status}");
         }
-        _ => anyhow::bail!("usage: ascnet-launcher [--setup GAME | --inspect GAME | --install GAME | --restore GAME | --check-server ORIGIN]"),
+        _ => anyhow::bail!(
+            "usage: ascnet-launcher [--setup GAME | --inspect GAME | --install GAME | --restore GAME | --check-server ORIGIN]"
+        ),
     }
     Ok(())
 }
@@ -117,14 +116,18 @@ fn require_len(args: &[String], len: usize, usage: &str) -> Result<()> {
 }
 
 fn state_json(state: install::PatchState) -> serde_json::Value {
-    match state {
-        install::PatchState::Unpatched => json!({"state":"unpatched"}),
-        install::PatchState::Current => json!({"state":"current"}),
-        install::PatchState::UpdateAvailable => json!({"state":"updateAvailable"}),
-        install::PatchState::AdoptionRequired => json!({"state":"adoptionRequired"}),
-        install::PatchState::Unsupported(reason) => json!({"state":"unsupported","reason":reason}),
-        install::PatchState::RepairRequired(reason) => {
-            json!({"state":"repairRequired","reason":reason})
-        }
+    let mut value = serde_json::json!({});
+    let label = match &state {
+        install::PatchState::Unpatched => "unpatched",
+        install::PatchState::Current => "current",
+        install::PatchState::AdoptionRequired => "adoptionRequired",
+        install::PatchState::UpdateAvailable => "updateAvailable",
+        install::PatchState::Unsupported(_) => "unsupported",
+        install::PatchState::RepairRequired(_) => "repairRequired",
+    };
+    value["state"] = serde_json::Value::String(label.into());
+    if let install::PatchState::Unsupported(reason) | install::PatchState::RepairRequired(reason) = state {
+        value["reason"] = serde_json::Value::String(reason);
     }
+    value
 }

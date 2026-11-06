@@ -153,12 +153,7 @@ pub struct LocalBuild {
 }
 
 pub fn root() -> Result<PathBuf> {
-    let base = env::var_os("LOCALAPPDATA").context("LOCALAPPDATA is not set")?;
-    let base = PathBuf::from(base);
-    if !base.is_absolute() {
-        bail!("LOCALAPPDATA must be an absolute path");
-    }
-    Ok(base.join("AscNetLauncher").join("local"))
+    Ok(ascnet_platform::launcher_data_root()?.join("local"))
 }
 
 pub fn load_build() -> Result<Option<LocalBuild>> {
@@ -202,50 +197,27 @@ fn prepare_logged(
 ) -> Result<LocalBuild> {
     validate_repository(repository)?;
     validate_branch(branch)?;
-    #[cfg(not(windows))]
-    bail!("local source setup is supported on Windows only");
     let _operation = operation_lock()?;
     let root = root()?;
     fs::create_dir_all(&root).with_context(|| format!("create {}", root.display()))?;
-    #[cfg(windows)]
     let _setup_lock = open_setup_lock(&root)?;
     let script = env::current_exe()?
         .parent()
         .context("launcher executable has no parent directory")?
-        .join("setup-local.ps1");
+        .join(setup_script_name());
     if !script.is_file() {
         bail!("local setup script is missing: {}", script.display());
     }
-    // Refuse before setup-local.ps1 installs dependencies for a client we cannot patch.
+    // Refuse before setup installs dependencies for a client we cannot patch.
     crate::package::check_supported_client(&script.with_file_name("supported-client.json"), game)?;
 
     progress("Starting local source setup");
-    #[cfg(windows)]
-    let setup_job = create_job()?;
-    let mut child = OwnedChild(
-        hide_console(&mut Command::new("powershell.exe"))
-            .args([
-                "-NoLogo",
-                "-NoProfile",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-File",
-            ])
-            .arg(&script)
-            .arg("-Root")
-            .arg(&root)
-            .arg("-Repository")
-            .arg(repository)
-            .arg("-Branch")
-            .arg(branch)
-            .arg("-SetupLockHeld")
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .context("start PowerShell local setup")?,
-    );
-    #[cfg(windows)]
-    assign_to_job(&setup_job, &child.0)?;
+    let setup_job = ascnet_platform::ProcessGuard::new()?;
+    let mut setup = setup_command(&script, &root, repository, branch);
+    setup.stdout(Stdio::piped()).stderr(Stdio::piped());
+    ascnet_platform::isolate_process_group(&mut setup);
+    let mut child = OwnedChild(setup.spawn().context("start local setup")?);
+    setup_job.assign(&child.0)?;
     capture_setup(&mut child.0, log, progress, SETUP_TIMEOUT)?;
     let pending = root.join("build-state.pending.json");
     let bytes = fs::read(&pending).with_context(|| format!("read {}", pending.display()))?;
@@ -271,9 +243,49 @@ fn prepare_logged(
         matches!(crate::install::inspect(game, &package)?, crate::install::PatchState::Current),
         "prepared patch did not become current"
     );
-    #[cfg(windows)]
-    atomic_replace(&pending, &root.join("build-state.json"))?;
+    ascnet_platform::atomic_replace(&pending, &root.join("build-state.json"))?;
     Ok(build)
+}
+
+fn setup_script_name() -> &'static str {
+    if cfg!(windows) {
+        "setup-local.ps1"
+    } else {
+        "setup-local.sh"
+    }
+}
+
+fn setup_command(script: &Path, root: &Path, repository: &str, branch: &str) -> Command {
+    #[cfg(windows)]
+    {
+        let mut command = Command::new("powershell.exe");
+        command
+            .args(["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File"])
+            .arg(script)
+            .arg("-Root")
+            .arg(root)
+            .arg("-Repository")
+            .arg(repository)
+            .arg("-Branch")
+            .arg(branch)
+            .arg("-SetupLockHeld");
+        ascnet_platform::hide_console(&mut command);
+        command
+    }
+    #[cfg(unix)]
+    {
+        let mut command = Command::new("bash");
+        command
+            .arg(script)
+            .arg("--root")
+            .arg(root)
+            .arg("--repository")
+            .arg(repository)
+            .arg("--branch")
+            .arg(branch)
+            .arg("--setup-lock-held");
+        command
+    }
 }
 
 fn capture_setup(
@@ -480,166 +492,156 @@ pub struct LocalRuntime {
     server_dll: PathBuf,
     mongo_port: u16,
     stopped: bool,
-    #[cfg(windows)]
-    job: JobHandle,
+    _guard: ascnet_platform::ProcessGuard,
     _operation: Option<OperationPermit>,
 }
 
 impl LocalRuntime {
     pub fn start(build: &LocalBuild, progress: &mut dyn FnMut(&str)) -> Result<Self> {
-        #[cfg(not(windows))]
-        {
-            let _ = (build, progress);
-            bail!("the local runtime is supported on Windows only");
-        }
-        #[cfg(windows)]
-        {
-            use std::os::windows::process::CommandExt;
-            use windows::Win32::System::Threading::CREATE_NO_WINDOW;
+        let operation = operation_lock()?;
+        let root = root()?;
+        validate_build(&root, build)?;
+        let _ports = reserve_ports([build.mongo_port, build.sdk_port, build.game_port])?;
+        fs::create_dir_all(root.join("data/mongo"))?;
+        fs::create_dir_all(root.join("logs"))?;
+        let guard = ascnet_platform::ProcessGuard::new()?;
 
-            let operation = operation_lock()?;
-            let root = root()?;
-            validate_build(&root, build)?;
-            let _ports = reserve_ports([build.mongo_port, build.sdk_port, build.game_port])?;
-            fs::create_dir_all(root.join("data/mongo"))?;
-            fs::create_dir_all(root.join("logs"))?;
-            let job = create_job()?;
+        progress("Starting MongoDB");
+        drop(_ports);
+        let mongo_log = fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(root.join("logs/mongod.log"))?;
+        let mut mongo_command = Command::new(&build.mongod);
+        mongo_command
+            .args(["--bind_ip", "127.0.0.1", "--dbpath"])
+            .arg(root.join("data/mongo"))
+            .arg("--port")
+            .arg(build.mongo_port.to_string())
+            .stdout(mongo_log.try_clone()?)
+            .stderr(mongo_log);
+        ascnet_platform::isolate_process_group(&mut mongo_command);
+        ascnet_platform::hide_console(&mut mongo_command);
+        let mut mongo = OwnedChild(mongo_command.spawn().context("start MongoDB")?);
+        guard.assign(&mongo.0)?;
+        wait_tcp(&mut mongo.0, build.mongo_port, "MongoDB")?;
 
-            progress("Starting MongoDB");
-            drop(_ports);
-            let mongo_log = fs::OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(root.join("logs/mongod.log"))?;
-            let mut mongo = OwnedChild(
-                Command::new(&build.mongod)
-                    .args(["--bind_ip", "127.0.0.1", "--dbpath"])
-                    .arg(root.join("data/mongo"))
-                    .arg("--port")
-                    .arg(build.mongo_port.to_string())
-                    .stdout(mongo_log.try_clone()?)
-                    .stderr(mongo_log)
-                    .creation_flags(CREATE_NO_WINDOW.0)
-                    .spawn()
-                    .context("start MongoDB")?,
-            );
-            assign_to_job(&job, &mongo.0)?;
-            wait_tcp(&mut mongo.0, build.mongo_port, "MongoDB")?;
-
-            progress("Starting AscNet server");
-            let origin = format!("http://127.0.0.1:{}", build.sdk_port);
-            let server_log = fs::OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(root.join("logs/server.log"))?;
-            let mut server = OwnedChild(
-                Command::new(&build.dotnet)
-                    .arg(build.server_directory.join("AscNet.dll"))
-                    .args(["--urls", &origin])
-                    .current_dir(&build.resource_directory)
-                    .env("ASCNET_GATE_FALLBACK_USERNAME", "")
-                    .env("ASCNET_PUBLIC_HTTP_ORIGIN", &origin)
-                    .env("ASCNET_GAME_BIND_ADDRESS", "127.0.0.1")
-                    .env("ASCNET_MANAGED_STDIN", "1")
-                    .stdin(Stdio::piped())
-                    .stdout(server_log.try_clone()?)
-                    .stderr(server_log)
-                    .creation_flags(CREATE_NO_WINDOW.0)
-                    .spawn()
-                    .context("start AscNet server")?,
-            );
-            assign_to_job(&job, &server.0)?;
-            wait_server(&mut server.0, &origin, build.game_port)?;
-            progress("Local backend is ready");
-            Ok(Self {
-                server,
-                mongo,
-                dotnet: build.dotnet.clone(),
-                server_dll: build.server_directory.join("AscNet.dll"),
-                mongo_port: build.mongo_port,
-                stopped: false,
-                job,
-                _operation: Some(operation),
-            })
-        }
+        progress("Starting AscNet server");
+        let origin = format!("http://127.0.0.1:{}", build.sdk_port);
+        let server_log = fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(root.join("logs/server.log"))?;
+        let mut server_command = Command::new(&build.dotnet);
+        server_command
+            .arg(build.server_directory.join("AscNet.dll"))
+            .args(["--urls", &origin])
+            .current_dir(&build.resource_directory)
+            .env("ASCNET_GATE_FALLBACK_USERNAME", "")
+            .env("ASCNET_PUBLIC_HTTP_ORIGIN", &origin)
+            .env("ASCNET_GAME_BIND_ADDRESS", "127.0.0.1")
+            .env("ASCNET_MANAGED_STDIN", "1")
+            .stdin(Stdio::piped())
+            .stdout(server_log.try_clone()?)
+            .stderr(server_log);
+        ascnet_platform::isolate_process_group(&mut server_command);
+        ascnet_platform::hide_console(&mut server_command);
+        let mut server = OwnedChild(server_command.spawn().context("start AscNet server")?);
+        guard.assign(&server.0)?;
+        wait_server(&mut server.0, &origin, build.game_port)?;
+        progress("Local backend is ready");
+        Ok(Self {
+            server,
+            mongo,
+            dotnet: build.dotnet.clone(),
+            server_dll: build.server_directory.join("AscNet.dll"),
+            mongo_port: build.mongo_port,
+            stopped: false,
+            _guard: guard,
+            _operation: Some(operation),
+        })
     }
 
     pub fn stop(&mut self) -> Result<()> {
-        #[cfg(windows)]
-        {
-            use std::os::windows::process::CommandExt;
-            use windows::Win32::System::Threading::CREATE_NO_WINDOW;
-            if self.stopped {
-                return Ok(());
-            }
-            let server_request = (|| -> Result<()> {
-                let stdin = self
-                    .server
-                    .0
-                    .stdin
-                    .as_mut()
-                    .context("AscNet server stdin is unavailable")?;
-                stdin
-                    .write_all(b"shutdown\n")
-                    .context("request AscNet server shutdown")?;
-                stdin
-                    .flush()
-                    .context("flush AscNet server shutdown request")
-            })();
-            let server_result = wait_or_kill(&mut self.server.0, STOP_TIMEOUT);
-
-            let helper_result = (|| -> Result<bool> {
-                let mut shutdown = OwnedChild(
-                    Command::new(&self.dotnet)
-                        .arg(&self.server_dll)
-                        .args(["--shutdown-local-mongo", &self.mongo_port.to_string()])
-                        .current_dir(
-                            self.server_dll
-                                .parent()
-                                .context("AscNet server DLL has no directory")?,
-                        )
-                        .stdout(Stdio::null())
-                        .stderr(Stdio::null())
-                        .creation_flags(CREATE_NO_WINDOW.0)
-                        .spawn()
-                        .context("start owned MongoDB shutdown helper")?,
-                );
-                assign_to_job(&self.job, &shutdown.0)?;
-                wait_or_kill(&mut shutdown.0, STOP_TIMEOUT)
-            })();
-            let mongo_result = wait_or_kill(&mut self.mongo.0, STOP_TIMEOUT);
-            self.stopped = true;
-            self._operation.take();
-            let server_forced = server_result?;
-            let helper_forced = helper_result?;
-            let mongo_forced = mongo_result?;
-            if server_forced || helper_forced || mongo_forced {
-                bail!("local runtime did not stop gracefully; forced termination was required");
-            }
-            server_request?;
+        if self.stopped {
+            return Ok(());
         }
+        let server_request = (|| -> Result<()> {
+            let stdin = self
+                .server
+                .0
+                .stdin
+                .as_mut()
+                .context("AscNet server stdin is unavailable")?;
+            stdin
+                .write_all(b"shutdown\n")
+                .context("request AscNet server shutdown")?;
+            stdin
+                .flush()
+                .context("flush AscNet server shutdown request")
+        })();
+        let server_result = wait_or_kill(&mut self.server.0, STOP_TIMEOUT);
+
+        let helper_result = (|| -> Result<bool> {
+            let mut helper = Command::new(&self.dotnet);
+            helper
+                .arg(&self.server_dll)
+                .args(["--shutdown-local-mongo", &self.mongo_port.to_string()])
+                .current_dir(
+                    self.server_dll
+                        .parent()
+                        .context("AscNet server DLL has no directory")?,
+                )
+                .stdout(Stdio::null())
+                .stderr(Stdio::null());
+            ascnet_platform::hide_console(&mut helper);
+            let mut shutdown = OwnedChild(helper.spawn().context("start owned MongoDB shutdown helper")?);
+            wait_or_kill(&mut shutdown.0, STOP_TIMEOUT)
+        })();
+        let mongo_result = wait_or_kill(&mut self.mongo.0, STOP_TIMEOUT);
+        self.stopped = true;
+        self._operation.take();
+        let server_forced = server_result?;
+        let helper_forced = helper_result?;
+        let mongo_forced = mongo_result?;
+        if server_forced || helper_forced || mongo_forced {
+            bail!("local runtime did not stop gracefully; forced termination was required");
+        }
+        server_request?;
         Ok(())
     }
 }
 fn git_executable() -> Option<PathBuf> {
     if let Some(path) = env::var_os("PATH").and_then(|path| {
         env::split_paths(&path)
-            .map(|directory| directory.join("git.exe"))
+            .map(|directory| directory.join(git_name()))
             .find(|candidate| candidate.is_file())
     }) {
         return Some(path);
     }
-    ["ProgramFiles", "ProgramFiles(x86)", "LOCALAPPDATA"]
-        .into_iter()
-        .filter_map(env::var_os)
-        .map(PathBuf::from)
-        .flat_map(|base| {
-            [
-                base.join("Git/cmd/git.exe"),
-                base.join("Programs/Git/cmd/git.exe"),
-            ]
-        })
-        .find(|candidate| candidate.is_file())
+    if cfg!(windows) {
+        ["ProgramFiles", "ProgramFiles(x86)", "LOCALAPPDATA"]
+            .into_iter()
+            .filter_map(env::var_os)
+            .map(PathBuf::from)
+            .flat_map(|base| {
+                [
+                    base.join("Git/cmd/git.exe"),
+                    base.join("Programs/Git/cmd/git.exe"),
+                ]
+            })
+            .find(|candidate| candidate.is_file())
+    } else {
+        None
+    }
+}
+
+fn git_name() -> &'static str {
+    if cfg!(windows) {
+        "git.exe"
+    } else {
+        "git"
+    }
 }
 
 struct OwnedChild(Child);
@@ -692,16 +694,8 @@ fn operation_lock() -> Result<OperationPermit> {
         .map(|_| OperationPermit)
         .map_err(|_| anyhow::anyhow!("another local setup or runtime operation is active"))
 }
-#[cfg(windows)]
 fn open_setup_lock(root: &Path) -> Result<fs::File> {
-    use std::os::windows::fs::OpenOptionsExt;
-    fs::OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .share_mode(0)
-        .open(root.join("setup.lock"))
-        .context("another local setup is already active")
+    ascnet_platform::exclusive_lock(&root.join("setup.lock"))
 }
 
 fn validate_repository(repository: &str) -> Result<()> {
@@ -861,18 +855,12 @@ fn text_output<'a>(bytes: &'a [u8], description: &str) -> Result<&'a str> {
 }
 
 fn terminate_child(child: &mut Child) {
-    let _ = child.kill();
-    let _ = child.wait();
+    ascnet_platform::terminate_tree(child);
 }
 
 /// The launcher has no console, so console children would each open their own window.
 pub(crate) fn hide_console(command: &mut Command) -> &mut Command {
-    #[cfg(windows)]
-    {
-        use std::os::windows::process::CommandExt;
-        command.creation_flags(windows::Win32::System::Threading::CREATE_NO_WINDOW.0);
-    }
-    command
+    ascnet_platform::hide_console(command)
 }
 
 fn command_output_timeout(mut command: Command, timeout: Duration) -> Result<std::process::Output> {
@@ -893,76 +881,6 @@ fn command_output_timeout(mut command: Command, timeout: Duration) -> Result<std
         thread::sleep(Duration::from_millis(100));
     }
 }
-#[cfg(windows)]
-fn atomic_replace(source: &Path, destination: &Path) -> Result<()> {
-    use std::os::windows::ffi::OsStrExt;
-    use windows::{
-        core::PCWSTR,
-        Win32::Storage::FileSystem::{
-            MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH,
-        },
-    };
-    let source: Vec<u16> = source.as_os_str().encode_wide().chain(Some(0)).collect();
-    let destination: Vec<u16> = destination
-        .as_os_str()
-        .encode_wide()
-        .chain(Some(0))
-        .collect();
-    unsafe {
-        MoveFileExW(
-            PCWSTR(source.as_ptr()),
-            PCWSTR(destination.as_ptr()),
-            MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
-        )
-        .context("activate local build state")
-    }
-}
-
-#[cfg(windows)]
-struct JobHandle(windows::Win32::Foundation::HANDLE);
-
-#[cfg(windows)]
-impl Drop for JobHandle {
-    fn drop(&mut self) {
-        if !self.0.is_invalid() {
-            unsafe {
-                let _ = windows::Win32::Foundation::CloseHandle(self.0);
-            }
-        }
-    }
-}
-
-#[cfg(windows)]
-fn create_job() -> Result<JobHandle> {
-    use windows::Win32::System::JobObjects::{
-        CreateJobObjectW, JobObjectExtendedLimitInformation, SetInformationJobObject,
-        JOBOBJECT_EXTENDED_LIMIT_INFORMATION, JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
-    };
-    unsafe {
-        let job = JobHandle(CreateJobObjectW(None, None)?);
-        let mut info = JOBOBJECT_EXTENDED_LIMIT_INFORMATION::default();
-        info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
-        SetInformationJobObject(
-            job.0,
-            JobObjectExtendedLimitInformation,
-            &info as *const _ as _,
-            std::mem::size_of_val(&info) as u32,
-        )?;
-        Ok(job)
-    }
-}
-
-#[cfg(windows)]
-fn assign_to_job(job: &JobHandle, child: &Child) -> Result<()> {
-    use std::os::windows::io::AsRawHandle;
-    use windows::Win32::{Foundation::HANDLE, System::JobObjects::AssignProcessToJobObject};
-    unsafe {
-        AssignProcessToJobObject(job.0, HANDLE(child.as_raw_handle() as isize))
-            .context("contain local process in launcher job")
-    }
-}
-
-#[cfg(windows)]
 fn wait_or_kill(child: &mut Child, timeout: Duration) -> Result<bool> {
     let deadline = Instant::now() + timeout;
     while child.try_wait()?.is_none() && Instant::now() < deadline {

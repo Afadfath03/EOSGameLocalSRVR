@@ -388,3 +388,20 @@ proxylog
 
 # protocol gap tables
 Resources/table.pre-4.7.7/
+
+# Launcher packaged artifacts (CI / packaging/build-appimage.sh)
+AscNet.Launcher/*.AppImage
+AscNet.Launcher/*.AppImage.zsync
+AscNet.Launcher/AscNetLauncher.zip
+AscNet.Launcher/patch-manifest.json
+AscNet.Launcher/patch-bundle/
+AscNet.Launcher/patch-bundle.zip
+AscNet.Launcher/launcher.log
+squashfs-root/
+
+# AscNet.Patch build byproducts
+AscNet.Patch/patch-out/
+AscNet.Patch/version-obj/
+
+# CodeGraph local index (machine-specific)
+.codegraph/

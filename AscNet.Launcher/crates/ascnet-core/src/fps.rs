@@ -622,7 +622,9 @@ fn save_backup(game: &Path, bundle: &Path, original: &[u8], replacement: &[u8]) 
 fn create_real_dir(path: &Path) -> Result<()> {
     match fs::symlink_metadata(path) {
         Ok(metadata)
-            if metadata.file_type().is_symlink() || !metadata.is_dir() || is_reparse(&metadata) =>
+            if metadata.file_type().is_symlink()
+                || !metadata.is_dir()
+                || ascnet_platform::metadata_is_link(&metadata) =>
         {
             bail!(
                 "refusing non-directory/reparse backup path: {}",
@@ -636,16 +638,6 @@ fn create_real_dir(path: &Path) -> Result<()> {
         Err(error) => Err(error.into()),
     }
 }
-#[cfg(windows)]
-fn is_reparse(metadata: &fs::Metadata) -> bool {
-    use std::os::windows::fs::MetadataExt;
-    metadata.file_attributes() & 0x400 != 0
-}
-#[cfg(not(windows))]
-fn is_reparse(_: &fs::Metadata) -> bool {
-    false
-}
-
 fn write_new(path: &Path, data: &[u8]) -> Result<()> {
     let mut file = OpenOptions::new().write(true).create_new(true).open(path)?;
     file.write_all(data)?;
@@ -661,41 +653,13 @@ fn write_atomic(path: &Path, data: &[u8]) -> Result<()> {
     ));
     let result = (|| {
         write_new(&temporary, data)?;
-        atomic_replace(&temporary, path)?;
+        ascnet_platform::atomic_replace(&temporary, path)?;
         sync_dir(parent)
     })();
     if result.is_err() {
         let _ = fs::remove_file(temporary);
     }
     result
-}
-fn atomic_replace(source: &Path, destination: &Path) -> Result<()> {
-    #[cfg(windows)]
-    {
-        use std::os::windows::ffi::OsStrExt;
-        use windows::core::PCWSTR;
-        use windows::Win32::Storage::FileSystem::{
-            MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH,
-        };
-        let src: Vec<u16> = source.as_os_str().encode_wide().chain(Some(0)).collect();
-        let dst: Vec<u16> = destination
-            .as_os_str()
-            .encode_wide()
-            .chain(Some(0))
-            .collect();
-        unsafe {
-            MoveFileExW(
-                PCWSTR(src.as_ptr()),
-                PCWSTR(dst.as_ptr()),
-                MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
-            )?;
-        }
-        Ok(())
-    }
-    #[cfg(not(windows))]
-    {
-        fs::rename(source, destination).map_err(Into::into)
-    }
 }
 #[cfg(not(windows))]
 fn sync_dir(path: &Path) -> Result<()> {

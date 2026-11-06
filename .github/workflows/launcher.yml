@@ -1,0 +1,152 @@
+name: launcher
+
+on:
+  pull_request:
+    paths:
+      - "AscNet.Launcher/**"
+      - "AscNet.Patch/**"
+      - ".github/workflows/launcher.yml"
+  push:
+    branches: [main]
+    tags: ["v*"]
+    paths:
+      - "AscNet.Launcher/**"
+      - "AscNet.Patch/**"
+      - ".github/workflows/launcher.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
+
+jobs:
+  patch:
+    name: Windows patch DLLs
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - name: Build krsdk and lucia
+        run: cargo build --release --locked --manifest-path AscNet.Patch/Cargo.toml --target x86_64-pc-windows-msvc
+      - uses: microsoft/setup-msbuild@v2
+      - name: Build version.dll proxy
+        shell: pwsh
+        run: |
+          $out = Join-Path $PWD 'patch-out'
+          New-Item -ItemType Directory -Force $out | Out-Null
+          msbuild AscNet.Patch/VersionShim/src/VersionShim.vcxproj /m:1 /p:Configuration=Release /p:Platform=x64 "/p:OutDir=$out\" "/p:IntDir=$PWD/version-obj\"
+      - name: Assemble patch bundle
+        shell: pwsh
+        run: |
+          $out = Join-Path $PWD 'patch-out'
+          $bundle = Join-Path $PWD 'patch-bundle'
+          New-Item -ItemType Directory -Force $bundle | Out-Null
+          Copy-Item "$PWD/AscNet.Patch/target/x86_64-pc-windows-msvc/release/lucia.dll" $bundle
+          Copy-Item "$PWD/AscNet.Patch/target/x86_64-pc-windows-msvc/release/KRSDK.dll" $bundle
+          Copy-Item (Join-Path $out 'VersionShim.dll') (Join-Path $bundle 'version.dll')
+          Copy-Item "$PWD/AscNet.Launcher/supported-client.json" $bundle
+          [IO.File]::WriteAllText((Join-Path $bundle 'libraries.txt'), "*PGR.exe`nlucia.dll`n", (New-Object Text.UTF8Encoding($false)))
+          Compress-Archive -Path (Join-Path $bundle '*') -DestinationPath (Join-Path $PWD 'ascnet-patch.zip')
+          $hash = (Get-FileHash -Algorithm SHA256 (Join-Path $PWD 'ascnet-patch.zip')).Hash.ToLower()
+          # Only tagged builds publish a reusable bundle; a branch build gets an empty manifest so setup
+          # fails with an actionable message instead of downloading a release that does not exist.
+          $tag = if ("${{ github.ref }}" -like 'refs/tags/*') { "${{ github.ref_name }}" } else { '' }
+          $manifest = [ordered]@{
+            url = if ($tag) { "https://github.com/${{ github.repository }}/releases/download/$tag/ascnet-patch.zip" } else { '' }
+            sha256 = if ($tag) { $hash } else { '' }
+          }
+          ConvertTo-Json $manifest | Set-Content -Encoding utf8 patch-manifest.json
+          Copy-Item (Join-Path $PWD 'ascnet-patch.zip') (Join-Path $PWD 'patch-manifest.json') $PWD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: patch
+          path: |
+            ascnet-patch.zip
+            patch-manifest.json
+
+  windows:
+    name: Windows launcher
+    needs: patch
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/download-artifact@v4
+        with:
+          name: patch
+          path: patch
+      - name: Test
+        run: cargo test --workspace --manifest-path AscNet.Launcher/Cargo.toml
+      - name: Build
+        run: cargo build --release --locked --manifest-path AscNet.Launcher/Cargo.toml -p ascnet-cli
+      - name: Assemble launcher
+        shell: pwsh
+        run: |
+          $out = Join-Path $PWD 'launcher-out'
+          New-Item -ItemType Directory -Force $out | Out-Null
+          Copy-Item 'AscNet.Launcher/target/release/ascnet-launcher.exe' (Join-Path $out 'AscNetLauncher.exe')
+          Copy-Item 'AscNet.Launcher/launcher.json' $out
+          Copy-Item 'AscNet.Launcher/setup-local.ps1' $out
+          Copy-Item 'AscNet.Launcher/supported-client.json' $out
+          Copy-Item 'patch/patch-manifest.json' $out
+          Compress-Archive -Path (Join-Path $out '*') -DestinationPath 'AscNetLauncher.zip'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: AscNetLauncher.zip
+
+  linux:
+    name: Linux AppImage
+    needs: patch
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/download-artifact@v4
+        with:
+          name: patch
+          path: patch
+      - name: System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgl1 libegl1 libxkbcommon0 libwayland-client0 libx11-6 libxi6 libxcursor1 libxrandr2 libxinerama1 libfuse2 file wget
+      - name: Test
+        run: cargo test --workspace --manifest-path AscNet.Launcher/Cargo.toml
+      - name: Build
+        run: cargo build --release --locked --manifest-path AscNet.Launcher/Cargo.toml -p ascnet-cli
+      - name: appimagetool
+        run: |
+          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool
+          mkdir -p "$HOME/.local/bin"
+          mv appimagetool "$HOME/.local/bin/appimagetool"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Package AppImage
+        run: |
+          cp patch/patch-manifest.json AscNet.Launcher/patch-manifest.json
+          AscNet.Launcher/packaging/build-appimage.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: AscNet.Launcher/AscNetLauncher-x86_64.AppImage
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, linux, patch]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/windows/AscNetLauncher.zip
+            artifacts/linux/AscNetLauncher-x86_64.AppImage
+            artifacts/patch/ascnet-patch.zip

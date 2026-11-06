@@ -1,6 +1,6 @@
 # Client download
 
-Status: implemented (engine `src/download.rs`, UI `src/ui/client.rs`). The sections below the player guide are the research notes the engine was built from.
+Status: implemented (engine `crates/ascnet-core/src/download.rs`, UI `crates/ascnet-gui/src/views.rs`). The sections below the player guide are the research notes the engine was built from.
 
 ## Using it (player guide)
 No game selected: press **SELECT GAME** on the home screen (or **Settings → Game client…** at any time). The **Get game** view has:
@@ -25,7 +25,7 @@ No game selected: press **SELECT GAME** on the home screen (or **Settings → Ga
 
 Verify/repair and update never touch files outside the chosen folder, and refuse to run while PGR.exe is running.
 
-## Engine (`src/download.rs`)
+## Engine (`crates/ascnet-core/src/download.rs`)
 - **Pinned sources**: `supported-client.json` `"downloads"` holds, per region, the 4.8.0 CDN list (priority order), `baseUrl`,
   `indexFile` + `indexFileMd5`, `size`, every `patchConfig` entry (version, baseUrl, indexFile, MD5, size), the
   `resourcesExcludePath`, and the live `discovery` index URLs. File lists are authenticated against the pinned MD5; the live index

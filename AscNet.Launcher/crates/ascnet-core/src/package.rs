@@ -448,7 +448,7 @@ mod tests {
         let root = package();
         fs::write(
             root.join("supported-client.json"),
-            include_bytes!("../supported-client.json"),
+            include_bytes!("../../../supported-client.json"),
         )
         .unwrap();
         let package = load_package(&root).unwrap();
@@ -471,7 +471,7 @@ mod tests {
     #[test]
     fn kr_and_jp_retail_identities_are_accepted_from_bundled_metadata() {
         let root = package();
-        fs::write(root.join("supported-client.json"), include_bytes!("../supported-client.json")).unwrap();
+        fs::write(root.join("supported-client.json"), include_bytes!("../../../supported-client.json")).unwrap();
         let manifest = load_package(&root).unwrap().manifest;
         // SHA-256 of the 4.8.0 retail files (KR G286/50011, JP G282/50007); KRSDK.dll/PGRBase/UnityPlayer are shared.
         let kr = ("2cd82d51830b2e8ac373162aa2fbb9106ad3760906685abb51611770e1eb310e", "ccb048f28e779237a6dc07841e0bb96857c6903dc3ec21cdbec3fde71c3d8b33");
@@ -503,11 +503,11 @@ mod tests {
             *hashes = hashes[0].clone();
         }
         fs::write(&cached, serde_json::to_vec(&old).unwrap()).unwrap();
-        fs::write(&source, include_bytes!("../supported-client.json")).unwrap();
+        fs::write(&source, include_bytes!("../../../supported-client.json")).unwrap();
         refresh_supported_client(&root, &source).unwrap();
         let upgraded = load_package(&root).unwrap();
         let shipped: SupportedClient =
-            parse_supported_client(include_bytes!("../supported-client.json")).unwrap();
+            parse_supported_client(include_bytes!("../../../supported-client.json")).unwrap();
         assert_eq!(upgraded.manifest.originals, shipped.originals);
         assert!(!upgraded.manifest.accepts_original("PGR.exe", Some(&"00".repeat(32))));
         fs::remove_dir_all(root).unwrap();
@@ -551,7 +551,7 @@ mod tests {
     #[test]
     fn cn_retail_identities_are_accepted_from_bundled_metadata_and_lookalikes_rejected() {
         let root = package();
-        fs::write(root.join("supported-client.json"), include_bytes!("../supported-client.json")).unwrap();
+        fs::write(root.join("supported-client.json"), include_bytes!("../../../supported-client.json")).unwrap();
         let manifest = load_package(&root).unwrap().manifest;
         let cn = [
             ("PGR.exe", "489e674af8c981c083a022b1b268d9fec27f4f2d93f9f1ccb655ad0c0b9a3179"),

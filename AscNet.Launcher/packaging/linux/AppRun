@@ -1,0 +1,4 @@
+#!/bin/sh
+# AppImage entry point: keep the process in the foreground so the window owns the lifetime.
+HERE="$(dirname "$(readlink -f "$0")")"
+exec "$HERE/usr/bin/ascnet-launcher" "$@"

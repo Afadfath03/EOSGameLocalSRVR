@@ -1,12 +1,25 @@
 //! GitHub HTTPS/repository ownership is the release trust root, not a signing key.
-use anyhow::{bail, ensure, Context, Result};
+use anyhow::{ensure, Context, Result};
+#[cfg(windows)]
+use anyhow::bail;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::{collections::BTreeMap, fs::{self, File, OpenOptions}, io::{Read, Write}, path::{Path, PathBuf}, process::Command, time::{Duration, Instant}};
+use std::{collections::BTreeMap, fs::{self, OpenOptions}, io::{Read, Write}, path::{Path, PathBuf}, time::Duration};
+#[cfg(windows)]
+use std::{fs::File, process::Command, time::Instant};
 use crate::package::sha256_file;
 
-const FILES: [&str; 7] = ["AscNetLauncher.exe", "background.bmp", "background.mp4", "background.wav", "launcher.json", "setup-local.ps1", "supported-client.json"];
+const WINDOWS_FILES: [&str; 5] = ["AscNetLauncher.exe", "launcher.json", "patch-manifest.json", "setup-local.ps1", "supported-client.json"];
+/// Release members for this host. Linux ships one AppImage; Windows ships the flat launcher set.
+fn files() -> Vec<&'static str> {
+    if cfg!(windows) {
+        WINDOWS_FILES.to_vec()
+    } else {
+        vec![ascnet_platform::release_asset_name()]
+    }
+}
 const MAX_ARCHIVE: u64 = 128 * 1024 * 1024;
+#[cfg(windows)]
 const MAX_EXPANDED: u64 = 256 * 1024 * 1024;
 const TRANSACTION: &str = ".ascnet-launcher-update";
 // Retained in the executable and checked without executing downloaded code.
@@ -21,7 +34,10 @@ pub struct Release {
 }
 
 #[derive(Debug)]
-pub struct StagedUpdate { root: PathBuf }
+pub struct StagedUpdate { root: PathBuf, version: String }
+impl StagedUpdate {
+    pub fn version(&self) -> &str { &self.version }
+}
 impl Drop for StagedUpdate {
     fn drop(&mut self) { let _ = fs::remove_dir_all(&self.root); }
 }
@@ -86,13 +102,14 @@ pub fn check(repository: &str, current_version: &str) -> Result<Option<Release>>
     let releases: Vec<ApiRelease> = serde_json::from_slice(&bytes)?;
     let Some((version, release)) = releases.into_iter().filter(|r| !r.draft && !r.prerelease)
         .filter_map(|r| stable_version(&r.tag_name).map(|v| (v, r))).filter(|(v, _)| v > &current).max_by(|a,b| a.0.cmp(&b.0)) else { return Ok(None) };
-    let assets: Vec<_> = release.assets.into_iter().filter(|a| a.name == "AscNetLauncher.zip").collect();
-    ensure!(assets.len() == 1, "release must contain exactly one AscNetLauncher.zip");
+    let asset_name = ascnet_platform::release_asset_name();
+    let assets: Vec<_> = release.assets.into_iter().filter(|a| a.name == asset_name).collect();
+    ensure!(assets.len() == 1, "release must contain exactly one {asset_name}");
     let asset = &assets[0];
     ensure!(asset.state == "uploaded" && asset.size > 0 && asset.size <= MAX_ARCHIVE, "invalid release asset size/state");
     let digest = asset.digest.as_deref().and_then(|d| d.strip_prefix("sha256:")).context("GitHub asset SHA-256 digest is required")?;
     ensure!(digest.len() == 64 && digest.bytes().all(|b| b.is_ascii_hexdigit()), "invalid GitHub SHA-256 digest");
-    let expected = format!("https://github.com/{repository}/releases/download/{}/AscNetLauncher.zip", release.tag_name);
+    let expected = format!("https://github.com/{repository}/releases/download/{}/{asset_name}", release.tag_name);
     ensure!(asset.browser_download_url == expected, "release asset URL does not match repository/tag");
     Ok(Some(Release { version: version.to_string(), url: expected, digest: digest.to_ascii_lowercase(), size: asset.size }))
 }
@@ -118,11 +135,31 @@ fn directory(path: &Path) -> Result<()> {
     Ok(())
 }
 fn install_dir() -> Result<PathBuf> {
-    let exe = std::env::current_exe()?;
-    ensure!(exe.file_name().and_then(|s| s.to_str()) == Some("AscNetLauncher.exe"), "self-update requires AscNetLauncher.exe deployment");
-    let root = exe.parent().context("launcher has no directory")?.to_path_buf();
+    let root = ascnet_platform::launcher_install_dir()?;
+    if cfg!(windows) {
+        ensure!(
+            std::env::current_exe()?.file_name().and_then(|s| s.to_str()) == Some("AscNetLauncher.exe"),
+            "self-update requires AscNetLauncher.exe deployment"
+        );
+    }
     directory(&root)?;
     Ok(root)
+}
+
+/// Linux update target: the AppImage the user launched.
+#[cfg(unix)]
+fn appimage_path() -> Result<PathBuf> {
+    if let Some(value) = std::env::var_os("APPIMAGE") {
+        let path = PathBuf::from(value);
+        ensure!(path.is_absolute(), "APPIMAGE must be absolute");
+        return Ok(path);
+    }
+    let exe = std::env::current_exe()?;
+    ensure!(
+        exe.file_name().and_then(|s| s.to_str()) == Some(ascnet_platform::release_asset_name()),
+        "self-update requires an AppImage deployment"
+    );
+    Ok(exe)
 }
 fn synced_write(path: &Path, bytes: &[u8]) -> Result<()> {
     ensure!(!path.exists(), "durable update record already exists");
@@ -134,15 +171,17 @@ fn synced_write(path: &Path, bytes: &[u8]) -> Result<()> {
     replace(&temporary, path)?;
     Ok(())
 }
+#[cfg(windows)]
 fn extract(archive: &Path, target: &Path, version: &str) -> Result<BTreeMap<String, String>> {
+    let files = files();
     let mut zip = zip::ZipArchive::new(File::open(archive)?)?;
-    ensure!(zip.len() == FILES.len(), "launcher ZIP must contain exactly seven flat files");
+    ensure!(zip.len() == files.len(), "launcher ZIP member count mismatch");
     let mut hashes = BTreeMap::new();
     let mut expanded = 0u64;
     for index in 0..zip.len() {
         let mut member = zip.by_index(index)?;
         let name = member.name().to_owned();
-        ensure!(FILES.contains(&name.as_str()) && !hashes.contains_key(&name), "unexpected or duplicate ZIP member: {name}");
+        ensure!(files.contains(&name.as_str()) && !hashes.contains_key(&name), "unexpected or duplicate ZIP member: {name}");
         ensure!(!member.is_dir() && member.unix_mode().map_or(true, |m| m & 0o170000 == 0 || m & 0o170000 == 0o100000), "nonregular ZIP member");
         ensure!(matches!(member.compression(), zip::CompressionMethod::Stored | zip::CompressionMethod::Deflated), "unsupported ZIP compression");
         expanded = expanded.checked_add(member.size()).context("expanded size overflow")?;
@@ -154,14 +193,27 @@ fn extract(archive: &Path, target: &Path, version: &str) -> Result<BTreeMap<Stri
         output.sync_all()?;
         hashes.insert(name.clone(), sha256_file(&target.join(name))?);
     }
-    verify_version(&target.join(FILES[0]), version)?;
+    verify_version(&target.join(files[0]), version)?;
     Ok(hashes)
+}
+
+#[cfg(unix)]
+fn extract(archive: &Path, target: &Path, version: &str) -> Result<BTreeMap<String, String>> {
+    let name = ascnet_platform::release_asset_name();
+    let destination = target.join(name);
+    fs::copy(archive, &destination).context("staging the launcher AppImage")?;
+    verify_version(&destination, version)?;
+    Ok(BTreeMap::from([(name.to_owned(), sha256_file(&destination)?)]))
 }
 fn verify_version(exe: &Path, version: &str) -> Result<()> {
     regular(exe)?;
     ensure!(fs::metadata(exe)?.len() <= MAX_ARCHIVE, "executable too large");
     let bytes = fs::read(exe)?;
-    ensure!(bytes.starts_with(b"MZ"), "launcher asset is not a Windows executable");
+    if cfg!(windows) {
+        ensure!(bytes.starts_with(b"MZ"), "launcher asset is not a Windows executable");
+    } else {
+        ensure!(bytes.starts_with(b"\x7fELF"), "launcher asset is not a Linux executable");
+    }
     let marker = format!("ASCNET_LAUNCHER_VERSION={version}\0");
     ensure!(bytes.windows(marker.len()).any(|w| w == marker.as_bytes()), "release tag does not match embedded launcher version");
     Ok(())
@@ -193,7 +245,7 @@ pub fn stage(release: &Release) -> Result<StagedUpdate> {
     })();
     if result.is_err() { let _ = fs::remove_dir_all(&root); }
     result?;
-    Ok(StagedUpdate { root })
+    Ok(StagedUpdate { root, version: release.version.clone() })
 }
 
 fn read_journal(root: &Path, name: &str) -> Result<Journal> {
@@ -202,9 +254,10 @@ fn read_journal(root: &Path, name: &str) -> Result<Journal> {
     regular(&path)?;
     ensure!(fs::metadata(&path)?.len() < 16384, "update journal too large");
     let journal: Journal = serde_json::from_slice(&fs::read(path)?)?;
-    ensure!(journal.files.len() == FILES.len() && FILES.iter().all(|n| journal.files.contains_key(*n)), "invalid update file set");
-    ensure!(journal.old.keys().all(|n| FILES.contains(&n.as_str()) && n != "launcher.json"), "invalid backup file set");
-    ensure!(name != "journal.json" || journal.old.len() == FILES.len() - 1, "incomplete backup journal");
+    let files = files();
+    ensure!(journal.files.len() == files.len() && files.iter().all(|n| journal.files.contains_key(*n)), "invalid update file set");
+    ensure!(journal.old.keys().all(|n| files.contains(&n.as_str()) && n != "launcher.json"), "invalid backup file set");
+    ensure!(name != "journal.json" || journal.old.len() == files.len() - 1, "incomplete backup journal");
     ensure!(stable_version(&journal.release.version).is_some(), "invalid journal version");
     Ok(journal)
 }
@@ -215,7 +268,22 @@ fn verify_files(root: &Path, files: &BTreeMap<String, String>) -> Result<()> {
 }
 
 pub fn launch_update(staged: StagedUpdate) -> Result<()> {
-    #[cfg(not(windows))] { let _ = staged; bail!("self-update is supported on Windows only") }
+    #[cfg(unix)]
+    {
+        let install = install_dir()?;
+        ensure!(staged.root.parent() == Some(install.as_path()), "staging directory is not beside launcher");
+        let journal = read_journal(&staged.root, "staged.json")?;
+        verify_files(&staged.root.join("new"), &journal.files)?;
+        let name = ascnet_platform::release_asset_name();
+        let new = staged.root.join("new").join(name);
+        verify_version(&new, &journal.release.version)?;
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(&new, fs::Permissions::from_mode(0o755))?;
+        let target = appimage_path()?;
+        ensure!(target.parent() == Some(install.as_path()), "AppImage is not in the launcher directory");
+        ascnet_platform::atomic_replace(&new, &target)?;
+        return Ok(());
+    }
     #[cfg(windows)] {
         let install = install_dir()?;
         ensure!(staged.root.parent() == Some(install.as_path()), "staging directory is not beside launcher");
@@ -267,6 +335,7 @@ fn replace(source: &Path, target: &Path) -> Result<()> {
     #[cfg(not(windows))] fs::rename(source, target)?;
     Ok(())
 }
+#[cfg(windows)]
 fn rollback(install: &Path, root: &Path, journal: &Journal) -> Result<()> {
     directory(install)?;
     directory(&root.join("old"))?;
@@ -321,7 +390,7 @@ fn worker(pid: u32, install: &Path) -> Result<()> {
     let mut length = image.len() as u32;
     unsafe { QueryFullProcessImageNameW(parent.0, PROCESS_NAME_WIN32, PWSTR(image.as_mut_ptr()), &mut length)?; }
     let image = PathBuf::from(std::ffi::OsString::from_wide(&image[..length as usize]));
-    ensure!(fs::canonicalize(&image)? == fs::canonicalize(install.join(FILES[0]))?, "update parent is not the installed launcher");
+    ensure!(fs::canonicalize(&image)? == fs::canonicalize(install.join(WINDOWS_FILES[0]))?, "update parent is not the installed launcher");
     ensure!(sha256_file(&image)? == sha256_file(&executable)?, "update helper is not a copy of its parent");
     synced_write(&root.join("ready"), b"ready")?;
     ensure!(unsafe { WaitForSingleObject(parent.0, 120_000) } == WAIT_OBJECT_0, "launcher did not exit for update");
@@ -339,20 +408,20 @@ fn worker(pid: u32, install: &Path) -> Result<()> {
         } else {
             let managed = journal.files.iter().filter(|(n, _)| n.as_str() != "launcher.json").map(|(n,h)| (n.clone(),h.clone())).collect();
             verify_files(install, &managed)?;
-            verify_version(&install.join(FILES[0]), &journal.release.version)?;
+            verify_version(&install.join(WINDOWS_FILES[0]), &journal.release.version)?;
         }
         retire(&root)?;
         relaunch(install, Some("--self-update-rolled-back"))?;
         return Ok(());
     }
     verify_files(&root.join("new"), &journal.files)?;
-    verify_version(&root.join("new").join(FILES[0]), &journal.release.version)?;
+    verify_version(&root.join("new").join(WINDOWS_FILES[0]), &journal.release.version)?;
     if root.join("old").exists() {
         directory(&root.join("old"))?;
         fs::remove_dir_all(root.join("old"))?;
     }
     fs::create_dir(root.join("old"))?;
-    for name in FILES.into_iter().filter(|n| *n != "launcher.json") {
+    for name in WINDOWS_FILES.into_iter().filter(|n| *n != "launcher.json") {
         let target = install.join(name);
         let hash = if target.exists() {
             regular(&target)?;
@@ -368,7 +437,7 @@ fn worker(pid: u32, install: &Path) -> Result<()> {
     // The immutable journal and every backup are durable before the first replacement.
     synced_write(&root.join("journal.json"), &serde_json::to_vec(&journal)?)?;
     let result = (|| -> Result<()> {
-        for name in FILES.into_iter().filter(|n| *n != "launcher.json") {
+        for name in WINDOWS_FILES.into_iter().filter(|n| *n != "launcher.json") {
             let target = install.join(name);
             if target.exists() { regular(&target)?; }
             replace(&root.join("new").join(name), &target)?;
@@ -404,7 +473,7 @@ fn worker(pid: u32, install: &Path) -> Result<()> {
 
 #[cfg(windows)]
 fn relaunch(install: &Path, argument: Option<&str>) -> Result<std::process::Child> {
-    let mut command = Command::new(install.join(FILES[0]));
+    let mut command = Command::new(install.join(WINDOWS_FILES[0]));
     if let Some(argument) = argument { command.arg(argument); }
     Ok(command.current_dir(install).spawn()?)
 }
@@ -480,6 +549,7 @@ mod tests {
         for repository in ["http://github.com/a/b", "https://github.com.evil/a/b", "https://github.com/a/../b", "https://github.com/a/b?x", "https://github.com/a/b#x"] { assert!(repository_path(repository).is_err()); }
         assert_eq!(repository_path("https://github.com/a/b.git").unwrap(), "a/b");
     }
+    #[cfg(windows)]
     #[test]
     fn archive_rejects_traversal_duplicates_and_corruption() {
         let root = std::env::temp_dir().join(uuid::Uuid::new_v4().to_string());
@@ -488,7 +558,7 @@ mod tests {
         for (case, bad) in ["../AscNetLauncher.exe", "C:AscNetLauncher.exe"].iter().enumerate() {
             let path = root.join(format!("{case}.zip"));
             let mut zip = zip::ZipWriter::new(File::create(&path).unwrap());
-            for (index, name) in FILES.iter().enumerate() {
+            for (index, name) in WINDOWS_FILES.iter().enumerate() {
                 zip.start_file(if index == 0 { *bad } else { *name }, zip::write::SimpleFileOptions::default()).unwrap();
                 zip.write_all(b"payload").unwrap();
             }
@@ -500,7 +570,7 @@ mod tests {
         assert!(extract(&corrupt, &root, "1.0.3").is_err());
         let duplicate = root.join("duplicate.zip");
         let mut zip = zip::ZipWriter::new(File::create(&duplicate).unwrap());
-        for name in FILES {
+        for name in WINDOWS_FILES {
             zip.start_file(name, zip::write::SimpleFileOptions::default()).unwrap();
             zip.write_all(b"payload").unwrap();
         }
@@ -522,6 +592,7 @@ mod tests {
         assert!(verify_version(&executable, "1.0.4").is_err());
         fs::remove_dir_all(root).unwrap();
     }
+    #[cfg(windows)]
     #[test]
     fn rollback_is_repeatable_and_preserves_configuration() {
         let install = std::env::temp_dir().join(uuid::Uuid::new_v4().to_string());
